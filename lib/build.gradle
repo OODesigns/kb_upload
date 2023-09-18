@@ -24,6 +24,7 @@ dependencies {
     testImplementation 'org.assertj:assertj-core:3.24.2'
 
     implementation 'com.amazonaws:aws-lambda-java-core:1.2.2'
+    implementation 'com.amazonaws:aws-lambda-java-events:3.11.0'
     implementation 'org.json:json:20230618'
     implementation 'com.networknt:json-schema-validator:1.0.87'
 }
@@ -35,7 +36,16 @@ java {
     }
 }
 
-tasks.named('test') {
-    // Use JUnit Platform for unit tests.
+tasks.register('buildZip', Zip) {
+    from compileJava
+    from processResources
+    into('lib') {
+        from configurations.runtimeClasspath
+    }
+}
+
+test {
     useJUnitPlatform()
 }
+
+build.dependsOn buildZip

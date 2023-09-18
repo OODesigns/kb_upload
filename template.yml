@@ -1,0 +1,20 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: A function that validates the structure of the Chat Bot knowledge file.
+
+Resources:
+  ValidationFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: lib/build/distributions/lib.zip
+      Handler: function.HandleValidation::handleRequest
+      Runtime: java17
+      Description: Java function
+      MemorySize: 2048
+      Timeout: 10
+      # Function's execution role
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - AWSLambda_ReadOnlyAccess
+        - AWSLambdaVPCAccessExecutionRole
+      Tracing: PassThrough

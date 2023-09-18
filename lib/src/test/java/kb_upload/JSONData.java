@@ -5,6 +5,7 @@ import org.json.JSONObject;
 public class JSONData implements JSON {
     public static final String INVALID_JSON_FORMAT_S = "Invalid Json format: %s";
     private final String data;
+    protected final JSONObject jsonObject;
 
     public JSONData(final String data) {
         try {
