@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json-schema.org/draft/2020-12/schema#",
+  "title": "knowledge Schema",
+  "type": "object",
+  "properties": {
+    "utterance": {
+      "type": "array",
+      "items": {
+        "properties": {
+          "entries": {
+            "description": "The corresponding text to the utterance",
+            "type": "string"
+          },
+          "name": {
+            "description": "Name of utterance",
+            "type": "string"
+          }
+        },
+        "required": ["name", "entries"]
+      }
+    }
+  }
+}

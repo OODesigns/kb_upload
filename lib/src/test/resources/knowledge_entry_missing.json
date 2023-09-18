@@ -1,0 +1,6 @@
+{
+ "$schema": "knowledgeSchema.json",
+  "utterance": [
+    {"name": "confirmation"}
+   ]
+}
