@@ -2,6 +2,11 @@ AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: A function that validates the structure of the Chat Bot knowledge file.
 
+Parameters:
+  SourceBucketName:
+    Type: String
+    Default: "s3-knowledge-upload"
+
 Resources:
   ValidationFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
@@ -14,7 +19,14 @@ Resources:
       Timeout: 10
       # Function's execution role
       Policies:
+        # Provides write permissions to CloudWatch Logs.
         - AWSLambdaBasicExecutionRole
+        # Provides read-only access to AWS Lambda service, AWS Lambda console features, and other related AWS services.
         - AWSLambda_ReadOnlyAccess
+        # Provides minimum permissions for a Lambda function to execute while accessing a resource within a VPC - create, describe, delete network interfaces and write permissions to CloudWatch Logs.
         - AWSLambdaVPCAccessExecutionRole
+
+        - S3ReadPolicy:
+             BucketName: !Ref SourceBucketName
       Tracing: PassThrough
+
