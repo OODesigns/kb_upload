@@ -14,7 +14,7 @@ public class FileLoader{
 
     public FileLoader(final String fileName) {
 
-        final ClassLoader classLoader = JSONData.class.getClassLoader();
+        final ClassLoader classLoader = FileLoader.class.getClassLoader();
 
         try (final InputStream inputStream = classLoader.getResourceAsStream(fileName)) {
             if (inputStream == null)
