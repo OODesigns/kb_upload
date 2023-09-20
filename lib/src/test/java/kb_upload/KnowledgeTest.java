@@ -10,8 +10,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 class KnowledgeTest {
     @Test void nameMissing() {
 
-        final JSON json = new JSONData(new FileLoader("knowledge_name_missing.json").load());
-        final JSONSchema jsonSchema = new JSONSchemaData(new FileLoader("knowledgeSchema.json").load());
+        final JSON json = new JSONData(new FileLoader("knowledge_name_missing.json").toString());
+        final JSONSchema jsonSchema = new JSONSchemaData(new FileLoader("knowledgeSchema.json").toString());
 
         final Validator<JSONSchema, JSON> validator = new JSONValidator();
 
@@ -23,8 +23,8 @@ class KnowledgeTest {
 
     @Test void entryMissing() {
 
-        final JSON json = new JSONData(new FileLoader("knowledge_entry_missing.json").load());
-        final JSONSchema jsonSchema = new JSONSchemaData(new FileLoader("knowledgeSchema.json").load());
+        final JSON json = new JSONData(new FileLoader("knowledge_entry_missing.json").toString());
+        final JSONSchema jsonSchema = new JSONSchemaData(new FileLoader("knowledgeSchema.json").toString());
 
         final Validator<JSONSchema, JSON> validator = new JSONValidator();
 
@@ -36,8 +36,8 @@ class KnowledgeTest {
 
     @Test void nameEntryMissing() {
 
-        final JSON json = new JSONData(new FileLoader("knowledge_name_entry_missing.json").load());
-        final JSONSchema jsonSchema = new JSONSchemaData(new FileLoader("knowledgeSchema.json").load());
+        final JSON json = new JSONData(new FileLoader("knowledge_name_entry_missing.json").toString());
+        final JSONSchema jsonSchema = new JSONSchemaData(new FileLoader("knowledgeSchema.json").toString());
 
         final Validator<JSONSchema, JSON> validator = new JSONValidator();
 
