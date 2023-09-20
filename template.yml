@@ -12,7 +12,7 @@ Resources:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
       CodeUri: lib/build/distributions/lib.zip
-      Handler: function.HandleValidation::handleRequest
+      Handler: function.HandleValidation
       Runtime: java17
       Description: Java function
       MemorySize: 2048
@@ -29,4 +29,11 @@ Resources:
         - S3ReadPolicy:
              BucketName: !Ref SourceBucketName
       Tracing: PassThrough
+
+Outputs:
+  LambdaFunctionArn:
+    Description: "ARN of the Lambda function"
+    Value: !GetAtt ValidationFunction.Arn
+
+
 
