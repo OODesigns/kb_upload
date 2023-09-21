@@ -5,6 +5,8 @@ package kb_upload;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 class KnowledgeTest {
@@ -46,5 +48,28 @@ class KnowledgeTest {
         assertThat(validate.state()).isInstanceOf(ValidatedStateError.class);
         assertThat(validate.messages().get(0)).isEqualTo("$.utterance[0].name: is missing but it is required");
         assertThat(validate.messages().get(1)).isEqualTo("$.utterance[0].entries: is missing but it is required");
+    }
+
+    @Test void transformJSONToList(){
+
+        final String jsonData = """
+                {
+                "person":[
+                    {
+                        "firstName": "John",
+                        "lastName": "Doe Doe Doe"
+                    },
+                    {
+                        "firstName": "Jane",
+                        "lastName": "Smith"
+                    }
+                ]}""";
+
+        final Transformer<String, List<String>> transformer = new JSonArrayToList("person");
+
+        final List<String> transformed = transformer.transform(jsonData);
+
+        assertThat(transformed.get(0)).isEqualTo("John Doe Doe Doe");
+        assertThat(transformed.get(1)).isEqualTo("Jane Smith");
     }
 }

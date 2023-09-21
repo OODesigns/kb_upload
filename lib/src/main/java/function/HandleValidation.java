@@ -18,6 +18,11 @@ public class HandleValidation implements RequestHandler<S3Event, String> {
         final Validated validate = validator.validate(jsonSchema, knowledgeFile);
 
         logger.log("RESULT: " + validate);
+
+        if(validate.state() instanceof ValidatedStateError){
+            throw new RuntimeException(validate.messages().toString());
+        }
+
         return validate.toString();
     }
 }
