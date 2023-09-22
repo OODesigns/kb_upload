@@ -1,28 +1,50 @@
 package function;
 
 import com.amazonaws.services.lambda.runtime.Context;
-import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.S3Event;
 import kb_upload.*;
 
-public class HandleValidation implements RequestHandler<S3Event, String> {
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.function.Predicate;
+
+public class HandleValidation implements RequestHandler<S3Event, Void> {
     @Override
-    public String handleRequest(final S3Event event, final Context context) {
-        final LambdaLogger logger = context.getLogger();
+    public Void handleRequest(final S3Event event, final Context context) {
+                 getFiles(event)
+                .map(this::validate)
+                .map(logResult(context))
+                .filter(isNotValidFile())
+                .ifPresent(this::throwException);
+                 return null;
+    }
 
-        final JSON knowledgeFile = new JSONData(new S3FileLoader(event).toString());
-        final JSONSchema jsonSchema = new JSONSchemaData(new FileLoader("knowledgeSchema.json").toString());
+    private void throwException(final Validated validated) {
+        throw new RuntimeException(validated.messages().toString());
+    }
 
-        final Validator<JSONSchema, JSON> validator = new JSONValidator();
-        final Validated validate = validator.validate(jsonSchema, knowledgeFile);
+    private static Predicate<Validated> isNotValidFile() {
+        return validated -> !(validated.state() instanceof ValidatedStateOK);
+    }
 
-        logger.log("RESULT: " + validate);
+    private Function<Validated, Validated> logResult(final Context context) {
+        return validated -> {
+            context.getLogger().log("RESULT: "+validated);
+            return validated;
+        };
+    }
 
-        if(validate.state() instanceof ValidatedStateError){
-            throw new RuntimeException(validate.messages().toString());
-        }
 
-        return validate.toString();
+    private Validated validate(final JsonFile jsonFile) {
+        return new JSONValidator().validate(jsonFile.jsonSchema(), jsonFile.knowledgeFile());
+    }
+
+    private Optional<JsonFile> getFiles(final S3Event event) {
+        return Optional.of(new JsonFile(new JSONData(new S3FileLoader(event).toString()),
+                new JSONSchemaData(new FileLoader("knowledgeSchema.json").toString())));
+    }
+
+    private record JsonFile(JSON knowledgeFile, JSONSchema jsonSchema) {
     }
 }

@@ -24,13 +24,13 @@ public class JSonArrayToList implements Transformer<String, Optional<List<String
                 .map(getJsonArrayItems());
     }
 
-    private static Function<JsonNode, List<String>> getJsonArrayItems() {
+    private Function<JsonNode, List<String>> getJsonArrayItems() {
         return arrayNode -> StreamSupport.stream(arrayNode.spliterator(), false)
                 .map(getJsonNodeAsString())
                 .collect(Collectors.toList());
     }
 
-    private static Function<JsonNode, String> getJsonNodeAsString() {
+    private Function<JsonNode, String> getJsonNodeAsString() {
         return node -> StreamSupport.stream(node.spliterator(), false)
                 .map(JsonNode::asText)
                 .collect(Collectors.joining(SPACE));
