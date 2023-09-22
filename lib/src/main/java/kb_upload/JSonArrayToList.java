@@ -1,13 +1,15 @@
 package kb_upload;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.util.List;
-import java.util.Optional;
-
-public class JSonArrayToList implements Transformer<String, List<String>> {
+public class JSonArrayToList implements Transformer<String, Optional<List<String>>> {
     public static final String SPACE = " ";
     private final String arrayName;
 
@@ -15,12 +17,24 @@ public class JSonArrayToList implements Transformer<String, List<String>> {
         this.arrayName = arrayName;
     }
 
-    private String concatenate(final JsonNode jsonNode) {
-        final StringBuilder result = new StringBuilder();
-        jsonNode.elements().forEachRemaining(valueNode -> result.append(valueNode.asText()).append(SPACE));
-        return result.toString().trim();
+    @Override
+    public Optional<List<String>> transform(final String jsonText) {
+        return getArray(jsonText)
+                .filter(JsonNode::isArray)
+                .map(getJsonArrayItems());
     }
 
+    private static Function<JsonNode, List<String>> getJsonArrayItems() {
+        return arrayNode -> StreamSupport.stream(arrayNode.spliterator(), false)
+                .map(getJsonNodeAsString())
+                .collect(Collectors.toList());
+    }
+
+    private static Function<JsonNode, String> getJsonNodeAsString() {
+        return node -> StreamSupport.stream(node.spliterator(), false)
+                .map(JsonNode::asText)
+                .collect(Collectors.joining(SPACE));
+    }
 
     private Optional<JsonNode> getArray(final String json) {
         try {
@@ -28,15 +42,5 @@ public class JSonArrayToList implements Transformer<String, List<String>> {
         } catch (final JsonProcessingException ex) {
             return Optional.empty();
         }
-    }
-
-
-    @Override
-    public List<String> transform(final String json) {
-        return getArray(json)
-                .filter(JsonNode::isArray)
-                .map(this::concatenate)
-                .stream()
-                .toList();
     }
 }
