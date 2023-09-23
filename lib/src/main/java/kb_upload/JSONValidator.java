@@ -9,15 +9,22 @@ import com.networknt.schema.SpecVersion;
 import com.networknt.schema.ValidationMessage;
 
 import java.util.Collections;
+import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class JSONValidator implements Validator<JSONSchema, JSON> {
 
+    private final Supplier<JsonSchemaFactory> factory;
+
+    public JSONValidator(final Supplier<JsonSchemaFactory> factory) {
+        this.factory = factory;
+    }
+
     @Override
-    public Validated validate(final JSONSchema jsonSchemaData, final JSON jsonData) {
-        final JsonSchemaFactory factory =
-                JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V4);
+    public Optional<Validated> validate(final JSONSchema jsonSchemaData, final JSON jsonData) {
+//        factory = JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V4);
 
         final JsonSchema jsonSchema = factory.getSchema(jsonSchemaData.get());
 
