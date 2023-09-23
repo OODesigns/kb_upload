@@ -41,7 +41,7 @@ public class HandleValidation implements RequestHandler<S3Event, Void> {
     }
 
     private Optional<JsonFile> getFiles(final S3Event event) {
-        return Optional.of(new JsonFile(new JSONData(new S3FileLoader(event).toString()),
+        return Optional.of(new JsonFile(new JSONData(new S3EventFileLoader(event).toString()),
                 new JSONSchemaData(new FileLoader("knowledgeSchema.json").toString())));
     }
 
