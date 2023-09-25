@@ -1,5 +1,5 @@
 package kb_upload;
 
-public interface JSONSchema {
-    String get();
-}
+import java.util.function.Supplier;
+
+public interface JSONSchema extends Supplier<String> {}

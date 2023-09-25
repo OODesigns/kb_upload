@@ -11,7 +11,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class JSonArrayToList implements Transformer<String, Optional<List<String>>> {
     public static final String SPACE = " ";
+    private static final ObjectMapper objectMapper = new ObjectMapper();
     private final String arrayName;
+
 
     public JSonArrayToList(final String arrayName) {
         this.arrayName = arrayName;
@@ -38,9 +40,10 @@ public class JSonArrayToList implements Transformer<String, Optional<List<String
 
     private Optional<JsonNode> getArray(final String json) {
         try {
-            return Optional.of(new ObjectMapper().readTree(json).get(arrayName));
+            return Optional.of(objectMapper.readTree(json).get(arrayName));
         } catch (final JsonProcessingException ex) {
             return Optional.empty();
         }
     }
+
 }

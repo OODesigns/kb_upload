@@ -30,6 +30,7 @@ Resources:
              BucketName: !Ref SourceBucketName
       Tracing: PassThrough
 
+
 Outputs:
   LambdaFunctionArn:
     Description: "ARN of the Lambda function"

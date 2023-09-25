@@ -1,5 +1,5 @@
 package kb_upload;
 
-public interface JSON {
-    String get();
-}
+import java.util.function.Supplier;
+
+public interface JSON extends Supplier<String> {}
