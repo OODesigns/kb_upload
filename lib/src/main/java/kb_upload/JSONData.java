@@ -1,5 +1,4 @@
 package kb_upload;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 public class JSONData implements JSON {
@@ -11,8 +10,8 @@ public class JSONData implements JSON {
         try {
             jsonObject = new JSONObject(data);
             this.data = data;
-        } catch (final JSONException e){
-            throw new RuntimeException(String.format(INVALID_JSON_FORMAT_S, e.getMessage()));
+        } catch (final org.json.JSONException e){
+            throw new JSONException(String.format(INVALID_JSON_FORMAT_S, e.getMessage()));
         }
     }
 
