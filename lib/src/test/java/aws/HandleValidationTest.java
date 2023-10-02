@@ -1,153 +1,86 @@
 package aws;
 
 import com.amazonaws.services.lambda.runtime.Context;
+import com.amazonaws.services.lambda.runtime.LambdaLogger;
+import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.S3Event;
-import kb_upload.ValidatedStateError;
-import kb_upload.ValidatedStateOK;
+import kb_upload.*;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoSettings;
 import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 @MockitoSettings
 public class HandleValidationTest {
 
+    static private final String validJSON = """
+            {
+            }
+            """;
+
     @Test
     void handleRequestWithValidData(@Mock final S3Event s3Event,
-                                    @Mock final Context context) {
+                                    @Mock final Context context,
+                                    @Mock final LambdaLogger lambdaLogger,
+                                    @Mock final Validation validation,
+                                    @Mock final Validator<JSONSchema, JSON, Validation> validator) {
 
-        final String jsonData = """
-                {
-                "person":[
-                    {
-                        "firstName": "John",
-                        "lastName": "Doe Doe Doe"
-                    },
-                    {
-                        "firstName": "Jane",
-                        "lastName": "Smith"
-                    }
-                ]}""";
+        when(context.getLogger()).thenReturn(lambdaLogger);
+        when(validator.validate(any(),any())).thenReturn(Optional.of(validation));
 
+        when(validation.state()).thenReturn(new ValidatedStateOK());
+        when(validation.toString()).thenReturn("ValidatedStateOK");
 
-        final TestLogger testLogger = new TestLogger();
-        when(context.getLogger()).thenReturn(testLogger);
+        final RequestHandler<S3Event, Void> requestHandler
+                = new HandleValidation(unusedEvent -> Optional.of(validJSON), validator);
 
-        final HandleValidation handleValidation = new HandleValidation(s3Event1 -> Optional.of(jsonData));
+        requestHandler.handleRequest(s3Event, context);
 
-        handleValidation.handleRequest(s3Event, context);
+        final ArgumentCaptor<String> logData = ArgumentCaptor.forClass(String.class);
+        verify(lambdaLogger, times(1)).log(logData.capture());
 
-        assertThat(testLogger.toString()).contains(new ValidatedStateOK().toString());
-    }
-
-    @Test
-    void handleRequestWithMissingEntries(@Mock final S3Event s3Event,
-                                         @Mock final Context context) {
-
-        final String jsonDataMissingEntries = """
-                {
-                 "$schema": "knowledgeSchema.json",
-                  "utterance": [
-                    {"name": "confirmation"}
-                   ]
-                }
-                
-                """;
-
-        final TestLogger testLogger = new TestLogger();
-
-        when(context.getLogger()).thenReturn(testLogger);
-
-       final HandleValidation handleValidation = new HandleValidation(s3Event1 -> Optional.of(jsonDataMissingEntries));
-
-       assertThrows(RuntimeException.class, () -> handleValidation.handleRequest(s3Event, context));
-
-
-       assertThat(testLogger.toString())
-                .contains(new ValidatedStateError().toString())
-                .contains("entries: is missing but it is required");
+        assertThat(logData.getValue()).contains("ValidatedStateOK");
 
     }
 
     @Test
-    void handleRequestWithMissingName(@Mock final S3Event s3Event,
-                                      @Mock final Context context) {
+    void handleRequestWithDataMissing(@Mock final S3Event s3Event,
+                                    @Mock final Context context,
+                                    @Mock final LambdaLogger lambdaLogger,
+                                    @Mock final Validation validation,
+                                    @Mock final Validator<JSONSchema, JSON, Validation> validator) {
 
-        final String jsonDataMissingName = """
-                {
-                  "$schema": "knowledgeSchema.json",
-                   "utterance": [
-                     { "name": "first name",
-                       "entries":"anything"
-                     },
-                     {"entries":"more anything"}
-                   ]
-                 }
-                
-                """;
+        when(context.getLogger()).thenReturn(lambdaLogger);
+        when(validator.validate(any(),any())).thenReturn(Optional.of(validation));
 
-        final TestLogger testLogger = new TestLogger();
+        when(validation.state()).thenReturn(new ValidatedStateError());
+        when(validation.toString()).thenReturn("ValidatedStateError");
 
-        when(context.getLogger()).thenReturn(testLogger);
+        final RequestHandler<S3Event, Void> requestHandler
+                = new HandleValidation(unusedEvent -> Optional.of(validJSON), validator);
 
-        final HandleValidation handleValidation = new HandleValidation(s3Event1 -> Optional.of(jsonDataMissingName));
+        assertThrows(ValidationException.class, ()->requestHandler.handleRequest(s3Event, context));
 
-        assertThrows(RuntimeException.class, () -> handleValidation.handleRequest(s3Event, context));
+        final ArgumentCaptor<String> logData = ArgumentCaptor.forClass(String.class);
+        verify(lambdaLogger, times(1)).log(logData.capture());
 
-        assertThat(testLogger.toString())
-                .contains(new ValidatedStateError().toString())
-                .contains("name: is missing but it is required");
+        assertThat(logData.getValue()).contains("ValidatedStateError");
 
     }
+
 
     @Test
-    void handleRequestWithMissingNameEntries(@Mock final S3Event s3Event,
-                                      @Mock final Context context) {
+    void handleRequestWithDefaultConNoValidFile(@Mock final S3Event s3Event,
+                                                @Mock final Context context){
+        final RequestHandler<S3Event, Void> requestHandler
+                = new HandleValidation();
 
-        final String jsonDataMissingNameEntries = """
-                {
-                    "$schema": "knowledgeSchema.json",
-                     "utterance": [
-                       {}
-                     ]
-                   }
-                                
-                """;
-
-        final TestLogger testLogger = new TestLogger();
-
-        when(context.getLogger()).thenReturn(testLogger);
-
-        final HandleValidation handleValidation = new HandleValidation(s3Event1 -> Optional.of(jsonDataMissingNameEntries));
-
-        assertThrows(RuntimeException.class, () -> handleValidation.handleRequest(s3Event, context));
-
-        assertThat(testLogger.toString())
-                .contains(new ValidatedStateError().toString())
-                .contains("name: is missing but it is required")
-                .contains("entries: is missing but it is required");
-
+        assertThrows(ValidationException.class, ()->requestHandler.handleRequest(s3Event, context));
     }
 
-    @Test
-    void handleRequestWithInvalidJson(@Mock final S3Event s3Event,
-                                      @Mock final Context context) {
-
-        final String jsonDataMissingBracket = """
-                {
-                    "$schema": "knowledgeSchema.json",
-                     "utterance":
-                       {}
-                     ]
-                   }
-                                
-                """;
-
-        final HandleValidation handleValidation = new HandleValidation(s3Event1 -> Optional.of(jsonDataMissingBracket));
-
-        assertThrows(RuntimeException.class, () -> handleValidation.handleRequest(s3Event, context));
-    }
 }

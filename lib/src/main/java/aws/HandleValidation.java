@@ -14,52 +14,61 @@ import java.util.function.Predicate;
 
 public class HandleValidation implements RequestHandler<S3Event, Void> {
 
-    private static final String RESULT = "RESULT: ";
+    private static final String RESULT = "RESULT: %s";
     public static final String EXPECTED_FILE_NAME = "knowledge.json";
-    private final Retrievable<S3Event, Optional<String>> fileData;
-
-    public static final FileLoader FILE_LOADER = new FileLoader("knowledgeSchema.json");
+        public static final FileLoader FILE_LOADER = new FileLoader("knowledgeSchema.json");
     public static final JSONSchemaData JSON_SCHEMA = new JSONSchemaData(FILE_LOADER.toString());
-    public static final Validator<JSONSchema, JSON, Validation> JSON_VALIDATOR =
-            new JSONValidator(()-> JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V4));
+    public static final String EXPECTED_FILE_NOT_UPLOADED = "Expected File: knowledge.json was not uploaded";
+    private final Retrievable<S3Event, Optional<String>> fileData;
+    private final Validator<JSONSchema, JSON, Validation> validator;
 
-    HandleValidation(final Retrievable<S3Event, Optional<String>> fileData) {
+    /**
+     * Used for testing purposes only
+     */
+    HandleValidation(final  Retrievable<S3Event, Optional<String>> fileData,
+                            final Validator<JSONSchema, JSON, Validation> validator) {
         this.fileData = fileData;
+        this.validator = validator;
     }
 
     public HandleValidation() {
         this.fileData = new S3SingleFileData(EXPECTED_FILE_NAME, ()-> AmazonS3ClientBuilder.standard().build());
+        this.validator = new JSONValidator(()->JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V4));
     }
 
-
-    @Override
+     @Override
     public Void handleRequest(final S3Event event, final Context context) {
         fileData.retrieve(event)
-                .flatMap(this::validate)
-                .map(logResult(context))
-                .filter(isNotValidFile())
-                .ifPresent(this::throwException);
-
+                .ifPresentOrElse(f->validateFileData(f, context), this::throwFileMissing);
         return null;
     }
 
-    private void throwException(final Validation validation) {
-        throw new RuntimeException(validation.messages().toString());
+    private void validateFileData(final String fileData, final Context context) {
+        Optional.of(fileData)
+                .flatMap(this::validate)
+                .map(logResult(context))
+                .filter(notValidFile())
+                .ifPresent(this::throwInvalidDataException);
     }
 
-    private static Predicate<Validation> isNotValidFile() {
-        return Validation -> !(Validation.state() instanceof ValidatedStateOK);
+    private void throwFileMissing() {
+        throw new ValidationException(EXPECTED_FILE_NOT_UPLOADED);
+    }
+
+    private void throwInvalidDataException(final Validation validation) {
+        throw new ValidationException(validation.messages().toString());
+    }
+
+    private static Predicate<Validation> notValidFile() {
+        return Validation -> Validation.state() instanceof ValidatedStateError;
     }
 
     private Function<Validation, Validation> logResult(final Context context) {
-        return Validation -> {
-            context.getLogger().log(RESULT + Validation);
-            return Validation;
-        };
+        return v -> { context.getLogger().log(String.format(RESULT, v)); return v; };
     }
 
     private Optional<Validation> validate(final String dataToValidate) {
-        return JSON_VALIDATOR.validate(JSON_SCHEMA, new JSONData(dataToValidate));
+        return validator.validate(JSON_SCHEMA, new JSONData(dataToValidate));
     }
 
 }

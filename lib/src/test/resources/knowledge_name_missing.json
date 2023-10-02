@@ -1,9 +1,0 @@
-{
-  "$schema": "knowledgeSchema.json",
-  "utterance": [
-    { "name": "first name",
-      "entries":"anything"
-    },
-    {"entries":"more anything"}
-  ]
-}
