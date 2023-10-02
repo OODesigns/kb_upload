@@ -5,7 +5,7 @@ import com.sun.nio.sctp.InvalidStreamException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.Objects;
+
 
 public class FileLoader{
 
@@ -22,7 +22,7 @@ public class FileLoader{
 
             data = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
 
-        } catch (final IOException | InvalidStreamException | NullPointerException e) {
+        } catch (final IOException | InvalidStreamException e) {
             throw new FileLoaderException(e);
         }
     }

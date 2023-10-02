@@ -1,8 +1,9 @@
-package function;
+package aws;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.S3Event;
+import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.networknt.schema.JsonSchemaFactory;
 import com.networknt.schema.SpecVersion;
 import kb_upload.*;
@@ -14,6 +15,7 @@ import java.util.function.Predicate;
 public class HandleValidation implements RequestHandler<S3Event, Void> {
 
     private static final String RESULT = "RESULT: ";
+    public static final String EXPECTED_FILE_NAME = "knowledge.json";
     private final Retrievable<S3Event, Optional<String>> fileData;
 
     public static final FileLoader FILE_LOADER = new FileLoader("knowledgeSchema.json");
@@ -26,13 +28,13 @@ public class HandleValidation implements RequestHandler<S3Event, Void> {
     }
 
     public HandleValidation() {
-        this.fileData = new S3FileData();
+        this.fileData = new S3SingleFileData(EXPECTED_FILE_NAME, ()-> AmazonS3ClientBuilder.standard().build());
     }
 
 
     @Override
     public Void handleRequest(final S3Event event, final Context context) {
-        fileData.get(event)
+        fileData.retrieve(event)
                 .flatMap(this::validate)
                 .map(logResult(context))
                 .filter(isNotValidFile())

@@ -1,13 +1,11 @@
-package function;
+package aws;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
-import kb_upload.JSonArrayToList;
 import software.amazon.awssdk.services.s3.S3Client;
 
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 
 
 public class HandleTransformation implements RequestHandler<Map<String, Object>, Void> {
@@ -17,9 +15,9 @@ public class HandleTransformation implements RequestHandler<Map<String, Object>,
 
     @Override
     public Void handleRequest(final Map<String, Object> input, final Context context) {
-        new JSonArrayToList(UTTERANCE)
-                .transform(new S3FileLoader(this::getClient, KNOWLEDGE_JSON).toString())
-                .ifPresent(this::saveToFile);
+//        new JSonArrayToList(UTTERANCE)
+//                .transform(new S3FileLoader(this::getClient, KNOWLEDGE_JSON).toString())
+//                .ifPresent(this::saveToFile);
 
         return null;
     }

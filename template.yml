@@ -12,7 +12,7 @@ Resources:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
       CodeUri: lib/build/distributions/lib.zip
-      Handler: function.HandleValidation
+      Handler: aws.HandleValidation
       Runtime: java17
       Description: Java function
       MemorySize: 2048

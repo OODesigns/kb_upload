@@ -1,5 +1,5 @@
-package function;
+package kb_upload;
 
 public interface Retrievable<T, U> {
-    U get(T t);
+    U retrieve(T t);
 }
