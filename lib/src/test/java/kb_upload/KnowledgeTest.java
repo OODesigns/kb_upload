@@ -63,7 +63,7 @@ class KnowledgeTest {
 
         final String jsonData = """
                 {
-                "person":[
+                "person"J:[
                     {
                         "firstName": "John",
                         "lastName": "Doe Doe Doe"

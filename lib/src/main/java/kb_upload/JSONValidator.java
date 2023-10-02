@@ -51,7 +51,7 @@ public class JSONValidator implements Validator<JSONSchema, JSON> {
                                 validationMessages
                                         .stream()
                                         .map(ValidationMessage::getMessage)
-                                        .collect(Collectors.toList()));
+                                        .toList());
     }
 
     private Optional<Knowledge> transformDataToJsonNodes(final JSONSchema jsonSchemaData, final JSON knowledgeData){

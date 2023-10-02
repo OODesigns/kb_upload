@@ -5,6 +5,7 @@ import com.amazonaws.services.lambda.runtime.events.models.s3.S3EventNotificatio
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class S3FileData implements Retrievable<com.amazonaws.services.lambda.runtime.events.S3Event, java.util.Optional<String>> {
     @Override
@@ -20,6 +21,12 @@ public class S3FileData implements Retrievable<com.amazonaws.services.lambda.run
     }
 
     private Optional<S3EventNotification.S3Entity> getS3Entity(final S3Event event) {
-        return Optional.of(event.getRecords().get(0).getS3());
+        return event.getRecords().stream()
+                .limit(2)
+                .map(S3EventNotification.S3EventNotificationRecord::getS3)
+                .collect(Collectors.collectingAndThen(
+                        Collectors.toList(),
+                        list -> list.size() == 1 ? Optional.of(list.get(0)) : Optional.empty()
+                ));
     }
 }

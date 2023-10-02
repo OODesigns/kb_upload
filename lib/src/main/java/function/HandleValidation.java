@@ -37,6 +37,7 @@ public class HandleValidation implements RequestHandler<S3Event, Void> {
                 .map(logResult(context))
                 .filter(isNotValidFile())
                 .ifPresent(this::throwException);
+
         return null;
     }
 

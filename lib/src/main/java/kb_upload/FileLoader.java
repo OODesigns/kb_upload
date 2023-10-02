@@ -23,7 +23,7 @@ public class FileLoader{
             data = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
 
         } catch (final IOException | InvalidStreamException | NullPointerException e) {
-            throw new RuntimeException(e);
+            throw new FileLoaderException(e);
         }
     }
 

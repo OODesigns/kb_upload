@@ -29,6 +29,7 @@ dependencies {
     implementation 'com.amazonaws:aws-java-sdk-s3:1.12.553'
     implementation 'software.amazon.awssdk:s3:2.20.152'
     implementation 'org.json:json:20230618'
+
     implementation 'com.networknt:json-schema-validator:1.0.87'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.2'
     // https://mvnrepository.com/artifact/org.slf4j/slf4j-nop
