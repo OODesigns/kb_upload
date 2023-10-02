@@ -18,7 +18,7 @@ public class HandleValidation implements RequestHandler<S3Event, Void> {
 
     public static final FileLoader FILE_LOADER = new FileLoader("knowledgeSchema.json");
     public static final JSONSchemaData JSON_SCHEMA = new JSONSchemaData(FILE_LOADER.toString());
-    public static final JSONValidator JSON_VALIDATOR =
+    public static final Validator<JSONSchema, JSON, Validation> JSON_VALIDATOR =
             new JSONValidator(()-> JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V4));
 
     HandleValidation(final Retrievable<S3Event, Optional<String>> fileData) {
@@ -41,22 +41,22 @@ public class HandleValidation implements RequestHandler<S3Event, Void> {
         return null;
     }
 
-    private void throwException(final Validated validated) {
-        throw new RuntimeException(validated.messages().toString());
+    private void throwException(final Validation validation) {
+        throw new RuntimeException(validation.messages().toString());
     }
 
-    private static Predicate<Validated> isNotValidFile() {
-        return validated -> !(validated.state() instanceof ValidatedStateOK);
+    private static Predicate<Validation> isNotValidFile() {
+        return Validation -> !(Validation.state() instanceof ValidatedStateOK);
     }
 
-    private Function<Validated, Validated> logResult(final Context context) {
-        return validated -> {
-            context.getLogger().log(RESULT + validated);
-            return validated;
+    private Function<Validation, Validation> logResult(final Context context) {
+        return Validation -> {
+            context.getLogger().log(RESULT + Validation);
+            return Validation;
         };
     }
 
-    private Optional<Validated> validate(final String dataToValidate) {
+    private Optional<Validation> validate(final String dataToValidate) {
         return JSON_VALIDATOR.validate(JSON_SCHEMA, new JSONData(dataToValidate));
     }
 

@@ -2,6 +2,6 @@ package kb_upload;
 
 import java.util.Optional;
 
-public interface Validator<T, U>{
-    Optional<Validated> validate(T t, U u);
+public interface Validator<T, U, V>{
+    Optional<V> validate(T t, U u);
 }

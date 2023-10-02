@@ -13,9 +13,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
-public class JSONValidator implements Validator<JSONSchema, JSON> {
+public class JSONValidator implements Validator<JSONSchema, JSON, Validation> {
 
     private final Supplier<JsonSchemaFactory> schemaFactory;
 
@@ -23,23 +22,21 @@ public class JSONValidator implements Validator<JSONSchema, JSON> {
         this.schemaFactory = factory;
     }
 
-    private Set<ValidationMessage> apply(final Knowledge k) {
-        return k.knowledgeSchema.validate(k.knowledge);
-    }
-
     @Override
-    public Optional<Validated> validate(final JSONSchema knowledgeSchemaData, final JSON knowledgeData) {
-        return transformDataToJsonNodes(knowledgeSchemaData, knowledgeData)
+    public Optional<Validation> validate(final JSONSchema jsonSchema, final JSON json) {
+        return transformDataToJsonNodes(jsonSchema, json)
                 .map(this::apply)
-                .map(getValidated());
+                .map(getValidation());
 
     }
 
-    private Function<Set<ValidationMessage>, Validated> getValidated() {
+    private Set<ValidationMessage> apply(final JSONNodes jsonNodes) {
+        return jsonNodes.schema().validate(jsonNodes.node);
+    }
+
+    private Function<Set<ValidationMessage>, Validated> getValidation() {
         return validationMessages ->
-                validationMessages.isEmpty()
-                        ? statusOK()
-                        : statusError(validationMessages);
+                validationMessages.isEmpty() ? statusOK() : statusError(validationMessages);
     }
 
     private Validated statusOK() {
@@ -54,24 +51,22 @@ public class JSONValidator implements Validator<JSONSchema, JSON> {
                                         .toList());
     }
 
-    private Optional<Knowledge> transformDataToJsonNodes(final JSONSchema jsonSchemaData, final JSON knowledgeData){
+    private Optional<JSONNodes> transformDataToJsonNodes(final JSONSchema jsonSchemaData, final JSON knowledgeData){
         try
         {
-            return Optional.of(new Knowledge(getKnowledgeSchemaJsonNode(jsonSchemaData),
-                                           getKnowledgeJsonNode(knowledgeData)));
-
+            return Optional.of(new JSONNodes(getSchemaNode(jsonSchemaData), getNode(knowledgeData)));
         } catch (final JsonProcessingException | JsonSchemaException ex) {
             return Optional.empty();
         }
     }
 
-    private record Knowledge(JsonSchema knowledgeSchema, JsonNode knowledge){}
+    private record JSONNodes(JsonSchema schema, JsonNode node){}
 
-    private JsonNode getKnowledgeJsonNode(final JSON knowledgeData) throws JsonProcessingException {
-        return new ObjectMapper().readTree(knowledgeData.get());
+    private JsonNode getNode(final JSON json) throws JsonProcessingException {
+        return new ObjectMapper().readTree(json.get());
     }
 
-    private JsonSchema getKnowledgeSchemaJsonNode(final JSONSchema jsonSchemaData) throws JsonSchemaException{
+    private JsonSchema getSchemaNode(final JSONSchema jsonSchemaData) throws JsonSchemaException{
         return schemaFactory.get().getSchema(jsonSchemaData.get());
     }
 }
