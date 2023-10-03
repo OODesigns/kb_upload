@@ -40,7 +40,7 @@ public class JSonArrayToList implements Transformer<String, Optional<List<String
 
     private Optional<JsonNode> getArray(final String json) {
         try {
-            return Optional.of(objectMapper.readTree(json).get(arrayName));
+            return Optional.ofNullable(objectMapper.readTree(json).get(arrayName));
         } catch (final JsonProcessingException ex) {
             return Optional.empty();
         }
