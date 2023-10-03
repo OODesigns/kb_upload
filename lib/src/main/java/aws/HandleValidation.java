@@ -32,7 +32,7 @@ public class HandleValidation implements RequestHandler<S3Event, Void> {
     }
 
     public HandleValidation() {
-        this.fileData = new S3SingleFileData(EXPECTED_FILE_NAME, ()-> AmazonS3ClientBuilder.standard().build());
+        this.fileData = new S3EventSingleFileData(EXPECTED_FILE_NAME, ()-> AmazonS3ClientBuilder.standard().build());
         this.validator = new JSONValidator(()->JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V4));
     }
 

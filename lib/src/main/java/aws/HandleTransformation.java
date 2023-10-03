@@ -2,6 +2,7 @@ package aws;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
+import kb_upload.JSonArrayToList;
 import software.amazon.awssdk.services.s3.S3Client;
 
 import java.util.List;
@@ -13,13 +14,15 @@ public class HandleTransformation implements RequestHandler<Map<String, Object>,
     private static final String UTTERANCE = "utterance";
     private static final String KNOWLEDGE_JSON = "knowledge.json";
 
+
+
     @Override
     public Void handleRequest(final Map<String, Object> input, final Context context) {
 //        new JSonArrayToList(UTTERANCE)
 //                .transform(new S3FileLoader(this::getClient, KNOWLEDGE_JSON).toString())
 //                .ifPresent(this::saveToFile);
-
-        return null;
+//
+       return null;
     }
 
     private void saveToFile(final List<String> transformedData) {

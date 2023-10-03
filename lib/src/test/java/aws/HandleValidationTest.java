@@ -72,8 +72,6 @@ public class HandleValidationTest {
         assertThat(logData.getValue()).contains("ValidatedStateError");
 
     }
-
-
     @Test
     void handleRequestWithDefaultConNoValidFile(@Mock final S3Event s3Event,
                                                 @Mock final Context context){
@@ -82,5 +80,4 @@ public class HandleValidationTest {
 
         assertThrows(ValidationException.class, ()->requestHandler.handleRequest(s3Event, context));
     }
-
 }
