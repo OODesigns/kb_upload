@@ -25,28 +25,28 @@ public class S3FileSaverTest {
 
     @Test
     void errorSavingReturnsErrorState(@Mock final S3Client s3Client,
-                                      @Mock final BucketName bucketName,
-                                      @Mock final Key key){
+                                      @Mock final BucketNameProvider bucketNameProvider,
+                                      @Mock final KeyNameProvider keyNameProvider){
 
         when(s3Client.putObject(any(PutObjectRequest.class), any(RequestBody.class) )).thenThrow(SdkException.class);
 
         final S3FileSaver s3FileSaver = new S3FileSaver(() -> s3Client);
 
-        s3FileSaver.save(bucketName, key, "someData")
+        s3FileSaver.save(bucketNameProvider, keyNameProvider, "someData")
                 .ifPresentOrElse(s->assertThat(s).isInstanceOf(S3FileSaverErrorState.class),
                         ()->fail(EXPECTED_STATE_BUT_GOT_NOTHING));
     }
 
     @Test
     void savingReturnsOKState(@Mock final S3Client s3Client,
-                                      @Mock final BucketName bucketName,
-                                      @Mock final Key key){
+                                      @Mock final BucketNameProvider bucketNameProvider,
+                                      @Mock final KeyNameProvider keyNameProvider){
 
         final S3FileSaver s3FileSaver = new S3FileSaver(() -> s3Client);
 
         final ArgumentCaptor<RequestBody> contents = ArgumentCaptor.forClass(RequestBody.class);
 
-        s3FileSaver.save(bucketName, key, "someData")
+        s3FileSaver.save(bucketNameProvider, keyNameProvider, "someData")
                 .ifPresentOrElse(s->assertThat(s).isInstanceOf(S3FileSaverOKState.class),
                         ()->fail(EXPECTED_STATE_BUT_GOT_NOTHING));
 

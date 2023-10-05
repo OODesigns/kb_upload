@@ -14,8 +14,8 @@ public class S3FileSaver {
         this.s3Client = s3Client;
     }
 
-    public Optional<S3FileSaverState> save(final BucketName bucketName, final Key key, final String contents) {
-        return getRequest(bucketName, key)
+    public Optional<S3FileSaverState> save(final BucketNameProvider bucketNameProvider, final KeyNameProvider keyNameProvider, final String contents) {
+        return getRequest(bucketNameProvider, keyNameProvider)
                 .map(saveContents(contents));
     }
 
@@ -30,7 +30,7 @@ public class S3FileSaver {
         };
     }
 
-    private Optional<PutObjectRequest> getRequest(final BucketName bucketName, final Key key) {
-        return Optional.of(PutObjectRequest.builder().bucket(bucketName.get()).key(key.get()).build());
+    private Optional<PutObjectRequest> getRequest(final BucketNameProvider bucketNameProvider, final KeyNameProvider keyNameProvider) {
+        return Optional.of(PutObjectRequest.builder().bucket(bucketNameProvider.get()).key(keyNameProvider.get()).build());
     }
 }

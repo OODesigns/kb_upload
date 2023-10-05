@@ -17,7 +17,7 @@ import static org.mockito.Mockito.when;
 
 
 @MockitoSettings
-class S3EventSingleFileDataTest {
+class S3EventSingleFileLoaderTest {
 
     @Test
     void retrieveSingleFileData(@Mock final AmazonS3 amazonS3,
@@ -42,9 +42,9 @@ class S3EventSingleFileDataTest {
 
         when(notificationRecord.getS3()).thenReturn(s3Entity);
 
-        final S3EventSingleFileData s3EventSingleFileData = new S3EventSingleFileData("expectedName.txt", ()->amazonS3);
+        final S3EventSingleFileLoader s3EventSingleFileLoader = new S3EventSingleFileLoader("expectedName.txt", ()->amazonS3);
 
-        s3EventSingleFileData.retrieve(s3Event)
+        s3EventSingleFileLoader.retrieve(s3Event)
                 .ifPresentOrElse(s->assertThat(s).contains("someData"),
                         ()->fail("Expected to have some data"));
 
@@ -74,9 +74,9 @@ class S3EventSingleFileDataTest {
 
         when(notificationRecord.getS3()).thenReturn(s3Entity);
 
-        final S3EventSingleFileData s3EventSingleFileData = new S3EventSingleFileData("expectedName.txt", ()->amazonS3);
+        final S3EventSingleFileLoader s3EventSingleFileLoader = new S3EventSingleFileLoader("expectedName.txt", ()->amazonS3);
 
-        s3EventSingleFileData.retrieve(s3Event)
+        s3EventSingleFileLoader.retrieve(s3Event)
                 .ifPresentOrElse(s->assertThat(s).contains("someData"),
                         ()->fail("Expected to have some data"));
 
@@ -100,9 +100,9 @@ class S3EventSingleFileDataTest {
 
         when(notificationRecord.getS3()).thenReturn(s3Entity);
 
-        final S3EventSingleFileData s3EventSingleFileData = new S3EventSingleFileData("expectedName.txt", ()->amazonS3);
+        final S3EventSingleFileLoader s3EventSingleFileLoader = new S3EventSingleFileLoader("expectedName.txt", ()->amazonS3);
 
-        s3EventSingleFileData.retrieve(s3Event)
+        s3EventSingleFileLoader.retrieve(s3Event)
                 .ifPresent(__->fail("Expected no data as there were 0 matching records"));
 
     }
@@ -116,9 +116,9 @@ class S3EventSingleFileDataTest {
         when(s3Event.getRecords()).thenReturn(records);
 
 
-        final S3EventSingleFileData s3EventSingleFileData = new S3EventSingleFileData("expectedName.txt", ()->amazonS3);
+        final S3EventSingleFileLoader s3EventSingleFileLoader = new S3EventSingleFileLoader("expectedName.txt", ()->amazonS3);
 
-        s3EventSingleFileData.retrieve(s3Event)
+        s3EventSingleFileLoader.retrieve(s3Event)
                 .ifPresent(__->fail("Expected no data as there were 0 matching records"));
 
     }

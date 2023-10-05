@@ -12,12 +12,12 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-public class S3EventSingleFileData implements Retrievable<S3Event, Optional<String>> {
+public class S3EventSingleFileLoader implements Retrievable<S3Event, Optional<String>> {
     public static final int FIRST_ITEM = 0;
     private final String expectedFileName;
     private final Supplier<AmazonS3> amazonS3;
 
-    public S3EventSingleFileData(final String expectedFileName, final Supplier<AmazonS3> amazonS3) {
+    public S3EventSingleFileLoader(final String expectedFileName, final Supplier<AmazonS3> amazonS3) {
         this.expectedFileName = expectedFileName;
         this.amazonS3 = amazonS3;
     }

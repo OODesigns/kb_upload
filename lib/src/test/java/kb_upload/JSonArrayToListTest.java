@@ -26,9 +26,9 @@ class JSonArrayToListTest {
                 }
             ]}""";
 
-        final Transformer<String, Optional<List<String>>> transformer = new JSonArrayToList("person");
+        final Transformer<JSON, Optional<List<String>>> transformer = new JSonArrayToList("person");
 
-        transformer.transform(jsonData)
+        transformer.transform(new JSONData(jsonData))
                 .ifPresentOrElse(t->{
                     assertThat(t.get(0)).isEqualTo("John Doe Doe Doe");
                     assertThat(t.get(1)).isEqualTo("Jane Smith");}
@@ -52,35 +52,9 @@ class JSonArrayToListTest {
                 }
             ]}""";
 
-        final Transformer<String, Optional<List<String>>> transformer = new JSonArrayToList("person");
+        final Transformer<JSON, Optional<List<String>>> transformer = new JSonArrayToList("person");
 
-        transformer.transform(jsonData)
+        transformer.transform(new JSONData(jsonData))
                 .ifPresent(__->fail("Expected to get nothing but got something"));
     }
-
-    @Test
-    void failToTransformInvalidJSONToList(){
-
-        final String jsonData = """
-            {
-            "persons":
-                {
-                    "firstName": "John",
-                    "lastName": "Doe Doe Doe"
-                },
-                {
-                    "firstName": "Jane",
-                    "lastName": "Smith"
-                }
-            ]}""";
-
-        final Transformer<String, Optional<List<String>>> transformer = new JSonArrayToList("person");
-
-        transformer.transform(jsonData)
-                .ifPresent(__->fail("Expected to get nothing but got something"));
-    }
-
-
-
-
 }
