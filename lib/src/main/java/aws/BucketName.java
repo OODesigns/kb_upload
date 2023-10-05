@@ -1,27 +1,24 @@
 package aws;
 
+import java.util.Optional;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
+
 
 public class BucketName implements BucketNameProvider {
     private static final int MIN_NAME_LENGTH = 3;
     private static final int MAX_NAME_LENGTH = 63;
-    private static final String INVALID_NAME = "Invalid AWS bucket name: ";
+    private static final String INVALID_NAME = "Invalid AWS bucket name: %s";
     private final String bucketName;
 
     public BucketName(final String bucketName) {
-        this.bucketName = bucketName;
-        if (!isValidBucketName(bucketName)) {
-            throw new InvalidBucketNameException(INVALID_NAME + bucketName);
-        }
+        this.bucketName = isValidBucketName(bucketName)
+                .orElseThrow(()->new InvalidBucketNameException(String.format(INVALID_NAME,bucketName)));
     }
 
-    private boolean isValidBucketName(final String bucketName) {
-        return Stream.of(
-                hasValidNameSize(bucketName),
-                includesValidCharacters(bucketName),
-                excludesIPAddressFormat(bucketName)
-        ).allMatch(Boolean::booleanValue);
+    private Optional<String> isValidBucketName(final String bucketName) {
+        return  hasValidNameSize(bucketName) &&
+                includesValidCharacters(bucketName) &&
+                excludesIPAddressFormat(bucketName) ? Optional.of(bucketName): Optional.empty();
     }
 
     private static boolean excludesIPAddressFormat(final String bucketName) {
