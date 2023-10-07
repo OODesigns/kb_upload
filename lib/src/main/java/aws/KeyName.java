@@ -3,7 +3,7 @@ package aws;
 import java.util.Optional;
 import java.util.function.Predicate;
 
-public class KeyName implements KeyNameProvider {
+public class KeyName implements KeyNameTransformer {
     public static final String INVALID_OBJECT_KEY = "Invalid S3 Object Key: %s";
     private final String keyname;
 

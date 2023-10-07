@@ -8,7 +8,7 @@ import java.util.function.Supplier;
 
 
 
-public class S3FileLoader implements Retrievable<S3File, Optional<String>> {
+public class S3FileLoader implements Retrievable<S3Object, Optional<String>> {
     private final Supplier<AmazonS3> amazonS3;
 
     public S3FileLoader(final Supplier<AmazonS3> amazonS3) {
@@ -16,10 +16,10 @@ public class S3FileLoader implements Retrievable<S3File, Optional<String>> {
     }
 
     @Override
-    public Optional<String> retrieve(final S3File s3File) {
+    public Optional<String> retrieve(final S3Object s3Object) {
         try{
-          return Optional.of(amazonS3.get().getObjectAsString(s3File.bucketNameProvider().get(),
-                s3File.keyNameProvider().get()));
+          return Optional.of(amazonS3.get().getObjectAsString(s3Object.bucketNameTransformer().get(),
+                s3Object.keyNameTransformer().get()));
         }catch ( final SdkClientException e){
           return Optional.empty();
         }

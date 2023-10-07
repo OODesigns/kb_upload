@@ -19,34 +19,34 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @MockitoSettings
-public class S3FileSaverTest {
+public class S3ObjectSaverTest {
 
     public static final String EXPECTED_STATE_BUT_GOT_NOTHING = "Expected FileSaver State but got nothing";
 
     @Test
     void errorSavingReturnsErrorState(@Mock final S3Client s3Client,
-                                      @Mock final BucketNameProvider bucketNameProvider,
-                                      @Mock final KeyNameProvider keyNameProvider){
+                                      @Mock final BucketNameTransformer bucketNameTransformer,
+                                      @Mock final KeyNameTransformer keyNameTransformer){
 
         when(s3Client.putObject(any(PutObjectRequest.class), any(RequestBody.class) )).thenThrow(SdkException.class);
 
         final S3FileSaver s3FileSaver = new S3FileSaver(() -> s3Client);
 
-        s3FileSaver.save(bucketNameProvider, keyNameProvider, "someData")
+        s3FileSaver.save(bucketNameTransformer, keyNameTransformer, "someData")
                 .ifPresentOrElse(s->assertThat(s).isInstanceOf(S3FileSaverErrorState.class),
                         ()->fail(EXPECTED_STATE_BUT_GOT_NOTHING));
     }
 
     @Test
     void savingReturnsOKState(@Mock final S3Client s3Client,
-                                      @Mock final BucketNameProvider bucketNameProvider,
-                                      @Mock final KeyNameProvider keyNameProvider){
+                                      @Mock final BucketNameTransformer bucketNameTransformer,
+                                      @Mock final KeyNameTransformer keyNameTransformer){
 
         final S3FileSaver s3FileSaver = new S3FileSaver(() -> s3Client);
 
         final ArgumentCaptor<RequestBody> contents = ArgumentCaptor.forClass(RequestBody.class);
 
-        s3FileSaver.save(bucketNameProvider, keyNameProvider, "someData")
+        s3FileSaver.save(bucketNameTransformer, keyNameTransformer, "someData")
                 .ifPresentOrElse(s->assertThat(s).isInstanceOf(S3FileSaverOKState.class),
                         ()->fail(EXPECTED_STATE_BUT_GOT_NOTHING));
 

@@ -15,48 +15,66 @@ import java.util.function.Predicate;
 public class HandleValidation implements RequestHandler<S3Event, Void> {
 
     private static final String RESULT = "RESULT: %s";
-    public static final String EXPECTED_FILE_NAME = "knowledge.json";
-        public static final FileLoader FILE_LOADER = new FileLoader("knowledgeSchema.json");
+    public static final String EXPECTED_OBJECT_NAME = "knowledge.json";
+    public static final FileLoader FILE_LOADER = new FileLoader("knowledgeSchema.json");
     public static final JSONSchemaData JSON_SCHEMA = new JSONSchemaData(FILE_LOADER.toString());
-    public static final String EXPECTED_FILE_NOT_UPLOADED = "Expected File: knowledge.json was not uploaded";
-    private final Retrievable<S3Event, Optional<String>> fileData;
+    private static final String EXPECTED_OBJECT_NOT_UPLOADED = "Expected S3Object: knowledge.json was not uploaded";
+    private static final String UNABLE_TO_LOAD_FILE = "Unable to load file from bucket: %s and key: %s";
+    private final Retrievable<S3Event, Optional<S3Object>> s3ObjectProvider;
     private final Validator<JSONSchema, JSON, Validation> validator;
+    private final Retrievable<S3Object, Optional<String>> fileLoader;
 
     /**
      * Used for testing purposes only
      */
-    HandleValidation(final  Retrievable<S3Event, Optional<String>> fileData,
-                            final Validator<JSONSchema, JSON, Validation> validator) {
-        this.fileData = fileData;
+    HandleValidation(final  Retrievable<S3Event, Optional<S3Object>> s3ObjectProvider,
+                            final Validator<JSONSchema, JSON, Validation> validator,
+                            final Retrievable<S3Object, Optional<String>> fileLoader){
+        this.s3ObjectProvider = s3ObjectProvider;
         this.validator = validator;
+        this.fileLoader = fileLoader;
     }
 
     public HandleValidation() {
-        this.fileData = new S3EventSingleFileLoader(EXPECTED_FILE_NAME, ()-> AmazonS3ClientBuilder.standard().build());
+        this.s3ObjectProvider = new S3EventSingleObject(EXPECTED_OBJECT_NAME, BucketName::new, KeyName::new);
         this.validator = new JSONValidator(()->JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V4));
+        this.fileLoader = new S3FileLoader(AmazonS3ClientBuilder::defaultClient);
     }
 
      @Override
     public Void handleRequest(final S3Event event, final Context context) {
-        fileData.retrieve(event)
-                .ifPresentOrElse(f->validateFileData(f, context), this::throwFileMissing);
+        s3ObjectProvider.retrieve(event)
+                .ifPresentOrElse(o-> validateData(context, o),
+                        ()->this.throwObjectMissing(context));
         return null;
     }
 
-    private void validateFileData(final String fileData, final Context context) {
+    private void validateData(final Context context, final S3Object s3Object) {
+        fileLoader.retrieve(s3Object).
+                ifPresentOrElse(f->validateData(f, context),
+                        ()->throwUnableToLoadFile(context, s3Object));
+    }
+
+     private void validateData(final String fileData, final Context context) {
         Optional.of(fileData)
                 .flatMap(this::validate)
                 .map(logResult(context))
                 .filter(notValidFile())
-                .ifPresent(this::throwInvalidDataException);
+                .ifPresent(validation -> throwInvalidDataException(context, validation));
     }
 
-    private void throwFileMissing() {
-        throw new ValidationException(EXPECTED_FILE_NOT_UPLOADED);
+    private void throwUnableToLoadFile(final Context context, final S3Object s3Object) {
+        throw new ValidationException(context, String.format(UNABLE_TO_LOAD_FILE,
+                                               s3Object.bucketNameTransformer().get(),
+                                               s3Object.keyNameTransformer().get()));
     }
 
-    private void throwInvalidDataException(final Validation validation) {
-        throw new ValidationException(validation.messages().toString());
+    private void throwObjectMissing(final Context context){
+        throw new ValidationException(context, EXPECTED_OBJECT_NOT_UPLOADED);
+    }
+
+    private void throwInvalidDataException(final Context context, final Validation validation) {
+        throw new ValidationException(context, validation.messages().toString());
     }
 
     private static Predicate<Validation> notValidFile() {

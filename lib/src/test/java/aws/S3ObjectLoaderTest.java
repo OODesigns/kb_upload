@@ -12,7 +12,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @MockitoSettings
-class S3FileLoaderTest {
+class S3ObjectLoaderTest {
 
     @Test
     void retrieveFileData(@Mock final AmazonS3 amazonS3){
@@ -21,7 +21,7 @@ class S3FileLoaderTest {
 
         final S3FileLoader s3FileLoader = new S3FileLoader(()->amazonS3);
 
-        s3FileLoader.retrieve(new S3File(new BucketName("expected-bucket"),new KeyName("expectedFilename.txt")))
+        s3FileLoader.retrieve(new S3Object(new BucketName("expected-bucket"),new KeyName("expectedFilename.txt")))
                 .ifPresentOrElse(s->assertThat(s).contains("someData"),
                         ()->fail("Expected to have some data"));
     }
@@ -33,7 +33,7 @@ class S3FileLoaderTest {
 
         final S3FileLoader s3FileLoader = new S3FileLoader(() -> amazonS3);
 
-        final Optional<String> retrieve = s3FileLoader.retrieve(new S3File(new BucketName("expected-bucket"), new KeyName("expectedFilename.txt")));
+        final Optional<String> retrieve = s3FileLoader.retrieve(new S3Object(new BucketName("expected-bucket"), new KeyName("expectedFilename.txt")));
 
         assertThat(retrieve).isEmpty();
     }
