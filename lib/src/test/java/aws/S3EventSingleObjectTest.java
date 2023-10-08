@@ -42,8 +42,8 @@ class S3EventSingleObjectTest {
 
         s3EventSingleObject.retrieve(s3Event)
                 .ifPresentOrElse(s->{
-                    assertThat(s.bucketNameTransformer().get()).contains("name");
-                    assertThat(s.keyNameTransformer().get()).contains("expectedName.txt");},
+                    assertThat(s.getBucketName()).contains("name");
+                    assertThat(s.getKeyName()).contains("expectedName.txt");},
                         ()->fail("Expected to have an object"));
 
     }
@@ -81,8 +81,8 @@ class S3EventSingleObjectTest {
 
         s3EventSingleObject.retrieve(s3Event)
                 .ifPresentOrElse(s->{
-                            assertThat(s.bucketNameTransformer().get()).contains("name");
-                            assertThat(s.keyNameTransformer().get()).contains("expectedName.txt");},
+                            assertThat(s.getBucketName()).contains("name");
+                            assertThat(s.getKeyName()).contains("expectedName.txt");},
                         ()->fail("Expected to have an object"));
 
     }

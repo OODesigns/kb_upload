@@ -1,3 +1,7 @@
 package aws;
 
-public record S3Object(BucketNameTransformer bucketNameTransformer, KeyNameTransformer keyNameTransformer) {}
+public interface S3Object {
+    String getBucketName();
+
+    String getKeyName();
+}

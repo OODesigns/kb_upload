@@ -34,7 +34,7 @@ public class S3EventSingleObject implements Retrievable<S3Event, Optional<S3Obje
     }
 
    private S3Object getData(final S3EventNotification.S3Entity s3Entity) {
-        return new S3Object(bucketNameTransformer.transform(s3Entity.getBucket().getName()),
+        return new S3ObjectName(bucketNameTransformer.transform(s3Entity.getBucket().getName()),
                 keyNameTransformer.transform(s3Entity.getObject().getKey()));
     }
 

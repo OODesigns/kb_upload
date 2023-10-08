@@ -90,16 +90,12 @@ public class HandleValidationTest {
                                     @Mock final S3Event s3Event,
                                     @Mock final Context context,
                                     @Mock final LambdaLogger lambdaLogger,
-                                    @Mock final BucketNameTransformer bucketNameTransformer,
-                                    @Mock final KeyNameTransformer keyNameTransformer,
                                     @Mock final Validator<JSONSchema, JSON, Validation> validator) {
 
         when(context.getLogger()).thenReturn(lambdaLogger);
         when(fileLoader.retrieve(any())).thenReturn(Optional.empty());
-        when(s3Object.bucketNameTransformer()).thenReturn(bucketNameTransformer);
-        when(s3Object.keyNameTransformer()).thenReturn(keyNameTransformer);
-        when(bucketNameTransformer.get()).thenReturn("bucket");
-        when(keyNameTransformer.get()).thenReturn("key");
+        when(s3Object.getBucketName()).thenReturn("bucket");
+        when(s3Object.getKeyName()).thenReturn("key");
 
         final RequestHandler<S3Event, Void> requestHandler
                 = new HandleValidation(unusedEvent -> Optional.of(s3Object), validator, fileLoader);

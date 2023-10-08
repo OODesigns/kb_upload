@@ -18,8 +18,8 @@ public class S3FileLoader implements Retrievable<S3Object, Optional<String>> {
     @Override
     public Optional<String> retrieve(final S3Object s3Object) {
         try{
-          return Optional.of(amazonS3.get().getObjectAsString(s3Object.bucketNameTransformer().get(),
-                s3Object.keyNameTransformer().get()));
+          return Optional.of(amazonS3.get().getObjectAsString(s3Object.getBucketName(),
+                s3Object.getKeyName()));
         }catch ( final SdkClientException e){
           return Optional.empty();
         }

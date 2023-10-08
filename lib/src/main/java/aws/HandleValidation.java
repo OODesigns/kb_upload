@@ -65,8 +65,8 @@ public class HandleValidation implements RequestHandler<S3Event, Void> {
 
     private void throwUnableToLoadFile(final Context context, final S3Object s3Object) {
         throw new ValidationException(context, String.format(UNABLE_TO_LOAD_FILE,
-                                               s3Object.bucketNameTransformer().get(),
-                                               s3Object.keyNameTransformer().get()));
+                                               s3Object.getBucketName(),
+                                               s3Object.getKeyName()));
     }
 
     private void throwObjectMissing(final Context context){

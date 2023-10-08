@@ -21,7 +21,7 @@ class S3ObjectLoaderTest {
 
         final S3FileLoader s3FileLoader = new S3FileLoader(()->amazonS3);
 
-        s3FileLoader.retrieve(new S3Object(new BucketName("expected-bucket"),new KeyName("expectedFilename.txt")))
+        s3FileLoader.retrieve(new S3ObjectName(new BucketName("expected-bucket"),new KeyName("expectedFilename.txt")))
                 .ifPresentOrElse(s->assertThat(s).contains("someData"),
                         ()->fail("Expected to have some data"));
     }
@@ -33,7 +33,7 @@ class S3ObjectLoaderTest {
 
         final S3FileLoader s3FileLoader = new S3FileLoader(() -> amazonS3);
 
-        final Optional<String> retrieve = s3FileLoader.retrieve(new S3Object(new BucketName("expected-bucket"), new KeyName("expectedFilename.txt")));
+        final Optional<String> retrieve = s3FileLoader.retrieve(new S3ObjectName(new BucketName("expected-bucket"), new KeyName("expectedFilename.txt")));
 
         assertThat(retrieve).isEmpty();
     }
