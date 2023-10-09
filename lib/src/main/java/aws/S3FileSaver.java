@@ -1,4 +1,5 @@
 package aws;
+import kb_upload.Storable;
 import software.amazon.awssdk.core.exception.SdkException;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
@@ -7,16 +8,11 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-public class S3FileSaver {
+public class S3FileSaver implements Storable<S3Object, String, Optional<S3FileSaverState>> {
     private final Supplier<S3Client> s3Client;
 
     public S3FileSaver(final Supplier<S3Client> s3Client) {
         this.s3Client = s3Client;
-    }
-
-    public Optional<S3FileSaverState> save(final S3Object s3Object , final String contents) {
-        return getRequest(s3Object)
-                .map(saveContents(contents));
     }
 
     private Function<PutObjectRequest, S3FileSaverState> saveContents(final String contents) {
@@ -35,5 +31,11 @@ public class S3FileSaver {
                 .bucket(s3object.getBucketName())
                 .key(s3object.getKeyName())
                 .build());
+    }
+
+    @Override
+    public Optional<S3FileSaverState> store(final S3Object s3Object, final String contents) {
+        return getRequest(s3Object)
+                .map(saveContents(contents));
     }
 }

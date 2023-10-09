@@ -14,13 +14,13 @@ import java.util.stream.Collectors;
 public class S3EventSingleObject implements Retrievable<S3Event, Optional<S3Object>> {
     public static final int FIRST_ITEM = 0;
     private final String expectedKeyName;
-    private final Transformer<String, BucketNameTransformer> bucketNameTransformer;
-    private final Transformer<String, KeyNameTransformer> keyNameTransformer;
+    private final Transformer<String, BucketNameProvider> bucketNameTransformer;
+    private final Transformer<String, KeyNameProvider> keyNameTransformer;
 
 
     public S3EventSingleObject(final String expectedKeyName,
-                               final Transformer<String, BucketNameTransformer> bucketNameTransformer,
-                               final Transformer<String, KeyNameTransformer> keyNameTransformer
+                               final Transformer<String, BucketNameProvider> bucketNameTransformer,
+                               final Transformer<String, KeyNameProvider> keyNameTransformer
     ) {
         this.expectedKeyName = expectedKeyName;
         this.bucketNameTransformer = bucketNameTransformer;

@@ -31,7 +31,7 @@ public class S3ObjectSaverTest {
 
         final S3FileSaver s3FileSaver = new S3FileSaver(() -> s3Client);
 
-        s3FileSaver.save(s3Object, "someData")
+        s3FileSaver.store(s3Object, "someData")
                 .ifPresentOrElse(s->assertThat(s).isInstanceOf(S3FileSaverErrorState.class),
                         ()->fail(EXPECTED_STATE_BUT_GOT_NOTHING));
     }
@@ -42,7 +42,7 @@ public class S3ObjectSaverTest {
 
         final S3FileSaver s3FileSaver = new S3FileSaver(() -> s3Client);
 
-        s3FileSaver.save(s3Object, "someData")
+        s3FileSaver.store(s3Object, "someData")
                 .ifPresentOrElse(s->assertThat(s).isInstanceOf(S3FileSaverOKState.class),
                         ()->fail(EXPECTED_STATE_BUT_GOT_NOTHING));
 
