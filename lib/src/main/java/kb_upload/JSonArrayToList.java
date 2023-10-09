@@ -9,7 +9,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class JSonArrayToList implements Transformer<JSON, Optional<List<String>>> {
+public class JSonArrayToList implements Transformer<JSON, mappable<List<String>, String, String>> {
     public static final String SPACE = " ";
     private static final ObjectMapper objectMapper = new ObjectMapper();
     private final String arrayName;
@@ -20,10 +20,12 @@ public class JSonArrayToList implements Transformer<JSON, Optional<List<String>>
     }
 
     @Override
-    public Optional<List<String>> transform(final JSON json) {
+    public mappable<List<String>, String, String> transform(final JSON json) {
         return getArray(json.get())
                 .filter(JsonNode::isArray)
-                .map(getJsonArrayItems());
+                .map(getJsonArrayItems())
+                .map(JsonTransformationResult::new)
+                .orElseGet(()->new JsonTransformationResult(List.of()));
     }
 
     private Function<JsonNode, List<String>> getJsonArrayItems() {
@@ -45,5 +47,4 @@ public class JSonArrayToList implements Transformer<JSON, Optional<List<String>>
             return Optional.empty();
         }
     }
-
 }

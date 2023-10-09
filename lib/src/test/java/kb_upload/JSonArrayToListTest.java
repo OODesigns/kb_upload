@@ -1,9 +1,7 @@
 package kb_upload;
 
 import org.junit.jupiter.api.Test;
-
-import java.util.List;
-import java.util.Optional;
+import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
@@ -26,13 +24,13 @@ class JSonArrayToListTest {
                 }
             ]}""";
 
-        final Transformer<JSON, Optional<List<String>>> transformer = new JSonArrayToList("person");
+        final JSonArrayToList transformer = new JSonArrayToList("person");
 
-        Optional.of(new JSONData(jsonData))
-                .flatMap(transformer::transform)
+        transformer.transform(new JSONData(jsonData))
+                .map(Objects::toString)
                 .ifPresentOrElse(t->{
-                            assertThat(t.get(0)).isEqualTo("John Doe Doe Doe");
-                            assertThat(t.get(1)).isEqualTo("Jane Smith");
+                            assertThat(t).contains("John Doe Doe Doe");
+                            assertThat(t).contains("Jane Smith");
                         },()->fail("Expected to get data but got nothing")
                 );
     }
@@ -53,10 +51,9 @@ class JSonArrayToListTest {
                 }
             ]}""";
 
-        final Transformer<JSON, Optional<List<String>>> transformer = new JSonArrayToList("person");
-
-        Optional.of(new JSONData(jsonData))
-                .flatMap(transformer::transform)
+        final JSonArrayToList transformer = new JSonArrayToList("person");
+        transformer.transform(new JSONData(jsonData))
+                .map(Object::toString)
                 .ifPresent(__->fail("Expected to get nothing but got something"));
     }
 }
