@@ -50,6 +50,6 @@ public class S3EventSingleObject implements Retrievable<S3Event, Optional<S3Obje
     }
 
     private Predicate<S3EventNotification.S3Entity> hasValidateName() {
-            return s3Entity -> s3Entity.getObject().getKey().equalsIgnoreCase(expectedKeyName);
+            return s3Entity -> s3Entity.getObject().getKey().toLowerCase().contains(expectedKeyName.toLowerCase());
     }
 }

@@ -20,9 +20,6 @@ import static org.mockito.Mockito.*;
 
 @MockitoSettings
 public class S3ObjectSaverTest {
-
-    public static final String EXPECTED_STATE_BUT_GOT_NOTHING = "Expected FileSaver State but got nothing";
-
     @Test
     void errorSavingReturnsErrorState(@Mock final S3Client s3Client,
                                       @Mock final S3Object s3Object){
@@ -31,10 +28,9 @@ public class S3ObjectSaverTest {
 
         final S3FileSaver s3FileSaver = new S3FileSaver(() -> s3Client);
 
-        s3FileSaver.store(s3Object, "someData")
-                .ifPresentOrElse(s->assertThat(s).isInstanceOf(S3FileSaverErrorState.class),
-                        ()->fail(EXPECTED_STATE_BUT_GOT_NOTHING));
-    }
+        assertThat(s3FileSaver.store(s3Object, "someData")).isInstanceOf(S3FileSaverErrorState.class);
+
+      }
 
     @Test
     void savingReturnsOKState(@Mock final S3Client s3Client,
@@ -42,9 +38,7 @@ public class S3ObjectSaverTest {
 
         final S3FileSaver s3FileSaver = new S3FileSaver(() -> s3Client);
 
-        s3FileSaver.store(s3Object, "someData")
-                .ifPresentOrElse(s->assertThat(s).isInstanceOf(S3FileSaverOKState.class),
-                        ()->fail(EXPECTED_STATE_BUT_GOT_NOTHING));
+        assertThat(s3FileSaver.store(s3Object, "someData")).isInstanceOf(S3FileSaverOKState.class);
 
         final ArgumentCaptor<RequestBody> contents = ArgumentCaptor.forClass(RequestBody.class);
 

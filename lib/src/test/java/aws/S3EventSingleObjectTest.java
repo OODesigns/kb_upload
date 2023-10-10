@@ -49,6 +49,37 @@ class S3EventSingleObjectTest {
     }
 
     @Test
+    void retrieveSingleS3ObjectFromPath(@Mock final S3Event s3Event,
+                                @Mock final S3EventNotification.S3EventNotificationRecord notificationRecord,
+                                @Mock final S3EventNotification.S3Entity s3Entity,
+                                @Mock final S3EventNotification.S3BucketEntity bucket,
+                                @Mock final S3EventNotification.S3ObjectEntity objectEntity){
+
+        final List<S3EventNotification.S3EventNotificationRecord> records = new ArrayList<>();
+        records.add(notificationRecord);
+
+        when(s3Event.getRecords()).thenReturn(records);
+
+        when(s3Entity.getBucket()).thenReturn(bucket);
+        when(s3Entity.getObject()).thenReturn(objectEntity);
+
+        when(bucket.getName()).thenReturn("name");
+        when(objectEntity.getKey()).thenReturn("folder1/folder2/expectedName.txt");
+
+        when(notificationRecord.getS3()).thenReturn(s3Entity);
+
+        final S3EventSingleObject s3EventSingleObject = new S3EventSingleObject("expectedName.txt",
+                BucketName::new, KeyName::new);
+
+        s3EventSingleObject.retrieve(s3Event)
+                .ifPresentOrElse(s->{
+                            assertThat(s.getBucketName()).contains("name");
+                            assertThat(s.getKeyName()).contains("expectedName.txt");},
+                        ()->fail("Expected to have an object"));
+
+    }
+
+    @Test
     void retrieveSingleFileDataManyEvents(@Mock final S3Event s3Event,
                                           @Mock final S3EventNotification.S3EventNotificationRecord notificationRecord,
                                           @Mock final S3EventNotification.S3EventNotificationRecord notificationRecord2,
