@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 
 public class HandleTransformation implements RequestHandler<Map<String, String>, Void> {
@@ -63,12 +64,22 @@ public class HandleTransformation implements RequestHandler<Map<String, String>,
     private void saveToFile(final String data, final Map<String, String> input, final Context context) {
         getBucketNameForTransformedFile(input, context)
                 .map(getS3Object())
-                .map(s-> fileStoreProvider.retrieve(getRegion(input, context)).store(s , data))
-                .filter(s3FileSaverState -> s3FileSaverState instanceof S3FileSaverErrorState)
-                .ifPresent(getS3FileSaverStateConsumer(context));
+                .map(s-> store(data, input, context, s))
+                .filter(hasErrorState())
+                .ifPresent(throwSaveException(context));
     }
 
-    private static Consumer<S3FileSaverState> getS3FileSaverStateConsumer(final Context context) {
+    private static Predicate<S3FileSaverState> hasErrorState() {
+        return s3FileSaverState -> s3FileSaverState instanceof S3FileSaverErrorState;
+    }
+
+    private S3FileSaverState store(final String data, final Map<String, String> input, final Context context, final S3Object s) {
+        return fileStoreProvider
+                .retrieve(getRegion(input, context))
+                .store(s, data);
+    }
+
+    private static Consumer<S3FileSaverState> throwSaveException(final Context context) {
         return error -> {
             throw new TransformationException(context,
                     String.format(ERROR_UNABLE_TO_SAVE_TRANSFORMED_FILE, error));
