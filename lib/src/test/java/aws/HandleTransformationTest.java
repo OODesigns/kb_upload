@@ -191,7 +191,7 @@ class HandleTransformationTest {
     }
 
     @Test
-    void errorSavingFails
+    void errorSavingFile
             (@Mock final Context context,
              @Mock final LambdaLogger lambdaLogger,
              @Mock final Retrievable<S3Object, Optional<String>> fileLoader,
@@ -223,30 +223,62 @@ class HandleTransformationTest {
         assertThat(logData.getValue()).contains("Test Error");
     }
 
+    @Test
+    void SavingFileWithOutIssue
+            (@Mock final Context context,
+             @Mock final LambdaLogger lambdaLogger,
+             @Mock final Retrievable<S3Object, Optional<String>> fileLoader,
+             @Mock final Transformer<JSON, mappable<List<String>, String, String>> jsonTransformer,
+             @Mock final mappable<List<String>, String, String>  transformedResult,
+             @Mock final Retrievable<Region, Storable<S3Object, String, S3FileSaverState>> fileStoreProvider,
+             @Mock final Storable<S3Object, String, S3FileSaverState> storable){
+
+        when(context.getLogger()).thenReturn(lambdaLogger);
+        when(fileLoader.retrieve(any(S3Object.class))).thenReturn(Optional.of("{\"nothing\":\"some text\"}"));
+        when(jsonTransformer.transform(any())).thenReturn(transformedResult);
+        when(transformedResult.map(any())).thenReturn(Optional.of(List.of("data1", "data2").toString()));
+        when(fileStoreProvider.retrieve(any())).thenReturn(storable);
+        when(storable.store(any(), any())).thenReturn(new S3FileSaverOKState());
+
+
+        final Map<String, String> input = Map.of("Transformation-BucketName", "bucket1",
+                "Transformed-BucketName", "bucket2",
+                "Transformed-Region", "eu-north-1");
+
+        final HandleTransformation handleTransformation
+                = new HandleTransformation(fileLoader, jsonTransformer, fileStoreProvider);
+
+        handleTransformation.handleRequest(input, context);
+
+        final ArgumentCaptor<String> data = ArgumentCaptor.forClass(String.class);
+        final ArgumentCaptor<String> logData = ArgumentCaptor.forClass(String.class);
+
+        verify(storable, times(1)).store(any(), data.capture());
+        verify(lambdaLogger, times(1)).log(logData.capture());
+
+        assertThat(data.getValue()).contains("data1", "data2");
+        assertThat(logData.getValue()).contains("S3FileSaverOKState");
+    }
+
+    @Test
+    void handleTransformationWithDefaultConNoValidFile(@Mock final Context context,
+                                                       @Mock final LambdaLogger lambdaLogger){
+
+        final Map<String, String> input = Map.of("Transformation-BucketName", "bucket1",
+                    "Transformed-BucketName", "bucket2",
+                    "Transformed-Region", "eu-north-1");
+
+        when(context.getLogger()).thenReturn(lambdaLogger);
+
+
+        final HandleTransformation handleTransformation
+                = new HandleTransformation();
+
+        assertThrows(TransformationException.class, ()-> handleTransformation.handleRequest(input, context));
+    }
 
 
 
 
 
-//    @Test
-//    void passValidJsonConvertToLinesOfText(@Mock final Object nothing,
-//                                           @Mock final Context context,
-//                                           @Mock final Retrievable<S3Object, Optional<String>> fileLoader,
-//                                           @Mock final Storable<S3Object, String, Optional<S3FileSaverState>> s3FileSaver,
-//                                           @Mock final LambdaLogger lambdaLogger){
-//
-//        when(fileLoader.retrieve(any(S3Object.class))).thenReturn(Optional.of("{\"utterance\":\"some text\"}"));
-//        when(s3FileSaver.store(any(S3Object.class), any(String.class))).thenReturn(Optional.of(new S3FileSaverOKState()));
-//        when(context.getLogger()).thenReturn(lambdaLogger);
-//
-//        final HandleTransformation handleTransformation
-//                = new HandleTransformation(fileLoader, s3FileSaver);
-//
-//        handleTransformation.handleRequest(nothing, context);
-//
-//        final ArgumentCaptor<String> logData = ArgumentCaptor.forClass(String.class);
-//
-//        verify(lambdaLogger, times(1)).log(logData.capture());
-//        assertThat(logData.getValue()).contains("S3FileSaverOKState");
-//    }
 }

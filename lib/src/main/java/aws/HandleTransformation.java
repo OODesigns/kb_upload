@@ -27,6 +27,7 @@ public class HandleTransformation implements RequestHandler<Map<String, String>,
     public static final String UNABLE_TO_TRANSFORM_DATA = "Unable to transform data";
     public static final String TRANSFORMED_REGION = "Transformed-Region";
     public static final String ERROR_UNABLE_TO_SAVE_TRANSFORMED_FILE = "Error unable to save transformed file: %s";
+    public static final String OK_RESULT = "RESULT S3FileSaverOKState";
     private final Retrievable<S3Object, Optional<String>> fileLoader;
     private final Transformer<JSON, mappable<List<String>, String, String>> jsonTransformer;
     private final Retrievable<Region, Storable<S3Object, String, S3FileSaverState>> fileStoreProvider;
@@ -52,7 +53,7 @@ public class HandleTransformation implements RequestHandler<Map<String, String>,
 
     @Override
     public Void handleRequest(final Map<String, String> input, final Context context) {
-        getBucketNameForTransformationFile(input, context)
+        Optional.of(getBucketNameForTransformationFile(input, context))
                 .map(getS3Object())
                 .flatMap(s->this.getData(s, context))
                 .flatMap(transformData(context))
@@ -62,11 +63,12 @@ public class HandleTransformation implements RequestHandler<Map<String, String>,
     }
 
     private void saveToFile(final String data, final Map<String, String> input, final Context context) {
-        getBucketNameForTransformedFile(input, context)
+        Optional.of(getBucketNameForTransformedFile(input, context))
                 .map(getS3Object())
                 .map(s-> store(data, input, context, s))
                 .filter(hasErrorState())
-                .ifPresent(throwSaveException(context));
+                .ifPresentOrElse(throwSaveException(context),
+                        ()->context.getLogger().log(OK_RESULT));
     }
 
     private static Predicate<S3FileSaverState> hasErrorState() {
@@ -129,17 +131,17 @@ public class HandleTransformation implements RequestHandler<Map<String, String>,
         };
     }
 
-    private Optional<BucketNameProvider> getBucketNameForTransformationFile(final Map<String, String> input, final Context context) {
+    private BucketNameProvider getBucketNameForTransformationFile(final Map<String, String> input, final Context context) {
         try {
-            return Optional.of(input).map(i -> new BucketName(i.get(TRANSFORMATION_BUCKET_NAME)));
+            return new BucketName(input.get(TRANSFORMATION_BUCKET_NAME));
         } catch (final InvalidBucketNameException | NullPointerException e) {
             throw new TransformationException(context, BUCKET_NAME_FOR_TRANSFORMATION_IS_MISSING);
         }
     }
 
-    private Optional<BucketNameProvider> getBucketNameForTransformedFile(final Map<String, String> input, final Context context) {
+    private BucketNameProvider getBucketNameForTransformedFile(final Map<String, String> input, final Context context) {
         try {
-            return Optional.of(input).map(i -> new BucketName(i.get(TRANSFORMED_BUCKET_NAME)));
+            return new BucketName(input.get(TRANSFORMED_BUCKET_NAME));
         } catch (final InvalidBucketNameException | NullPointerException e) {
             throw new TransformationException(context, BUCKET_NAME_FOR_TRANSFORMED_IS_MISSING);
         }

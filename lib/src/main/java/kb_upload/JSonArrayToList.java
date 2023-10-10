@@ -42,8 +42,8 @@ public class JSonArrayToList implements Transformer<JSON, mappable<List<String>,
 
     private Optional<JsonNode> getArray(final String json) {
         try {
-            return Optional.ofNullable(objectMapper.readTree(json).get(arrayName));
-        } catch (final JsonProcessingException ex) {
+            return Optional.of(objectMapper.readTree(json).get(arrayName));
+        } catch (final JsonProcessingException | NullPointerException ex) {
             return Optional.empty();
         }
     }
