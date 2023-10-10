@@ -15,7 +15,7 @@ public class HandleTransformation implements RequestHandler<Map<String, String>,
 
     private static final String UTTERANCE = "utterance";
     private static final String KNOWLEDGE_JSON = "knowledge.json";
-    public static final String REGION_IS_MISSING = "Region is missing";
+    public static final String REGION_IS_MISSING = "Region name for transformed file is missing";
     private static final String TRANSFORMATION_BUCKET_NAME = "Transformation-BucketName";
     private static final String TRANSFORMED_BUCKET_NAME = "Transformed-BucketName";
     private static final String BUCKET_NAME_FOR_TRANSFORMATION_IS_MISSING = "Bucket name for transformation is missing";
@@ -24,9 +24,6 @@ public class HandleTransformation implements RequestHandler<Map<String, String>,
     public static final String UNABLE_TO_TRANSFORM_DATA = "Unable to transform data";
     private final Retrievable<S3Object, Optional<String>> fileLoader;
     private final Transformer<JSON, mappable<List<String>, String, String>> jsonTransformer;
-
-
-
 
 //    private final  Retrievable<Storable<S3Object, String, Optional<S3FileSaverState>>, Region>  fileSaver;
 
@@ -57,11 +54,9 @@ public class HandleTransformation implements RequestHandler<Map<String, String>,
 
     private void saveToFile(final String data, final Map<String, String> input, final Context context) {
         getBucketNameForTransformedFile(input, context);
+        getRegion(input, context);
 
     }
-
-
-
 
     private Region getRegion(final Map<String, String> regionName, final Context context) {
         try {
@@ -121,35 +116,4 @@ public class HandleTransformation implements RequestHandler<Map<String, String>,
             throw new TransformationException(context, BUCKET_NAME_FOR_TRANSFORMED_IS_MISSING);
         }
     }
-
-
-
-
-
-/*
-
-    private Optional<BucketNameProvider> getBucketName(final Map<String, String> input, final Context context) {
-        try {
-            return Optional.ofNullable(input.get("BucketName"))
-                    .map(BucketName::new);
-        } catch (final InvalidBucketNameException e) {
-            throw new TransformationException(context, REGION_IS_MISSING);
-        }
-
-    }
-
-    private void throwRegionMissing(final Context context) {
-        throw new TransformationException(context, REGION_IS_MISSING);
-    }
-
-//    private void transformData(final Region region, final Context context) {
-//        fileLoader.retrieve(new S3Object(new BucketName("knowledge-base-utterances"), new KeyName(KNOWLEDGE_JSON)))
-//                .ifPresentOrElse(f->transformData(f, context),
-//                        ()->throwUnableToLoadFile(context));
-//
-//    }
-
-
-
- */
 }

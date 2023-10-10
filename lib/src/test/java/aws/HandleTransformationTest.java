@@ -158,6 +158,33 @@ class HandleTransformationTest {
         assertThat(logData.getValue()).contains("Bucket name for transformed file is missing");
     }
 
+    @Test
+    void errorRegionForBucketMissing
+            (@Mock final Context context,
+             @Mock final LambdaLogger lambdaLogger,
+             @Mock final Retrievable<S3Object, Optional<String>> fileLoader,
+             @Mock final Transformer<JSON, mappable<List<String>, String, String>> jsonTransformer,
+             @Mock final mappable<List<String>, String, String>  transformedResult ){
+
+        when(context.getLogger()).thenReturn(lambdaLogger);
+        when(fileLoader.retrieve(any(S3Object.class))).thenReturn(Optional.of("{\"nothing\":\"some text\"}"));
+        when(jsonTransformer.transform(any())).thenReturn(transformedResult);
+        when(transformedResult.map(any())).thenReturn(Optional.of(List.of("data1", "data2").toString()));
+
+        final Map<String, String> input = Map.of("Transformation-BucketName", "bucket1",
+                                                 "Transformed-BucketName", "bucket2");
+
+        final HandleTransformation handleTransformation
+                = new HandleTransformation(fileLoader, jsonTransformer);
+
+        assertThrows(TransformationException.class, ()->handleTransformation.handleRequest(input, context));
+
+        final ArgumentCaptor<String> logData = ArgumentCaptor.forClass(String.class);
+        verify(lambdaLogger, times(1)).log(logData.capture());
+
+        assertThat(logData.getValue()).contains("Region name for transformed file is missing");
+    }
+
 
 
 
