@@ -17,12 +17,15 @@ import java.util.function.Predicate;
 public class HandleTransformation implements RequestHandler<Map<String, String>, Void> {
 
     private static final String UTTERANCE = "utterance";
-    private static final String KNOWLEDGE_JSON = "knowledge.json";
     public static final String REGION_IS_MISSING_OR_INVALID = "Region name for transformed file is missing or invalid";
     private static final String TRANSFORMATION_BUCKET_NAME = "Transformation-BucketName";
+    private static final String TRANSFORMATION_KEY_NAME = "Transformation-KeyName";
     private static final String TRANSFORMED_BUCKET_NAME = "Transformed-BucketName";
-    private static final String BUCKET_NAME_FOR_TRANSFORMATION_IS_MISSING = "Bucket name for transformation is missing";
+    private static final String TRANSFORMED_KEY_NAME = "Transformed-KeyName";
+    private static final String BUCKET_NAME_FOR_TRANSFORMATION_IS_MISSING = "Bucket name for transformation file is missing";
+    private static final String KEY_NAME_FOR_TRANSFORMATION_IS_MISSING = "Key name for transformation file is missing";
     private static final String BUCKET_NAME_FOR_TRANSFORMED_IS_MISSING = "Bucket name for transformed file is missing";
+    private static final String KEY_NAME_FOR_TRANSFORMED_IS_MISSING = "Key name for transformed file is missing";
     private static final String UNABLE_TO_LOAD_FILE = "Unable to load file from bucket: %s and key: %s";
     public static final String UNABLE_TO_TRANSFORM_DATA = "Unable to transform data";
     public static final String TRANSFORMED_REGION = "Transformed-Region";
@@ -31,8 +34,6 @@ public class HandleTransformation implements RequestHandler<Map<String, String>,
     private final Retrievable<S3Object, Optional<String>> fileLoader;
     private final Transformer<JSON, mappable<List<String>, String, String>> jsonTransformer;
     private final Retrievable<Region, Storable<S3Object, String, S3FileSaverState>> fileStoreProvider;
-
-
 
 
     //Used for testing purposes only
@@ -53,8 +54,7 @@ public class HandleTransformation implements RequestHandler<Map<String, String>,
 
     @Override
     public Void handleRequest(final Map<String, String> input, final Context context) {
-        Optional.of(getBucketNameForTransformationFile(input, context))
-                .map(getS3Object())
+        Optional.of(getS3ObjectForTransformation(input, context))
                 .flatMap(s->this.getData(s, context))
                 .flatMap(transformData(context))
                 .ifPresent(data->saveToFile(data, input, context));
@@ -63,8 +63,7 @@ public class HandleTransformation implements RequestHandler<Map<String, String>,
     }
 
     private void saveToFile(final String data, final Map<String, String> input, final Context context) {
-        Optional.of(getBucketNameForTransformedFile(input, context))
-                .map(getS3Object())
+        Optional.of(getS3ObjectForTransformed(input, context))
                 .map(s-> store(data, input, context, s))
                 .filter(hasErrorState())
                 .ifPresentOrElse(throwSaveException(context),
@@ -116,19 +115,14 @@ public class HandleTransformation implements RequestHandler<Map<String, String>,
                     s3Object.getBucketName(), s3Object.getKeyName()));
     }
 
-    private Function<BucketNameProvider, S3Object> getS3Object() {
-        return bucketName -> new S3Object() {
+    private S3Object getS3ObjectForTransformation(final Map<String, String> input, final Context context) {
+        return new S3ObjectName(getBucketNameForTransformationFile(input, context),
+                                getKeyNameForTransformationFile(input, context));
+    }
 
-            @Override
-            public String getBucketName() {
-                return bucketName.get();
-            }
-
-            @Override
-            public String getKeyName() {
-                return KNOWLEDGE_JSON;
-            }
-        };
+    private S3Object getS3ObjectForTransformed(final Map<String, String> input, final Context context) {
+        return new S3ObjectName(getBucketNameForTransformedFile(input, context),
+                getKeyNameForTransformedFile(input, context));
     }
 
     private BucketNameProvider getBucketNameForTransformationFile(final Map<String, String> input, final Context context) {
@@ -139,11 +133,27 @@ public class HandleTransformation implements RequestHandler<Map<String, String>,
         }
     }
 
+    private KeyNameProvider getKeyNameForTransformationFile(final Map<String, String> input, final Context context) {
+        try {
+            return new KeyName(input.get(TRANSFORMATION_KEY_NAME));
+        } catch (final InvalidS3ObjectKeyException | NullPointerException e) {
+            throw new TransformationException(context, KEY_NAME_FOR_TRANSFORMATION_IS_MISSING);
+        }
+    }
+
     private BucketNameProvider getBucketNameForTransformedFile(final Map<String, String> input, final Context context) {
         try {
             return new BucketName(input.get(TRANSFORMED_BUCKET_NAME));
         } catch (final InvalidBucketNameException | NullPointerException e) {
             throw new TransformationException(context, BUCKET_NAME_FOR_TRANSFORMED_IS_MISSING);
+        }
+    }
+
+    private KeyNameProvider getKeyNameForTransformedFile(final Map<String, String> input, final Context context) {
+        try {
+            return new KeyName(input.get(TRANSFORMED_KEY_NAME));
+        } catch (final InvalidS3ObjectKeyException | NullPointerException e) {
+            throw new TransformationException(context, KEY_NAME_FOR_TRANSFORMED_IS_MISSING);
         }
     }
 }

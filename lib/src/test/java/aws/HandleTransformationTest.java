@@ -22,7 +22,7 @@ import static org.mockito.Mockito.*;
 class HandleTransformationTest {
 
     @Test
-    void errorExpectedUploadBucketNameNullParameters(@Mock final Context context,
+    void errorExpectedTransformationBucketNameNullParameters(@Mock final Context context,
                                        @Mock final LambdaLogger lambdaLogger,
                                        @Mock final Retrievable<S3Object, Optional<String>> fileLoader,
                                        @Mock final Transformer<JSON, mappable<List<String>, String, String>> jsonTransformer,
@@ -38,11 +38,11 @@ class HandleTransformationTest {
         final ArgumentCaptor<String> logData = ArgumentCaptor.forClass(String.class);
         verify(lambdaLogger, times(1)).log(logData.capture());
 
-        assertThat(logData.getValue()).contains("Bucket name for transformation is missing");
+        assertThat(logData.getValue()).contains("Bucket name for transformation file is missing");
     }
 
     @Test
-    void errorExpectedUploadBucketNameMissing(@Mock final Context context,
+    void errorExpectedTransformationBucketNameMissing(@Mock final Context context,
                                               @Mock final LambdaLogger lambdaLogger,
                                               @Mock final Retrievable<S3Object, Optional<String>> fileLoader,
                                               @Mock final Transformer<JSON, mappable<List<String>, String, String>> jsonTransformer,
@@ -60,11 +60,11 @@ class HandleTransformationTest {
         final ArgumentCaptor<String> logData = ArgumentCaptor.forClass(String.class);
         verify(lambdaLogger, times(1)).log(logData.capture());
 
-        assertThat(logData.getValue()).contains("Bucket name for transformation is missing");
+        assertThat(logData.getValue()).contains("Bucket name for transformation file is missing");
     }
 
     @Test
-    void errorExpectedUploadBucketNameDataMissing(@Mock final Context context,
+    void errorExpectedTransformationBucketNameMissingData(@Mock final Context context,
                                               @Mock final LambdaLogger lambdaLogger,
                                               @Mock final Retrievable<S3Object, Optional<String>> fileLoader,
                                               @Mock final Transformer<JSON, mappable<List<String>, String, String>> jsonTransformer,
@@ -82,7 +82,29 @@ class HandleTransformationTest {
         final ArgumentCaptor<String> logData = ArgumentCaptor.forClass(String.class);
         verify(lambdaLogger, times(1)).log(logData.capture());
 
-        assertThat(logData.getValue()).contains("Bucket name for transformation is missing");
+        assertThat(logData.getValue()).contains("Bucket name for transformation file is missing");
+    }
+
+    @Test
+    void errorExpectedTransformationKeyNameMissing(@Mock final Context context,
+                                                          @Mock final LambdaLogger lambdaLogger,
+                                                          @Mock final Retrievable<S3Object, Optional<String>> fileLoader,
+                                                          @Mock final Transformer<JSON, mappable<List<String>, String, String>> jsonTransformer,
+                                                          @Mock final Retrievable<Region, Storable<S3Object, String, S3FileSaverState>> fileStoreProvider){
+
+        when(context.getLogger()).thenReturn(lambdaLogger);
+
+        final Map<String, String> input = Map.of("Transformation-BucketName", "bucket");
+
+        final HandleTransformation handleTransformation
+                = new HandleTransformation(fileLoader, jsonTransformer, fileStoreProvider);
+
+        assertThrows(TransformationException.class, ()->handleTransformation.handleRequest(input, context));
+
+        final ArgumentCaptor<String> logData = ArgumentCaptor.forClass(String.class);
+        verify(lambdaLogger, times(1)).log(logData.capture());
+
+        assertThat(logData.getValue()).contains("Key name for transformation file is missing");
     }
 
     @Test
@@ -95,7 +117,8 @@ class HandleTransformationTest {
         when(context.getLogger()).thenReturn(lambdaLogger);
         when(fileLoader.retrieve(any())).thenReturn(Optional.empty());
 
-        final Map<String, String> input = Map.of("Transformation-BucketName", "bucket");
+        final Map<String, String> input = Map.of("Transformation-BucketName", "bucket",
+                                                  "Transformation-KeyName", "key");
 
         final HandleTransformation handleTransformation
                 = new HandleTransformation(fileLoader, jsonTransformer, fileStoreProvider);
@@ -105,7 +128,7 @@ class HandleTransformationTest {
         final ArgumentCaptor<String> logData = ArgumentCaptor.forClass(String.class);
         verify(lambdaLogger, times(1)).log(logData.capture());
 
-        assertThat(logData.getValue()).contains("Unable to load file from bucket: bucket and key: knowledge.json");
+        assertThat(logData.getValue()).contains("Unable to load file from bucket: bucket and key: key");
     }
 
     @Test
@@ -122,7 +145,8 @@ class HandleTransformationTest {
         when(jsonTransformer.transform(any())).thenReturn(transformedResult);
         when(transformedResult.map(any())).thenReturn(Optional.empty());
 
-        final Map<String, String> input = Map.of("Transformation-BucketName", "bucket");
+        final Map<String, String> input = Map.of("Transformation-BucketName", "bucket",
+                                                 "Transformation-KeyName", "key");
 
         final HandleTransformation handleTransformation
                 = new HandleTransformation(fileLoader, jsonTransformer, fileStoreProvider);
@@ -149,7 +173,8 @@ class HandleTransformationTest {
         when(jsonTransformer.transform(any())).thenReturn(transformedResult);
         when(transformedResult.map(any())).thenReturn(Optional.of(List.of("data1", "data2").toString()));
 
-        final Map<String, String> input = Map.of("Transformation-BucketName", "bucket");
+        final Map<String, String> input = Map.of("Transformation-BucketName", "bucket",
+                                                 "Transformation-KeyName", "key");
 
         final HandleTransformation handleTransformation
                 = new HandleTransformation(fileLoader, jsonTransformer, fileStoreProvider);
@@ -160,6 +185,35 @@ class HandleTransformationTest {
         verify(lambdaLogger, times(1)).log(logData.capture());
 
         assertThat(logData.getValue()).contains("Bucket name for transformed file is missing");
+    }
+
+    @Test
+    void errorKeyNameForTransFormedIsMissing
+            (@Mock final Context context,
+             @Mock final LambdaLogger lambdaLogger,
+             @Mock final Retrievable<S3Object, Optional<String>> fileLoader,
+             @Mock final Transformer<JSON, mappable<List<String>, String, String>> jsonTransformer,
+             @Mock final mappable<List<String>, String, String>  transformedResult,
+             @Mock final Retrievable<Region, Storable<S3Object, String, S3FileSaverState>> fileStoreProvider){
+
+        when(context.getLogger()).thenReturn(lambdaLogger);
+        when(fileLoader.retrieve(any(S3Object.class))).thenReturn(Optional.of("{\"nothing\":\"some text\"}"));
+        when(jsonTransformer.transform(any())).thenReturn(transformedResult);
+        when(transformedResult.map(any())).thenReturn(Optional.of(List.of("data1", "data2").toString()));
+
+        final Map<String, String> input = Map.of("Transformation-BucketName", "bucket1",
+                                                 "Transformation-KeyName", "key1",
+                                                 "Transformed-BucketName", "bucket2");
+
+        final HandleTransformation handleTransformation
+                = new HandleTransformation(fileLoader, jsonTransformer, fileStoreProvider);
+
+        assertThrows(TransformationException.class, ()->handleTransformation.handleRequest(input, context));
+
+        final ArgumentCaptor<String> logData = ArgumentCaptor.forClass(String.class);
+        verify(lambdaLogger, times(1)).log(logData.capture());
+
+        assertThat(logData.getValue()).contains("Key name for transformed file is missing");
     }
 
     @Test
@@ -177,7 +231,9 @@ class HandleTransformationTest {
         when(transformedResult.map(any())).thenReturn(Optional.of(List.of("data1", "data2").toString()));
 
         final Map<String, String> input = Map.of("Transformation-BucketName", "bucket1",
-                                                 "Transformed-BucketName", "bucket2");
+                                                 "Transformation-KeyName", "key1",
+                                                 "Transformed-BucketName", "bucket2",
+                                                 "Transformed-KeyName", "key2");
 
         final HandleTransformation handleTransformation
                 = new HandleTransformation(fileLoader, jsonTransformer, fileStoreProvider);
@@ -207,10 +263,13 @@ class HandleTransformationTest {
         when(fileStoreProvider.retrieve(any())).thenReturn(storable);
         when(storable.store(any(), any())).thenReturn(new S3FileSaverErrorState("Test Error"));
 
+        final Map<String, String> input = Map.of(
+                "Transformation-BucketName", "bucket1",
+                "Transformation-KeyName", "key1",
+                "Transformed-BucketName", "bucket2",
+                "Transformed-KeyName", "key2",
+                "Transformed-Region", "eu-north-1");
 
-        final Map<String, String> input = Map.of("Transformation-BucketName", "bucket1",
-                                                 "Transformed-BucketName", "bucket2",
-                                                 "Transformed-Region", "eu-north-1");
 
         final HandleTransformation handleTransformation
                 = new HandleTransformation(fileLoader, jsonTransformer, fileStoreProvider);
@@ -240,9 +299,11 @@ class HandleTransformationTest {
         when(fileStoreProvider.retrieve(any())).thenReturn(storable);
         when(storable.store(any(), any())).thenReturn(new S3FileSaverOKState());
 
-
-        final Map<String, String> input = Map.of("Transformation-BucketName", "bucket1",
+        final Map<String, String> input = Map.of(
+                "Transformation-BucketName", "bucket1",
+                "Transformation-KeyName", "key1",
                 "Transformed-BucketName", "bucket2",
+                "Transformed-KeyName", "key2",
                 "Transformed-Region", "eu-north-1");
 
         final HandleTransformation handleTransformation
@@ -264,9 +325,12 @@ class HandleTransformationTest {
     void handleTransformationWithDefaultConNoValidFile(@Mock final Context context,
                                                        @Mock final LambdaLogger lambdaLogger){
 
-        final Map<String, String> input = Map.of("Transformation-BucketName", "bucket1",
-                    "Transformed-BucketName", "bucket2",
-                    "Transformed-Region", "eu-north-1");
+        final Map<String, String> input = Map.of(
+                "Transformation-BucketName", "bucket1",
+                "Transformation-KeyName", "key1",
+                "Transformed-BucketName", "bucket2",
+                "Transformed-KeyName", "key2",
+                "Transformed-Region", "eu-north-1");
 
         when(context.getLogger()).thenReturn(lambdaLogger);
 
