@@ -3,10 +3,10 @@ package aws;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.S3Event;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.networknt.schema.JsonSchemaFactory;
 import com.networknt.schema.SpecVersion;
 import kb_upload.*;
+import software.amazon.awssdk.services.s3.S3Client;
 
 import java.util.Optional;
 import java.util.function.Function;
@@ -24,21 +24,26 @@ public class HandleValidation implements RequestHandler<S3Event, Void> {
     private final Validator<JSONSchema, JSON, Validation> validator;
     private final Retrievable<S3Object, Optional<String>> fileLoader;
 
+    private final S3RequestProvider s3RequestProvider;
+
     /**
      * Used for testing purposes only
      */
     HandleValidation(final  Retrievable<S3Event, Optional<S3Object>> s3ObjectProvider,
                             final Validator<JSONSchema, JSON, Validation> validator,
-                            final Retrievable<S3Object, Optional<String>> fileLoader){
+                            final Retrievable<S3Object, Optional<String>> fileLoader,
+                            final S3RequestProvider s3RequestProvider){
         this.s3ObjectProvider = s3ObjectProvider;
         this.validator = validator;
         this.fileLoader = fileLoader;
+        this.s3RequestProvider = s3RequestProvider;
     }
 
     public HandleValidation() {
+        this.s3RequestProvider = new S3Request();
         this.s3ObjectProvider = new S3EventSingleObject(EXPECTED_OBJECT_NAME, BucketName::new, KeyName::new);
         this.validator = new JSONValidator(()->JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V4));
-        this.fileLoader = new S3FileLoader(AmazonS3ClientBuilder::defaultClient);
+        this.fileLoader = new S3FileLoader(()-> S3Client.builder().build() , s3RequestProvider);
     }
 
      @Override

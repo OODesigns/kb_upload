@@ -27,6 +27,7 @@ public class HandleValidationTest {
 
     @Test
     void handleRequestWithValidData(@Mock final S3Object s3Object,
+                                    @Mock final S3RequestProvider s3RequestProvider,
                                     @Mock final S3Event s3Event,
                                     @Mock final Context context,
                                     @Mock final LambdaLogger lambdaLogger,
@@ -40,7 +41,10 @@ public class HandleValidationTest {
         when(validation.toString()).thenReturn("ValidatedStateOK");
 
         final RequestHandler<S3Event, Void> requestHandler
-                = new HandleValidation(unusedEvent -> Optional.of(s3Object), validator, unusedS3Object -> Optional.of(validJSON));
+                = new HandleValidation(__->Optional.of(s3Object),
+                                      validator,
+                                       __-> Optional.of(validJSON),
+                                      s3RequestProvider);
 
         requestHandler.handleRequest(s3Event, context);
 
@@ -52,7 +56,9 @@ public class HandleValidationTest {
     }
 
     @Test
-    void handleRequestWithINValidData(@Mock final S3Object s3Object,
+    void handleRequestWithINValidData(
+                                    @Mock final S3Object s3Object,
+                                    @Mock final S3RequestProvider s3RequestProvider,
                                     @Mock final S3Event s3Event,
                                     @Mock final Context context,
                                     @Mock final LambdaLogger lambdaLogger,
@@ -69,7 +75,10 @@ public class HandleValidationTest {
         when(validation.toString()).thenReturn("ValidatedStateError");
 
         final RequestHandler<S3Event, Void> requestHandler
-                = new HandleValidation(unusedEvent -> Optional.of(s3Object), validator, unusedS3Object -> Optional.of(validJSON));
+                = new HandleValidation(__->Optional.of(s3Object),
+                                       validator,
+                                       __-> Optional.of(validJSON),
+                                       s3RequestProvider);
 
         assertThrows(ValidationException.class, ()->requestHandler.handleRequest(s3Event, context));
 
@@ -85,7 +94,9 @@ public class HandleValidationTest {
 
 
     @Test
-    void handleRequestWithValidDataUnableToLoad(@Mock final S3Object s3Object,
+    void handleRequestWithValidDataUnableToLoad(
+                                    @Mock final S3Object s3Object,
+                                    @Mock final S3RequestProvider s3RequestProvider,
                                     @Mock final Retrievable<S3Object, Optional<String>> fileLoader,
                                     @Mock final S3Event s3Event,
                                     @Mock final Context context,
@@ -98,7 +109,10 @@ public class HandleValidationTest {
         when(s3Object.getKeyName()).thenReturn("key");
 
         final RequestHandler<S3Event, Void> requestHandler
-                = new HandleValidation(unusedEvent -> Optional.of(s3Object), validator, fileLoader);
+                = new HandleValidation(__->Optional.of(s3Object),
+                                      validator,
+                                      __-> Optional.of(validJSON),
+                                      s3RequestProvider);
 
         assertThrows(ValidationException.class, ()->requestHandler.handleRequest(s3Event, context));
 
@@ -110,6 +124,7 @@ public class HandleValidationTest {
 
     @Test
     void handleRequestWithValidDataInvalidObject(@Mock final Retrievable<S3Object, Optional<String>> fileLoader,
+                                                 @Mock final S3RequestProvider s3RequestProvider,
                                                  @Mock final S3Event s3Event,
                                                  @Mock final Context context,
                                                  @Mock final LambdaLogger lambdaLogger,
@@ -118,7 +133,7 @@ public class HandleValidationTest {
         when(context.getLogger()).thenReturn(lambdaLogger);
 
         final RequestHandler<S3Event, Void> requestHandler
-                = new HandleValidation(unusedEvent -> Optional.empty(), validator, fileLoader);
+                = new HandleValidation(unusedEvent -> Optional.empty(), validator, fileLoader, s3RequestProvider);
 
         assertThrows(ValidationException.class, ()->requestHandler.handleRequest(s3Event, context));
 

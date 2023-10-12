@@ -20,6 +20,7 @@ String mockitoVersion = "5.2.0"
 dependencies {
     // Use JUnit Jupiter for testing.
     testImplementation "org.junit.jupiter:junit-jupiter:5.9.3"
+    testImplementation 'junit:junit:4.13.1'
     testRuntimeOnly "org.junit.platform:junit-platform-launcher"
 
     testImplementation "org.assertj:assertj-core:3.24.2"
@@ -28,7 +29,6 @@ dependencies {
 
     implementation "com.amazonaws:aws-lambda-java-core:1.2.2"
     implementation "com.amazonaws:aws-lambda-java-events:3.11.0"
-    implementation "com.amazonaws:aws-java-sdk-s3:1.12.553"
     implementation "software.amazon.awssdk:s3:2.20.152"
     implementation "org.json:json:20230618"
 

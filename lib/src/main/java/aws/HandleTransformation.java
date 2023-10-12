@@ -1,9 +1,7 @@
 package aws;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import kb_upload.*;
-import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 
 import java.util.List;
@@ -17,7 +15,6 @@ import java.util.function.Predicate;
 public class HandleTransformation implements RequestHandler<Map<String, String>, Void> {
 
     private static final String UTTERANCE = "utterance";
-    public static final String REGION_IS_MISSING_OR_INVALID = "Region name for transformed file is missing or invalid";
     private static final String TRANSFORMATION_BUCKET_NAME = "Transformation-BucketName";
     private static final String TRANSFORMATION_KEY_NAME = "Transformation-KeyName";
     private static final String TRANSFORMED_BUCKET_NAME = "Transformed-BucketName";
@@ -28,34 +25,39 @@ public class HandleTransformation implements RequestHandler<Map<String, String>,
     private static final String KEY_NAME_FOR_TRANSFORMED_IS_MISSING = "Key name for transformed file is missing";
     private static final String UNABLE_TO_LOAD_FILE = "Unable to load file from bucket: %s and key: %s";
     public static final String UNABLE_TO_TRANSFORM_DATA = "Unable to transform data";
-    public static final String TRANSFORMED_REGION = "Transformed-Region";
     public static final String ERROR_UNABLE_TO_SAVE_TRANSFORMED_FILE = "Error unable to save transformed file: %s";
     public static final String OK_RESULT = "RESULT S3FileSaverOKState";
     private final Retrievable<S3Object, Optional<String>> fileLoader;
     private final Transformer<JSON, mappable<List<String>, String, String>> jsonTransformer;
-    private final Retrievable<Region, Storable<S3Object, String, S3FileSaverState>> fileStoreProvider;
+
+    private final Storable<S3Object, String, S3FileSaverState> fileStore;
+
+    private final S3RequestProvider s3RequestProvider;
 
 
     //Used for testing purposes only
     HandleTransformation(final Retrievable<S3Object, Optional<String>> fileLoader,
                          final Transformer<JSON, mappable<List<String>, String, String>> jsonTransformer,
-                         final Retrievable<Region, Storable<S3Object, String, S3FileSaverState>> fileStoreProvider) {
+                         final Storable<S3Object, String, S3FileSaverState> fileStore,
+                         final S3RequestProvider s3RequestProvider) {
         this.fileLoader = fileLoader;
         this.jsonTransformer = jsonTransformer;
-        this.fileStoreProvider = fileStoreProvider;
+        this.fileStore = fileStore;
+        this.s3RequestProvider = s3RequestProvider;
     }
 
     public HandleTransformation() {
-        this.fileLoader = new S3FileLoader(AmazonS3ClientBuilder::defaultClient);
+        this.s3RequestProvider = new S3Request();
+        this.fileLoader = new S3FileLoader(()-> S3Client.builder().build() , s3RequestProvider);
+        this.fileStore =  new S3FileSaver(()-> S3Client.builder().build(), s3RequestProvider);
         this.jsonTransformer = new JSonArrayToList(UTTERANCE);
-        this.fileStoreProvider = region -> new S3FileSaver(()-> S3Client.builder().region(region).build());
     }
 
 
     @Override
     public Void handleRequest(final Map<String, String> input, final Context context) {
         Optional.of(getS3ObjectForTransformation(input, context))
-                .flatMap(s->this.getData(s, context))
+                .flatMap(s->this.getData(context, s))
                 .flatMap(transformData(context))
                 .ifPresent(data->saveToFile(data, input, context));
 
@@ -64,7 +66,7 @@ public class HandleTransformation implements RequestHandler<Map<String, String>,
 
     private void saveToFile(final String data, final Map<String, String> input, final Context context) {
         Optional.of(getS3ObjectForTransformed(input, context))
-                .map(s-> store(data, input, context, s))
+                .map(s-> fileStore.store(s, data))
                 .filter(hasErrorState())
                 .ifPresentOrElse(throwSaveException(context),
                         ()->context.getLogger().log(OK_RESULT));
@@ -74,25 +76,11 @@ public class HandleTransformation implements RequestHandler<Map<String, String>,
         return s3FileSaverState -> s3FileSaverState instanceof S3FileSaverErrorState;
     }
 
-    private S3FileSaverState store(final String data, final Map<String, String> input, final Context context, final S3Object s) {
-        return fileStoreProvider
-                .retrieve(getRegion(input, context))
-                .store(s, data);
-    }
-
     private static Consumer<S3FileSaverState> throwSaveException(final Context context) {
         return error -> {
             throw new TransformationException(context,
                     String.format(ERROR_UNABLE_TO_SAVE_TRANSFORMED_FILE, error));
         };
-    }
-
-    private Region getRegion(final Map<String, String> regionName, final Context context) {
-        try {
-            return Region.of(regionName.get(TRANSFORMED_REGION));
-        } catch (final IllegalArgumentException | NullPointerException e) {
-            throw new TransformationException(context, REGION_IS_MISSING_OR_INVALID);
-        }
     }
 
     private Function<JSON, Optional<String>> transformData(final Context context) {
@@ -103,11 +91,12 @@ public class HandleTransformation implements RequestHandler<Map<String, String>,
     }
 
 
-    private Optional<JSON> getData(final S3Object s3Object, final Context context) {
-        return fileLoader.retrieve(s3Object)
-                    .orElseThrow(() -> throwUnableToLoadFile(context, s3Object))
-                    .describeConstable()
-                    .map(JSONData::new);
+    private Optional<JSON> getData(final Context context, final S3Object s3Object) {
+        return fileLoader
+                .retrieve(s3Object)
+                .orElseThrow(() -> throwUnableToLoadFile(context, s3Object))
+                .describeConstable()
+                .map(JSONData::new);
     }
 
     private TransformationException throwUnableToLoadFile(final Context context, final S3Object s3Object) {
@@ -125,35 +114,64 @@ public class HandleTransformation implements RequestHandler<Map<String, String>,
                 getKeyNameForTransformedFile(input, context));
     }
 
-    private BucketNameProvider getBucketNameForTransformationFile(final Map<String, String> input, final Context context) {
+
+    private <T> T getProviderFromInput(final Map<String, String> input,
+                                       final String key,
+                                       final Context context,
+                                       final ProviderConstructor<T> constructor,
+                                       final String errorMessage) {
         try {
-            return new BucketName(input.get(TRANSFORMATION_BUCKET_NAME));
-        } catch (final InvalidBucketNameException | NullPointerException e) {
-            throw new TransformationException(context, BUCKET_NAME_FOR_TRANSFORMATION_IS_MISSING);
+            return constructor.create(input.get(key));
+        } catch (final RuntimeException e) {
+            throw new TransformationException(context, errorMessage);
         }
+    }
+
+    private interface ProviderConstructor<T> {
+        T create(String input) throws RuntimeException;
+    }
+
+    private BucketNameProvider getBucketNameForTransformationFile(final Map<String, String> input, final Context context) {
+        return getProviderFromInput(
+                input,
+                TRANSFORMATION_BUCKET_NAME,
+                context,
+                BucketName::new,
+                BUCKET_NAME_FOR_TRANSFORMATION_IS_MISSING
+        );
     }
 
     private KeyNameProvider getKeyNameForTransformationFile(final Map<String, String> input, final Context context) {
-        try {
-            return new KeyName(input.get(TRANSFORMATION_KEY_NAME));
-        } catch (final InvalidS3ObjectKeyException | NullPointerException e) {
-            throw new TransformationException(context, KEY_NAME_FOR_TRANSFORMATION_IS_MISSING);
-        }
+        return getProviderFromInput(
+                input,
+                TRANSFORMATION_KEY_NAME,
+                context,
+                KeyName::new,
+                KEY_NAME_FOR_TRANSFORMATION_IS_MISSING
+        );
     }
 
     private BucketNameProvider getBucketNameForTransformedFile(final Map<String, String> input, final Context context) {
-        try {
-            return new BucketName(input.get(TRANSFORMED_BUCKET_NAME));
-        } catch (final InvalidBucketNameException | NullPointerException e) {
-            throw new TransformationException(context, BUCKET_NAME_FOR_TRANSFORMED_IS_MISSING);
-        }
+        return getProviderFromInput(
+                input,
+                TRANSFORMED_BUCKET_NAME,
+                context,
+                BucketName::new,
+                BUCKET_NAME_FOR_TRANSFORMED_IS_MISSING
+        );
     }
 
     private KeyNameProvider getKeyNameForTransformedFile(final Map<String, String> input, final Context context) {
-        try {
-            return new KeyName(input.get(TRANSFORMED_KEY_NAME));
-        } catch (final InvalidS3ObjectKeyException | NullPointerException e) {
-            throw new TransformationException(context, KEY_NAME_FOR_TRANSFORMED_IS_MISSING);
-        }
+        return getProviderFromInput(
+                input,
+                TRANSFORMED_KEY_NAME,
+                context,
+                KeyName::new,
+                KEY_NAME_FOR_TRANSFORMED_IS_MISSING
+        );
     }
+
+
+
+
 }
