@@ -8,6 +8,9 @@ import com.networknt.schema.SpecVersion;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoSettings;
+
+import java.util.Optional;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.Mockito.when;
@@ -86,7 +89,7 @@ class KnowledgeValidationTest {
         final Validator<JSONSchema, JSON, Validation> validator = new JSONValidator(()->
                 JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V4));
 
-        validator.validate(jsonSchema, json)
+        Optional.of(validator.validate(jsonSchema, json))
                 .ifPresentOrElse(validation -> {
                     assertThat(validation.state()).isInstanceOf(ValidatedStateError.class);
                     assertThat(validation.messages()).anyMatch(m->m.contains("name: is missing but it is required"));}
@@ -102,7 +105,7 @@ class KnowledgeValidationTest {
         final Validator<JSONSchema, JSON, Validation> validator = new JSONValidator(()->
                 JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V4));
 
-        validator.validate(jsonSchema, json)
+        Optional.of(validator.validate(jsonSchema, json))
                 .ifPresentOrElse(v -> {
                             assertThat(v.state()).isInstanceOf(ValidatedStateError.class);
                             assertThat(v.messages()).anyMatch(m->m.contains("entries: is missing but it is required"));}
@@ -119,7 +122,7 @@ class KnowledgeValidationTest {
         final Validator<JSONSchema, JSON, Validation> validator = new JSONValidator(()->
                 JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V4));
 
-        validator.validate(jsonSchema, json)
+        Optional.of(validator.validate(jsonSchema, json))
                 .ifPresentOrElse(v -> {
                             assertThat(v.state()).isInstanceOf(ValidatedStateError.class);
                             assertThat(v.messages())
@@ -138,7 +141,7 @@ class KnowledgeValidationTest {
         final Validator<JSONSchema, JSON, Validation> validator = new JSONValidator(()->
                 JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V4));
 
-        validator.validate(jsonSchema, json)
+        Optional.of(validator.validate(jsonSchema, json))
                 .ifPresentOrElse(v -> {
                             assertThat(v.state()).isInstanceOf(ValidatedStateOK.class);
                             assertThat(v.messages()).isEmpty();}
@@ -155,7 +158,7 @@ class KnowledgeValidationTest {
         final Validator<JSONSchema, JSON, Validation> validator = new JSONValidator(()->
                 JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V4));
 
-        validator.validate(jsonSchema, json)
-                .ifPresent(__->fail("Expected Error but got a validation object"));
+        assertThat(validator.validate(jsonSchema, json).state()).isInstanceOf(ValidatedStateError.class);
+
     }
 }

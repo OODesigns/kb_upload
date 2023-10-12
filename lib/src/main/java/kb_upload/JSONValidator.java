@@ -9,6 +9,7 @@ import com.networknt.schema.JsonSchemaFactory;
 import com.networknt.schema.ValidationMessage;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
@@ -23,18 +24,25 @@ public class JSONValidator implements Validator<JSONSchema, JSON, Validation> {
     }
 
     @Override
-    public Optional<Validation> validate(final JSONSchema jsonSchema, final JSON json) {
+    public Validation validate(final JSONSchema jsonSchema, final JSON json) {
         return transformDataToJsonNodes(jsonSchema, json)
                 .map(this::apply)
-                .map(getValidation());
+                .map(getValidation())
+                .orElseGet(this::statusErrorOnTransformationFailure);
 
     }
+
+    private Validation statusErrorOnTransformationFailure() {
+        // You'll need to define how to handle errors when transformation fails
+        return new Validated(new ValidatedStateError(), List.of("Failed to transform data to JSON nodes."));
+    }
+
 
     private Set<ValidationMessage> apply(final JSONNodes jsonNodes) {
         return jsonNodes.schema().validate(jsonNodes.node);
     }
 
-    private Function<Set<ValidationMessage>, Validated> getValidation() {
+    private Function<Set<ValidationMessage>, Validation> getValidation() {
         return validationMessages ->
                 validationMessages.isEmpty() ? statusOK() : statusError(validationMessages);
     }

@@ -13,11 +13,11 @@ class S3RequestSupplierTest {
     @Test
     public void testGetPutRequest(@Mock final S3Client S3client,
                                   @Mock final S3RequestProvider s3RequestProvider) {
-        final S3Object mockS3Object = new S3ObjectName(new BucketName("testBucket"), new KeyName("testKey"));
+        final S3Object mockS3Object = new S3ObjectName(new BucketName("testbucket"), new KeyName("testKey"));
 
         final S3RequestSupplier s3RequestSupplier = new S3RequestSupplier(() -> S3client, s3RequestProvider);
 
-        final PutObjectRequest putRequest = PutObjectRequest.builder().bucket("testBucket").key("testKey").build();
+        final PutObjectRequest putRequest = PutObjectRequest.builder().bucket("testbucket").key("testKey").build();
         when(s3RequestProvider.getPutRequest(mockS3Object)).thenReturn(putRequest);
 
         final PutObjectRequest requestFromSupplier = s3RequestSupplier.getPutRequest(mockS3Object);
@@ -28,8 +28,8 @@ class S3RequestSupplierTest {
     public void testGetGetRequest(@Mock final S3Client S3client,
                                   @Mock final S3RequestProvider s3RequestProvider) {
 
-        final S3Object mockS3Object = new S3ObjectName(new BucketName("testBucket"), new KeyName("testKey"));
-        final GetObjectRequest getRequest = GetObjectRequest.builder().bucket("testBucket").key("testKey").build();
+        final S3Object mockS3Object = new S3ObjectName(new BucketName("testbucket"), new KeyName("testKey"));
+        final GetObjectRequest getRequest = GetObjectRequest.builder().bucket("testbucket").key("testKey").build();
 
         final S3RequestSupplier s3RequestSupplier = new S3RequestSupplier(() -> S3client, s3RequestProvider);
 

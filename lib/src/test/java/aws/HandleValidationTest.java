@@ -35,7 +35,7 @@ public class HandleValidationTest {
                                     @Mock final Validator<JSONSchema, JSON, Validation> validator) {
 
         when(context.getLogger()).thenReturn(lambdaLogger);
-        when(validator.validate(any(),any())).thenReturn(Optional.of(validation));
+        when(validator.validate(any(),any())).thenReturn(validation);
 
         when(validation.state()).thenReturn(new ValidatedStateOK());
         when(validation.toString()).thenReturn("ValidatedStateOK");
@@ -66,7 +66,7 @@ public class HandleValidationTest {
                                     @Mock final Validator<JSONSchema, JSON, Validation> validator) {
 
         when(context.getLogger()).thenReturn(lambdaLogger);
-        when(validator.validate(any(),any())).thenReturn(Optional.of(validation));
+        when(validator.validate(any(),any())).thenReturn(validation);
 
         final List<String> messages = List.of("message1", "message2");
 
@@ -97,21 +97,19 @@ public class HandleValidationTest {
     void handleRequestWithValidDataUnableToLoad(
                                     @Mock final S3Object s3Object,
                                     @Mock final S3RequestProvider s3RequestProvider,
-                                    @Mock final Retrievable<S3Object, Optional<String>> fileLoader,
                                     @Mock final S3Event s3Event,
                                     @Mock final Context context,
                                     @Mock final LambdaLogger lambdaLogger,
                                     @Mock final Validator<JSONSchema, JSON, Validation> validator) {
 
         when(context.getLogger()).thenReturn(lambdaLogger);
-        when(fileLoader.retrieve(any())).thenReturn(Optional.empty());
         when(s3Object.getBucketName()).thenReturn("bucket");
         when(s3Object.getKeyName()).thenReturn("key");
 
         final RequestHandler<S3Event, Void> requestHandler
                 = new HandleValidation(__->Optional.of(s3Object),
                                       validator,
-                                      __-> Optional.of(validJSON),
+                                      __->Optional.empty(),
                                       s3RequestProvider);
 
         assertThrows(ValidationException.class, ()->requestHandler.handleRequest(s3Event, context));

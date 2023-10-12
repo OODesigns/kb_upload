@@ -8,6 +8,7 @@ import com.networknt.schema.SpecVersion;
 import kb_upload.*;
 import software.amazon.awssdk.services.s3.S3Client;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -62,7 +63,7 @@ public class HandleValidation implements RequestHandler<S3Event, Void> {
 
      private void validateData(final String fileData, final Context context) {
         Optional.of(fileData)
-                .flatMap(this::validate)
+                .map(this::validate)
                 .map(logResult(context))
                 .filter(notValidFile())
                 .ifPresent(validation -> throwInvalidDataException(context, validation));
@@ -90,8 +91,12 @@ public class HandleValidation implements RequestHandler<S3Event, Void> {
         return v -> { context.getLogger().log(String.format(RESULT, v)); return v; };
     }
 
-    private Optional<Validation> validate(final String dataToValidate) {
-        return validator.validate(JSON_SCHEMA, new JSONData(dataToValidate));
+    private Validation validate(final String dataToValidate) {
+        try {
+            return validator.validate(JSON_SCHEMA, new JSONData(dataToValidate));
+        }catch (final JSONException e){
+            return new Validated(new ValidatedStateError(), List.of(e.getMessage()));
+        }
     }
 
 }

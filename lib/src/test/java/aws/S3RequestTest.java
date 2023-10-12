@@ -15,20 +15,20 @@ class S3RequestTest {
     @BeforeEach
     public void setUp() {
         s3Request = new S3Request();
-        mockS3Object = new S3ObjectName(new BucketName("testBucket"), new KeyName("testKey"));
+        mockS3Object = new S3ObjectName(new BucketName("testbucket"), new KeyName("testKey"));
     }
 
     @Test
     public void testGetPutRequest() {
         final PutObjectRequest request = s3Request.getPutRequest(mockS3Object);
-        assertEquals("testBucket", request.bucket());
+        assertEquals("testbucket", request.bucket());
         assertEquals("testKey", request.key());
     }
 
     @Test
     public void testGetGetRequest() {
         final GetObjectRequest request = s3Request.getGetRequest(mockS3Object);
-        assertEquals("testBucket", request.bucket());
+        assertEquals("testbucket", request.bucket());
         assertEquals("testKey", request.key());
     }
 
