@@ -78,7 +78,7 @@ public class HandleTransformation implements RequestHandler<Map<String, String>,
 
     private static Consumer<S3FileSaverState> throwSaveException(final Context context) {
         return error -> {
-            throw new TransformationException(context,
+            throw new s3Exception(context,
                     String.format(ERROR_UNABLE_TO_SAVE_TRANSFORMED_FILE, error));
         };
     }
@@ -86,7 +86,7 @@ public class HandleTransformation implements RequestHandler<Map<String, String>,
     private Function<JSON, Optional<String>> transformData(final Context context) {
          return json -> jsonTransformer.transform(json)
                  .map(Object::toString)
-                 .orElseThrow(()->new TransformationException(context, UNABLE_TO_TRANSFORM_DATA))
+                 .orElseThrow(()->new s3Exception(context, UNABLE_TO_TRANSFORM_DATA))
                  .describeConstable();
     }
 
@@ -99,8 +99,8 @@ public class HandleTransformation implements RequestHandler<Map<String, String>,
                 .map(JSONData::new);
     }
 
-    private TransformationException throwUnableToLoadFile(final Context context, final S3Object s3Object) {
-        return new TransformationException(context, String.format(UNABLE_TO_LOAD_FILE,
+    private s3Exception throwUnableToLoadFile(final Context context, final S3Object s3Object) {
+        return new s3Exception(context, String.format(UNABLE_TO_LOAD_FILE,
                     s3Object.getBucketName(), s3Object.getKeyName()));
     }
 
@@ -123,7 +123,7 @@ public class HandleTransformation implements RequestHandler<Map<String, String>,
         try {
             return constructor.create(input.get(key));
         } catch (final RuntimeException e) {
-            throw new TransformationException(context, errorMessage);
+            throw new s3Exception(context, errorMessage);
         }
     }
 

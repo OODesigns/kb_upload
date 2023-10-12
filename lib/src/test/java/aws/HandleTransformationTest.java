@@ -33,7 +33,7 @@ class HandleTransformationTest {
         final HandleTransformation handleTransformation
                 = new HandleTransformation(fileLoader, jsonTransformer, fileStore, s3RequestProvider);
 
-        assertThrows(TransformationException.class, ()->handleTransformation.handleRequest(null, context));
+        assertThrows(s3Exception.class, ()->handleTransformation.handleRequest(null, context));
 
         final ArgumentCaptor<String> logData = ArgumentCaptor.forClass(String.class);
         verify(lambdaLogger, times(1)).log(logData.capture());
@@ -56,7 +56,7 @@ class HandleTransformationTest {
         final HandleTransformation handleTransformation
                 = new HandleTransformation(fileLoader, jsonTransformer, fileStore,s3RequestProvider);
 
-        assertThrows(TransformationException.class, ()->handleTransformation.handleRequest(input, context));
+        assertThrows(s3Exception.class, ()->handleTransformation.handleRequest(input, context));
 
         final ArgumentCaptor<String> logData = ArgumentCaptor.forClass(String.class);
         verify(lambdaLogger, times(1)).log(logData.capture());
@@ -79,7 +79,7 @@ class HandleTransformationTest {
         final HandleTransformation handleTransformation
                 = new HandleTransformation(fileLoader, jsonTransformer, fileStore,s3RequestProvider);
 
-        assertThrows(TransformationException.class, ()->handleTransformation.handleRequest(input, context));
+        assertThrows(s3Exception.class, ()->handleTransformation.handleRequest(input, context));
 
         final ArgumentCaptor<String> logData = ArgumentCaptor.forClass(String.class);
         verify(lambdaLogger, times(1)).log(logData.capture());
@@ -102,7 +102,7 @@ class HandleTransformationTest {
         final HandleTransformation handleTransformation
                 = new HandleTransformation(fileLoader, jsonTransformer, fileStore, s3RequestProvider);
 
-        assertThrows(TransformationException.class, ()->handleTransformation.handleRequest(input, context));
+        assertThrows(s3Exception.class, ()->handleTransformation.handleRequest(input, context));
 
         final ArgumentCaptor<String> logData = ArgumentCaptor.forClass(String.class);
         verify(lambdaLogger, times(1)).log(logData.capture());
@@ -128,7 +128,7 @@ class HandleTransformationTest {
         final HandleTransformation handleTransformation
                 = new HandleTransformation(fileLoader, jsonTransformer, fileStore, s3RequestProvider);
 
-        assertThrows(TransformationException.class, ()->handleTransformation.handleRequest(input, context));
+        assertThrows(s3Exception.class, ()->handleTransformation.handleRequest(input, context));
 
         final ArgumentCaptor<String> logData = ArgumentCaptor.forClass(String.class);
         verify(lambdaLogger, times(1)).log(logData.capture());
@@ -157,7 +157,7 @@ class HandleTransformationTest {
         final HandleTransformation handleTransformation
                 = new HandleTransformation(fileLoader, jsonTransformer, fileStore, s3RequestProvider);
 
-        assertThrows(TransformationException.class, ()->handleTransformation.handleRequest(input, context));
+        assertThrows(s3Exception.class, ()->handleTransformation.handleRequest(input, context));
 
         final ArgumentCaptor<String> logData = ArgumentCaptor.forClass(String.class);
         verify(lambdaLogger, times(1)).log(logData.capture());
@@ -187,7 +187,7 @@ class HandleTransformationTest {
         final HandleTransformation handleTransformation
                 = new HandleTransformation(fileLoader, jsonTransformer, fileStore, s3RequestProvider);
 
-        assertThrows(TransformationException.class, ()->handleTransformation.handleRequest(input, context));
+        assertThrows(s3Exception.class, ()->handleTransformation.handleRequest(input, context));
 
         final ArgumentCaptor<String> logData = ArgumentCaptor.forClass(String.class);
         verify(lambdaLogger, times(1)).log(logData.capture());
@@ -218,7 +218,7 @@ class HandleTransformationTest {
         final HandleTransformation handleTransformation
                 = new HandleTransformation(fileLoader, jsonTransformer, fileStore, s3RequestProvider);
 
-        assertThrows(TransformationException.class, ()->handleTransformation.handleRequest(input, context));
+        assertThrows(s3Exception.class, ()->handleTransformation.handleRequest(input, context));
 
         final ArgumentCaptor<String> logData = ArgumentCaptor.forClass(String.class);
         verify(lambdaLogger, times(1)).log(logData.capture());
@@ -254,7 +254,7 @@ class HandleTransformationTest {
         final HandleTransformation handleTransformation
                 = new HandleTransformation(fileLoader, jsonTransformer, fileStore, s3RequestProvider);
 
-        assertThrows(TransformationException.class, ()->handleTransformation.handleRequest(input, context));
+        assertThrows(s3Exception.class, ()->handleTransformation.handleRequest(input, context));
 
         final ArgumentCaptor<String> logData = ArgumentCaptor.forClass(String.class);
         verify(lambdaLogger, times(1)).log(logData.capture());
@@ -316,7 +316,7 @@ class HandleTransformationTest {
         final HandleTransformation handleTransformation
                 = new HandleTransformation();
 
-        assertThrows(TransformationException.class, ()-> handleTransformation.handleRequest(input, context));
+        assertThrows(s3Exception.class, ()-> handleTransformation.handleRequest(input, context));
     }
 
 

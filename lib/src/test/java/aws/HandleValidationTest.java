@@ -80,7 +80,7 @@ public class HandleValidationTest {
                                        __-> Optional.of(validJSON),
                                        s3RequestProvider);
 
-        assertThrows(ValidationException.class, ()->requestHandler.handleRequest(s3Event, context));
+        assertThrows(s3Exception.class, ()->requestHandler.handleRequest(s3Event, context));
 
         final ArgumentCaptor<String> logData = ArgumentCaptor.forClass(String.class);
         verify(lambdaLogger, times(2)).log(logData.capture());
@@ -112,7 +112,7 @@ public class HandleValidationTest {
                                       __->Optional.empty(),
                                       s3RequestProvider);
 
-        assertThrows(ValidationException.class, ()->requestHandler.handleRequest(s3Event, context));
+        assertThrows(s3Exception.class, ()->requestHandler.handleRequest(s3Event, context));
 
         final ArgumentCaptor<String> logData = ArgumentCaptor.forClass(String.class);
         verify(lambdaLogger, times(1)).log(logData.capture());
@@ -133,7 +133,7 @@ public class HandleValidationTest {
         final RequestHandler<S3Event, Void> requestHandler
                 = new HandleValidation(unusedEvent -> Optional.empty(), validator, fileLoader, s3RequestProvider);
 
-        assertThrows(ValidationException.class, ()->requestHandler.handleRequest(s3Event, context));
+        assertThrows(s3Exception.class, ()->requestHandler.handleRequest(s3Event, context));
 
         final ArgumentCaptor<String> logData = ArgumentCaptor.forClass(String.class);
         verify(lambdaLogger, times(1)).log(logData.capture());
@@ -152,6 +152,6 @@ public class HandleValidationTest {
         final RequestHandler<S3Event, Void> requestHandler
                 = new HandleValidation();
 
-        assertThrows(ValidationException.class, ()->requestHandler.handleRequest(s3Event, context));
+        assertThrows(s3Exception.class, ()->requestHandler.handleRequest(s3Event, context));
     }
 }
