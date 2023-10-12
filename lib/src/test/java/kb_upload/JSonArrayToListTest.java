@@ -1,8 +1,8 @@
 package kb_upload;
 
 import org.junit.jupiter.api.Test;
-import java.util.Objects;
 
+import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
@@ -24,14 +24,16 @@ class JSonArrayToListTest {
                 }
             ]}""";
 
+          final String expectedResult = "John Doe Doe Doe\n" +
+                                        "Jane Smith";
+
         final JSonArrayToList transformer = new JSonArrayToList("person");
 
-        transformer.transform(new JSONData(jsonData))
-                .map(Objects::toString)
-                .ifPresentOrElse(t->{
-                            assertThat(t).contains("John Doe Doe Doe");
-                            assertThat(t).contains("Jane Smith");
-                        },()->fail("Expected to get data but got nothing")
+        final mappable<List<String>, String, String> transform = transformer.transform(new JSONData(jsonData));
+
+        transform.map(l->String.join("\n",l))
+                .ifPresentOrElse(t->assertThat(t).contains(expectedResult),
+                        ()->fail("Expected to get data but got nothing")
                 );
     }
 

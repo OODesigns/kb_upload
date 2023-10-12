@@ -7,6 +7,10 @@ Parameters:
     Type: String
     Default: "s3-knowledge-upload"
 
+  OutputBucketName:
+    Type: String
+    Default: "s3-knowledge-staging"
+
 Resources:
   ValidationFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
@@ -14,7 +18,7 @@ Resources:
       CodeUri: lib/build/distributions/lib.zip
       Handler: aws.HandleValidation
       Runtime: java17
-      Description: Java function
+      Description: Java function for validating the chatbot definition.
       MemorySize: 2048
       Timeout: 10
       # Function's execution role
@@ -30,11 +34,44 @@ Resources:
              BucketName: !Ref SourceBucketName
       Tracing: PassThrough
 
+  TransformationFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: lib/build/distributions/lib.zip
+      Handler: aws.HandleTransformation
+      Runtime: java17
+      Description: Java function for transformation
+      MemorySize: 2048
+      Timeout: 10
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - AWSLambda_ReadOnlyAccess
+        - AWSLambdaVPCAccessExecutionRole
+        - S3WritePolicy:
+            BucketName: !Ref OutputBucketName
+        - S3ReadPolicy:
+            BucketName: !Ref SourceBucketName
+      Tracing: PassThrough
+
+  S3WritePolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Action: s3:PutObject
+            Resource:
+              Fn::Sub: arn:aws:s3:::${OutputBucketName}/*
 
 Outputs:
-  LambdaFunctionArn:
-    Description: "ARN of the Lambda function"
+  ValidationLambdaFunctionArn:
+    Description: "ARN of the Validation Lambda function"
     Value: !GetAtt ValidationFunction.Arn
+
+  TransformationLambdaFunctionArn:
+    Description: "ARN of the Transformation Lambda function"
+    Value: !GetAtt TransformationFunction.Arn
 
 
 

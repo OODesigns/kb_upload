@@ -85,9 +85,13 @@ public class HandleTransformation implements RequestHandler<Map<String, String>,
 
     private Function<JSON, Optional<String>> transformData(final Context context) {
          return json -> jsonTransformer.transform(json)
-                 .map(Object::toString)
+                 .map(newLineForEachEntry())
                  .orElseThrow(()->new s3Exception(context, UNABLE_TO_TRANSFORM_DATA))
                  .describeConstable();
+    }
+
+    private static Function<List<String>, String> newLineForEachEntry() {
+        return l -> String.join("\n", l);
     }
 
 
