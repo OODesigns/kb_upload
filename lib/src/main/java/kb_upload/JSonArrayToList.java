@@ -9,7 +9,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class JSonArrayToList implements Transformer<JSON, mappable<List<String>, String, String>> {
+public class JSonArrayToList implements Transformer1_1<JSON, mappable<List<String>, String, String>> {
     public static final String SPACE = " ";
     private static final ObjectMapper objectMapper = new ObjectMapper();
     private final String arrayName;

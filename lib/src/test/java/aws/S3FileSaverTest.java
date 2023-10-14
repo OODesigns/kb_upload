@@ -23,7 +23,7 @@ public class S3FileSaverTest {
     @Test
     void errorSavingReturnsErrorState(@Mock final S3Client s3Client,
                                       @Mock final S3RequestProvider s3RequestProvider,
-                                      @Mock final S3Object s3Object,
+                                      @Mock final S3ObjectFactory s3ObjectFactory,
                                       @Mock final PutObjectRequest putObjectRequest){
 
         when(s3RequestProvider.getPutRequest(any())).thenReturn(putObjectRequest);
@@ -31,15 +31,15 @@ public class S3FileSaverTest {
 
         final S3FileSaver s3FileSaver = new S3FileSaver(() -> s3Client, s3RequestProvider);
 
-        assertThat(s3FileSaver.store(s3Object, "someData")).isInstanceOf(S3FileSaverErrorState.class);
+        assertThat(s3FileSaver.store(s3ObjectFactory, "someData")).isInstanceOf(S3FileSaverErrorState.class);
 
       }
 
     @Test
     void savingReturnsOKState(@Mock final S3Client s3Client,
                               @Mock final S3RequestProvider s3RequestProvider,
-                              @Mock final S3ObjectName s3Object,
-                              @Mock final PutObjectRequest putObjectRequest){
+                              @Mock final PutObjectRequest putObjectRequest,
+                              @Mock final S3Object s3Object){
 
         when(s3RequestProvider.getPutRequest(any())).thenReturn(putObjectRequest);
         final S3FileSaver s3FileSaver = new S3FileSaver(() -> s3Client, s3RequestProvider);

@@ -14,11 +14,11 @@ public class S3RequestSupplier extends S3ClientSupplier{
         this.s3RequestProvider = s3RequestProvider;
     }
 
-    protected PutObjectRequest getPutRequest(final S3Object s3object){
-        return s3RequestProvider.getPutRequest(s3object);
+    protected PutObjectRequest getPutRequest(final S3Object s3Object){
+        return s3RequestProvider.getPutRequest(s3Object);
     }
 
-    protected GetObjectRequest getGetRequest(final S3Object s3object){
-        return s3RequestProvider.getGetRequest(s3object);
+    protected GetObjectRequest getGetRequest(final S3Object s3Object){
+        return s3RequestProvider.getGetRequest(s3Object);
     }
 }

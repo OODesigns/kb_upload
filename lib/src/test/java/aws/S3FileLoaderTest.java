@@ -24,8 +24,8 @@ class S3FileLoaderTest {
     void retrieveFileData(@Mock final S3Client s3Client,
                           @Mock final S3RequestProvider s3RequestProvider,
                           @Mock final ResponseBytes<GetObjectResponse> responseBytes,
-                          @Mock final GetObjectRequest getObjectRequest){
-
+                          @Mock final GetObjectRequest getObjectRequest,
+                          @Mock final S3Object s3Object){
 
         when(s3RequestProvider.getGetRequest(any())).thenReturn(getObjectRequest);
         when(responseBytes.asByteArray()).thenReturn("someData".getBytes(StandardCharsets.UTF_8));
@@ -34,7 +34,7 @@ class S3FileLoaderTest {
 
         final S3FileLoader s3FileLoader = new S3FileLoader(()->s3Client, s3RequestProvider);
 
-        s3FileLoader.retrieve(new S3ObjectName(new BucketName("expected-bucket"),new KeyName("expectedFilename.txt")))
+        s3FileLoader.retrieve(s3Object)
                 .ifPresentOrElse(s->assertThat(s).contains("someData"),
                         ()->fail("Expected to have some data"));
     }
@@ -43,14 +43,15 @@ class S3FileLoaderTest {
     @Test
     void errorWhenGettingFileData(@Mock final S3Client s3Client,
                                   @Mock final S3RequestProvider s3RequestProvider,
-                                  @Mock final GetObjectRequest getObjectRequest) {
+                                  @Mock final GetObjectRequest getObjectRequest,
+                                  @Mock final S3Object s3Object) {
 
         when(s3RequestProvider.getGetRequest(any())).thenReturn(getObjectRequest);
         when(s3Client.getObject(any(GetObjectRequest.class), any(ResponseTransformer.class))).thenThrow(SdkException.class);
 
         final S3FileLoader s3FileLoader = new S3FileLoader(()->s3Client, s3RequestProvider);
 
-        final Optional<String> retrieve = s3FileLoader.retrieve(new S3ObjectName(new BucketName("expected-bucket"), new KeyName("expectedFilename.txt")));
+        final Optional<String> retrieve = s3FileLoader.retrieve(s3Object);
 
         assertThat(retrieve).isEmpty();
     }
