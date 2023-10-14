@@ -28,7 +28,7 @@ class HandleTransformationTest {
                                        @Mock final Transformer1_1<JSON, mappable<List<String>, String, String>> jsonTransformer,
                                        @Mock final Storable<S3Object, String, S3FileSaverState> fileStore,
                                        @Mock final S3RequestProvider s3RequestProvider,
-                                       @Mock final Transformer2_1<Context, S3Object, Optional<JSON>> s3JSONFileDataTransformer){
+                                       @Mock final Transformer2_1<Context, S3Object, JSON> s3JSONFileDataTransformer){
 
         when(context.getLogger()).thenReturn(lambdaLogger);
 
@@ -50,7 +50,7 @@ class HandleTransformationTest {
                                               @Mock final Transformer1_1<JSON, mappable<List<String>, String, String>> jsonTransformer,
                                               @Mock final Storable<S3Object, String, S3FileSaverState> fileStore,
                                               @Mock final S3RequestProvider s3RequestProvider,
-                                              @Mock final Transformer2_1<Context, S3Object, Optional<JSON>> s3JSONFileDataTransformer){
+                                              @Mock final Transformer2_1<Context, S3Object, JSON> s3JSONFileDataTransformer){
 
         when(context.getLogger()).thenReturn(lambdaLogger);
 
@@ -74,7 +74,7 @@ class HandleTransformationTest {
                                               @Mock final Transformer1_1<JSON, mappable<List<String>, String, String>> jsonTransformer,
                                               @Mock final Storable<S3Object, String, S3FileSaverState> fileStore,
                                               @Mock final S3RequestProvider s3RequestProvider,
-                                              @Mock final Transformer2_1<Context, S3Object, Optional<JSON>> s3JSONFileDataTransformer){
+                                              @Mock final Transformer2_1<Context, S3Object, JSON> s3JSONFileDataTransformer){
 
         when(context.getLogger()).thenReturn(lambdaLogger);
 
@@ -98,7 +98,7 @@ class HandleTransformationTest {
                                                           @Mock final Transformer1_1<JSON, mappable<List<String>, String, String>> jsonTransformer,
                                                           @Mock final Storable<S3Object, String, S3FileSaverState> fileStore,
                                                           @Mock final S3RequestProvider s3RequestProvider,
-                                                          @Mock final Transformer2_1<Context, S3Object, Optional<JSON>> s3JSONFileDataTransformer){
+                                                          @Mock final Transformer2_1<Context, S3Object, JSON> s3JSONFileDataTransformer){
 
         when(context.getLogger()).thenReturn(lambdaLogger);
 
@@ -123,7 +123,7 @@ class HandleTransformationTest {
                                @Mock final mappable<List<String>, String, String>  transformedResult,
                                @Mock final Storable<S3Object, String, S3FileSaverState> fileStore,
                                @Mock final S3RequestProvider s3RequestProvider,
-                               @Mock final Transformer2_1<Context, S3Object, Optional<JSON>> s3JSONFileDataTransformer,
+                               @Mock final Transformer2_1<Context, S3Object, JSON> s3JSONFileDataTransformer,
                                @Mock final JSON json){
 
         when(context.getLogger()).thenReturn(lambdaLogger);
@@ -131,7 +131,7 @@ class HandleTransformationTest {
         when(jsonTransformer.transform(any())).thenReturn(transformedResult);
         when(transformedResult.map(any())).thenReturn(Optional.empty());
 
-        when(s3JSONFileDataTransformer.transform(any() ,any())).thenReturn(Optional.of(json));
+        when(s3JSONFileDataTransformer.transform(any() ,any())).thenReturn(json);
 
         final Map<String, String> input = Map.of("Transformation-BucketName", "bucket",
                                                  "Transformation-KeyName", "key");
@@ -156,11 +156,11 @@ class HandleTransformationTest {
                                    @Mock final mappable<List<String>, String, String>  transformedResult,
                                    @Mock final Storable<S3Object, String, S3FileSaverState> fileStore,
                                    @Mock final S3RequestProvider s3RequestProvider,
-                                   @Mock final Transformer2_1<Context, S3Object, Optional<JSON>> s3JSONFileDataTransformer,
+                                   @Mock final Transformer2_1<Context, S3Object, JSON> s3JSONFileDataTransformer,
                                    @Mock final JSON json){
 
         when(context.getLogger()).thenReturn(lambdaLogger);
-        when(s3JSONFileDataTransformer.transform(any() ,any())).thenReturn(Optional.of(json));
+        when(s3JSONFileDataTransformer.transform(any() ,any())).thenReturn(json);
         when(jsonTransformer.transform(any())).thenReturn(transformedResult);
         when(transformedResult.map(any())).thenReturn(Optional.of(List.of("data1", "data2").toString()));
 
@@ -187,11 +187,11 @@ class HandleTransformationTest {
              @Mock final mappable<List<String>, String, String>  transformedResult,
              @Mock final Storable<S3Object, String, S3FileSaverState> fileStore,
              @Mock final S3RequestProvider s3RequestProvider,
-             @Mock final Transformer2_1<Context, S3Object, Optional<JSON>> s3JSONFileDataTransformer,
+             @Mock final Transformer2_1<Context, S3Object, JSON> s3JSONFileDataTransformer,
              @Mock final JSON json){
 
         when(context.getLogger()).thenReturn(lambdaLogger);
-        when(s3JSONFileDataTransformer.transform(any() ,any())).thenReturn(Optional.of(json));
+        when(s3JSONFileDataTransformer.transform(any() ,any())).thenReturn(json);
 
         when(jsonTransformer.transform(any())).thenReturn(transformedResult);
         when(transformedResult.map(any())).thenReturn(Optional.of(List.of("data1", "data2").toString()));
@@ -220,11 +220,11 @@ class HandleTransformationTest {
              @Mock final mappable<List<String>, String, String>  transformedResult,
              @Mock final Storable<S3Object, String, S3FileSaverState> fileStore,
              @Mock final S3RequestProvider s3RequestProvider,
-             @Mock final Transformer2_1<Context, S3Object, Optional<JSON>> s3JSONFileDataTransformer,
+             @Mock final Transformer2_1<Context, S3Object, JSON> s3JSONFileDataTransformer,
              @Mock final JSON json){
 
         when(context.getLogger()).thenReturn(lambdaLogger);
-        when(s3JSONFileDataTransformer.transform(any() ,any())).thenReturn(Optional.of(json));
+        when(s3JSONFileDataTransformer.transform(any() ,any())).thenReturn(json);
 
         when(jsonTransformer.transform(any())).thenReturn(transformedResult);
         when(transformedResult.map(any())).thenReturn(Optional.of(List.of("data1", "data2").toString()));
@@ -257,11 +257,11 @@ class HandleTransformationTest {
              @Mock final mappable<List<String>, String, String>  transformedResult,
              @Mock final Storable<S3Object, String, S3FileSaverState> fileStore,
              @Mock final S3RequestProvider s3RequestProvider,
-             @Mock final Transformer2_1<Context, S3Object, Optional<JSON>> s3JSONFileDataTransformer,
+             @Mock final Transformer2_1<Context, S3Object, JSON> s3JSONFileDataTransformer,
              @Mock final JSON json){
 
         when(context.getLogger()).thenReturn(lambdaLogger);
-        when(s3JSONFileDataTransformer.transform(any() ,any())).thenReturn(Optional.of(json));
+        when(s3JSONFileDataTransformer.transform(any() ,any())).thenReturn(json);
         when(jsonTransformer.transform(any())).thenReturn(transformedResult);
         when(transformedResult.map(any())).thenReturn(Optional.of(List.of("data1", "data2").toString()));
         when(fileStore.store(any(), any())).thenReturn(new S3FileSaverOKState());

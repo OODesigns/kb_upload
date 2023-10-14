@@ -58,7 +58,7 @@ public class HandleValidation implements RequestHandler<Map<String, String>, Voi
 
     }
      private void validateData(final JSON fileData, final Context context) {
-        Optional.of(fileData.get())
+        Optional.of(fileData)
                 .map(this::validate)
                 .map(logResult(context))
                 .filter(notValidFile())
@@ -77,9 +77,9 @@ public class HandleValidation implements RequestHandler<Map<String, String>, Voi
         return v -> { context.getLogger().log(String.format(RESULT, v)); return v; };
     }
 
-    private Validation validate(final String dataToValidate) {
+    private Validation validate(final JSON data) {
         try {
-            return validator.validate(JSON_SCHEMA, new JSONData(dataToValidate));
+            return validator.validate(JSON_SCHEMA, data);
         }catch (final JSONException e){
             return new Validated(new ValidatedStateError(), List.of(e.getMessage()));
         }

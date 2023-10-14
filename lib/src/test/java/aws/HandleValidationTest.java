@@ -31,7 +31,8 @@ public class HandleValidationTest {
                                     @Mock final LambdaLogger lambdaLogger,
                                     @Mock final Validation validation,
                                     @Mock final Validator<JSONSchema, JSON, Validation> validator,
-                                    @Mock final Transformer2_1<Context, S3Object, Optional<JSON>> s3JSONFileDataTransformer) {
+                                    @Mock final Transformer2_1<Context, S3Object, JSON> s3JSONFileDataTransformer,
+                                    @Mock final JSON json) {
 
 
         final Map<String, String> input = Map.of("Validation-BucketName", "bucket",
@@ -39,6 +40,7 @@ public class HandleValidationTest {
 
         when(context.getLogger()).thenReturn(lambdaLogger);
         when(validator.validate(any(),any())).thenReturn(validation);
+        when(s3JSONFileDataTransformer.transform(any() ,any())).thenReturn(json);
 
         when(validation.state()).thenReturn(new ValidatedStateOK());
         when(validation.toString()).thenReturn("ValidatedStateOK");
@@ -61,7 +63,7 @@ public class HandleValidationTest {
                                       @Mock final LambdaLogger lambdaLogger,
                                       @Mock final Validation validation,
                                       @Mock final Validator<JSONSchema, JSON, Validation> validator,
-                                      @Mock final Transformer2_1<Context, S3Object, Optional<JSON>> s3JSONFileDataTransformer,
+                                      @Mock final Transformer2_1<Context, S3Object, JSON> s3JSONFileDataTransformer,
                                       @Mock final JSON json){
 
 
@@ -70,7 +72,7 @@ public class HandleValidationTest {
 
         when(context.getLogger()).thenReturn(lambdaLogger);
         when(validator.validate(any(),any())).thenReturn(validation);
-        when(s3JSONFileDataTransformer.transform(any() ,any())).thenReturn(Optional.of(json));
+        when(s3JSONFileDataTransformer.transform(any() ,any())).thenReturn(json);
 
         final List<String> messages = List.of("message1", "message2");
 
@@ -99,7 +101,7 @@ public class HandleValidationTest {
                                     @Mock final S3RequestProvider s3RequestProvider,
                                     @Mock final Context context,
                                     @Mock final Validator<JSONSchema, JSON, Validation> validator,
-                                    @Mock final Transformer2_1<Context, S3Object, Optional<JSON>> s3JSONFileDataTransformer) {
+                                    @Mock final Transformer2_1<Context, S3Object, JSON> s3JSONFileDataTransformer) {
 
 
         final Map<String, String> input = Map.of("Validation-BucketName", "bucket",
