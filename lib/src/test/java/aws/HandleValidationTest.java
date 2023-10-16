@@ -9,6 +9,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoSettings;
 
+import java.io.ByteArrayInputStream;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -43,7 +44,9 @@ public class HandleValidationTest {
         when(validation.toString()).thenReturn("ValidatedStateOK");
 
         final RequestHandler<Map<String, String>, Void> requestHandler
-                = new HandleValidation(validator, __-> Optional.of(validJSON), s3RequestProvider);
+                = new HandleValidation(validator,
+                __-> Optional.of(new ByteArrayInputStream(validJSON.getBytes())),
+                s3RequestProvider);
 
         requestHandler.handleRequest(input, context);
 
@@ -72,10 +75,13 @@ public class HandleValidationTest {
 
         when(validation.state()).thenReturn(new ValidatedStateError());
         when(validation.messages()).thenReturn(messages);
+        //Passing valid JSON, so it does not throw an error,
         when(validation.toString()).thenReturn("ValidatedStateError");
-
+        //The validation however returns an error state
         final RequestHandler<Map<String, String>, Void> requestHandler
-                = new HandleValidation(validator, __-> Optional.of(validJSON), s3RequestProvider);
+                = new HandleValidation(validator,
+                __-> Optional.of(new ByteArrayInputStream(validJSON.getBytes())),
+                s3RequestProvider);
 
         assertThrows(s3Exception.class, ()->requestHandler.handleRequest(input, context));
 

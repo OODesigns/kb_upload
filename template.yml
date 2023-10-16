@@ -88,7 +88,7 @@ Resources:
                   - !GetAtt ValidationFunction.Arn
                   - !GetAtt TransformationFunction.Arn
 
-  ChatbotStateMachine:
+  ChatbotDefinitionStateMachine:
     Type: "AWS::StepFunctions::StateMachine"
     Properties:
       DefinitionString: !Sub |
@@ -137,7 +137,7 @@ Resources:
               - !Ref SourceBucketName
       State: "ENABLED"
       Targets:
-        - Arn: !Ref ChatbotStateMachine
+        - Arn: !Ref ChatbotDefinitionStateMachine
           Id: "StateMachineTarget"
           RoleArn: !GetAtt EventBridgeExecutionRole.Arn
 
@@ -160,7 +160,7 @@ Resources:
             Statement:
               - Effect: "Allow"
                 Action: "states:StartExecution"
-                Resource: !Ref ChatbotStateMachine
+                Resource: !Ref ChatbotDefinitionStateMachine
 
   TrailBucket:
     Type: "AWS::S3::Bucket"
@@ -214,7 +214,7 @@ Outputs:
 
   StateMachineArn:
     Description: "ARN of the state machine"
-    Value: !Ref ChatbotStateMachine
+    Value: !Ref ChatbotDefinitionStateMachine
 
 
 

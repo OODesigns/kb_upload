@@ -4,6 +4,9 @@ import com.amazonaws.services.lambda.runtime.RequestHandler;
 import kb_upload.*;
 import software.amazon.awssdk.services.s3.S3Client;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -24,19 +27,20 @@ public class HandleTransformation implements RequestHandler<Map<String, String>,
     private static final String OK_RESULT = "RESULT S3FileSaverOKState";
     private static final String TRANSFORMATION = "transformation";
     private static final String TRANSFORMED = "transformed";
-    private final Retrievable<S3Object, Optional<String>> fileLoader;
+    private final Retrievable<S3Object, Optional<InputStream>> fileLoader;
+
     private final Transformer1_1<JSON, mappable<List<String>, String, String>> jsonTransformer;
 
-    private final Storable<S3Object, String, S3FileSaverState> fileStore;
+    private final Storable<S3Object, ByteArrayOutputStream, S3FileSaverState> fileStore;
 
     private final S3RequestProvider s3RequestProvider;
     private final Transformer2_1<Context, S3Object, JSON> s3JSONFileDataTransformer;
 
 
     //Used for testing purposes only
-    HandleTransformation(final Retrievable<S3Object, Optional<String>> fileLoader,
+    HandleTransformation(final Retrievable<S3Object, Optional<InputStream>> fileLoader,
                          final Transformer1_1<JSON, mappable<List<String>, String, String>> jsonTransformer,
-                         final Storable<S3Object, String, S3FileSaverState> fileStore,
+                         final Storable<S3Object, ByteArrayOutputStream, S3FileSaverState> fileStore,
                          final S3RequestProvider s3RequestProvider) {
         this.fileLoader = fileLoader;
         this.jsonTransformer = jsonTransformer;
@@ -47,8 +51,8 @@ public class HandleTransformation implements RequestHandler<Map<String, String>,
 
     public HandleTransformation() {
         this.s3RequestProvider = new S3Request();
-        this.fileLoader = new S3FileLoader(()-> S3Client.builder().build() , s3RequestProvider);
-        this.fileStore =  new S3FileSaver(()-> S3Client.builder().build(), s3RequestProvider);
+        this.fileLoader = new S3StreamLoader(()-> S3Client.builder().build() , s3RequestProvider);
+        this.fileStore =  new S3StreamSaver(()-> S3Client.builder().build(), s3RequestProvider);
         this.jsonTransformer = new JSonArrayToList(UTTERANCE);
         this.s3JSONFileDataTransformer = new S3JSONFileDataTransformer(fileLoader);
     }
@@ -64,7 +68,7 @@ public class HandleTransformation implements RequestHandler<Map<String, String>,
         return null;
     }
 
-    private void saveToFile(final String data, final Map<String, String> input, final Context context) {
+    private void saveToFile(final ByteArrayOutputStream data, final Map<String, String> input, final Context context) {
         Optional.of(getS3ObjectForTransformed(input, context))
                 .map(s-> fileStore.store(s, data))
                 .filter(hasErrorState())
@@ -83,11 +87,24 @@ public class HandleTransformation implements RequestHandler<Map<String, String>,
         };
     }
 
-    private Function<JSON, Optional<String>> transformData(final Context context) {
+    private Function<JSON, Optional<ByteArrayOutputStream>> transformData(final Context context) {
          return json -> jsonTransformer.transform(json)
                  .map(newLineForEachEntry())
-                 .orElseThrow(()->new s3Exception(context, UNABLE_TO_TRANSFORM_DATA))
-                 .describeConstable();
+                 .map(transformToStream())
+                 .orElseThrow(()->new s3Exception(context, UNABLE_TO_TRANSFORM_DATA));
+    }
+
+    private static Function<String, Optional<ByteArrayOutputStream>> transformToStream() {
+        return s -> {
+            try {
+                final byte[] bytes = s.getBytes();
+                return Optional.of(new ByteArrayOutputStream(bytes.length) {{
+                    write(bytes);
+                }});
+            } catch (final IOException e) {
+                return Optional.empty();
+            }
+        };
     }
 
     private static Function<List<String>, String> newLineForEachEntry() {

@@ -8,6 +8,8 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoSettings;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -19,10 +21,12 @@ class S3JSONFileDataTransformerTest {
     @Test
     public void testTransform_successfullyTransforms(
             final @Mock S3Object s3Object,
-            final @Mock Retrievable<S3Object, Optional<String>> fileLoaderMock,
-            final @Mock Context context) {
+            final @Mock Retrievable<S3Object, Optional<InputStream>> fileLoaderMock,
+            final @Mock Context context,
+            final @Mock InputStream inputStream) throws IOException {
 
-        when(fileLoaderMock.retrieve(s3Object)).thenReturn(Optional.of("{\"key\": \"value\"}"));
+        when(inputStream.readAllBytes()).thenReturn("{\"key\": \"value\"}".getBytes());
+        when(fileLoaderMock.retrieve(s3Object)).thenReturn(Optional.of(inputStream));
 
         final S3JSONFileDataTransformer transformer = new S3JSONFileDataTransformer(fileLoaderMock);
 
@@ -34,7 +38,7 @@ class S3JSONFileDataTransformerTest {
     @Test
     public void testTransform_throwsExceptionWhenFileNotLoaded(
             final @Mock S3Object s3Object,
-            final @Mock Retrievable<S3Object, Optional<String>> fileLoaderMock,
+            final @Mock Retrievable<S3Object, Optional<InputStream>> fileLoaderMock,
             final @Mock Context context,
             final @Mock LambdaLogger lambdaLogger) {
 

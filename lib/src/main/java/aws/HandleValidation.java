@@ -7,6 +7,7 @@ import com.networknt.schema.SpecVersion;
 import kb_upload.*;
 import software.amazon.awssdk.services.s3.S3Client;
 
+import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -21,7 +22,7 @@ public class HandleValidation implements RequestHandler<Map<String, String>, Voi
     public static final JSONSchemaData JSON_SCHEMA = new JSONSchemaData(FILE_LOADER.toString());
     private static final String VALIDATION = "validation";
     private final Validator<JSONSchema, JSON, Validation> validator;
-    private final Retrievable<S3Object, Optional<String>> fileLoader;
+    private final Retrievable<S3Object, Optional<InputStream>> fileLoader;
     private final S3RequestProvider s3RequestProvider;
     private final Transformer2_1<Context, S3Object, JSON> s3JSONFileDataTransformer;
 
@@ -29,7 +30,7 @@ public class HandleValidation implements RequestHandler<Map<String, String>, Voi
      * Used for testing purposes only
      */
     HandleValidation(final Validator<JSONSchema, JSON, Validation> validator,
-                     final Retrievable<S3Object, Optional<String>> fileLoader,
+                     final Retrievable<S3Object, Optional<InputStream>> fileLoader,
                      final S3RequestProvider s3RequestProvider){
         this.validator = validator;
         this.fileLoader = fileLoader;
@@ -40,7 +41,7 @@ public class HandleValidation implements RequestHandler<Map<String, String>, Voi
     public HandleValidation() {
         this.s3RequestProvider = new S3Request();
         this.validator = new JSONValidator(()->JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V4));
-        this.fileLoader = new S3FileLoader(()-> S3Client.builder().build() , s3RequestProvider);
+        this.fileLoader = new S3StreamLoader(()-> S3Client.builder().build() , s3RequestProvider);
         this.s3JSONFileDataTransformer = new S3JSONFileDataTransformer(fileLoader);
     }
 
