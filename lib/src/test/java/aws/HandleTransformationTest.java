@@ -27,13 +27,12 @@ class HandleTransformationTest {
                                        @Mock final Retrievable<S3Object, Optional<String>>  fileLoader,
                                        @Mock final Transformer1_1<JSON, mappable<List<String>, String, String>> jsonTransformer,
                                        @Mock final Storable<S3Object, String, S3FileSaverState> fileStore,
-                                       @Mock final S3RequestProvider s3RequestProvider,
-                                       @Mock final Transformer2_1<Context, S3Object, JSON> s3JSONFileDataTransformer){
+                                       @Mock final S3RequestProvider s3RequestProvider){
 
         when(context.getLogger()).thenReturn(lambdaLogger);
 
         final HandleTransformation handleTransformation
-                = new HandleTransformation(fileLoader, jsonTransformer, fileStore, s3RequestProvider, s3JSONFileDataTransformer);
+                = new HandleTransformation(fileLoader, jsonTransformer, fileStore, s3RequestProvider);
 
         assertThrows(s3Exception.class, ()->handleTransformation.handleRequest(null, context));
 
@@ -49,15 +48,14 @@ class HandleTransformationTest {
                                               @Mock final Retrievable<S3Object, Optional<String>>  fileLoader,
                                               @Mock final Transformer1_1<JSON, mappable<List<String>, String, String>> jsonTransformer,
                                               @Mock final Storable<S3Object, String, S3FileSaverState> fileStore,
-                                              @Mock final S3RequestProvider s3RequestProvider,
-                                              @Mock final Transformer2_1<Context, S3Object, JSON> s3JSONFileDataTransformer){
+                                              @Mock final S3RequestProvider s3RequestProvider){
 
         when(context.getLogger()).thenReturn(lambdaLogger);
 
         final Map<String, String> input = Map.of("wrong Key", "wrong value");
 
         final HandleTransformation handleTransformation
-                = new HandleTransformation(fileLoader, jsonTransformer, fileStore, s3RequestProvider, s3JSONFileDataTransformer);
+                = new HandleTransformation(fileLoader, jsonTransformer, fileStore, s3RequestProvider);
 
         assertThrows(s3Exception.class, ()->handleTransformation.handleRequest(input, context));
 
@@ -73,15 +71,14 @@ class HandleTransformationTest {
                                               @Mock final Retrievable<S3Object, Optional<String>>  fileLoader,
                                               @Mock final Transformer1_1<JSON, mappable<List<String>, String, String>> jsonTransformer,
                                               @Mock final Storable<S3Object, String, S3FileSaverState> fileStore,
-                                              @Mock final S3RequestProvider s3RequestProvider,
-                                              @Mock final Transformer2_1<Context, S3Object, JSON> s3JSONFileDataTransformer){
+                                              @Mock final S3RequestProvider s3RequestProvider){
 
         when(context.getLogger()).thenReturn(lambdaLogger);
 
         final Map<String, String> input = Map.of("Transformation-BucketName", "");
 
         final HandleTransformation handleTransformation
-                = new HandleTransformation(fileLoader, jsonTransformer, fileStore, s3RequestProvider, s3JSONFileDataTransformer);
+                = new HandleTransformation(fileLoader, jsonTransformer, fileStore, s3RequestProvider);
 
         assertThrows(s3Exception.class, ()->handleTransformation.handleRequest(input, context));
 
@@ -97,15 +94,14 @@ class HandleTransformationTest {
                                                           @Mock final Retrievable<S3Object, Optional<String>>  fileLoader,
                                                           @Mock final Transformer1_1<JSON, mappable<List<String>, String, String>> jsonTransformer,
                                                           @Mock final Storable<S3Object, String, S3FileSaverState> fileStore,
-                                                          @Mock final S3RequestProvider s3RequestProvider,
-                                                          @Mock final Transformer2_1<Context, S3Object, JSON> s3JSONFileDataTransformer){
+                                                          @Mock final S3RequestProvider s3RequestProvider){
 
         when(context.getLogger()).thenReturn(lambdaLogger);
 
         final Map<String, String> input = Map.of("Transformation-BucketName", "bucket");
 
         final HandleTransformation handleTransformation
-                = new HandleTransformation(fileLoader, jsonTransformer, fileStore, s3RequestProvider, s3JSONFileDataTransformer);
+                = new HandleTransformation(fileLoader, jsonTransformer, fileStore, s3RequestProvider);
 
         assertThrows(s3Exception.class, ()->handleTransformation.handleRequest(input, context));
 
@@ -122,22 +118,19 @@ class HandleTransformationTest {
                                @Mock final Transformer1_1<JSON, mappable<List<String>, String, String>> jsonTransformer,
                                @Mock final mappable<List<String>, String, String>  transformedResult,
                                @Mock final Storable<S3Object, String, S3FileSaverState> fileStore,
-                               @Mock final S3RequestProvider s3RequestProvider,
-                               @Mock final Transformer2_1<Context, S3Object, JSON> s3JSONFileDataTransformer,
-                               @Mock final JSON json){
+                               @Mock final S3RequestProvider s3RequestProvider){
 
         when(context.getLogger()).thenReturn(lambdaLogger);
+        when(fileLoader.retrieve(any())).thenReturn(Optional.of("{}"));
 
         when(jsonTransformer.transform(any())).thenReturn(transformedResult);
         when(transformedResult.map(any())).thenReturn(Optional.empty());
-
-        when(s3JSONFileDataTransformer.transform(any() ,any())).thenReturn(json);
 
         final Map<String, String> input = Map.of("Transformation-BucketName", "bucket",
                                                  "Transformation-KeyName", "key");
 
         final HandleTransformation handleTransformation
-                = new HandleTransformation(fileLoader, jsonTransformer, fileStore, s3RequestProvider, s3JSONFileDataTransformer);
+                = new HandleTransformation(fileLoader, jsonTransformer, fileStore, s3RequestProvider);
 
         assertThrows(s3Exception.class, ()->handleTransformation.handleRequest(input, context));
 
@@ -155,12 +148,10 @@ class HandleTransformationTest {
                                    @Mock final Transformer1_1<JSON, mappable<List<String>, String, String>> jsonTransformer,
                                    @Mock final mappable<List<String>, String, String>  transformedResult,
                                    @Mock final Storable<S3Object, String, S3FileSaverState> fileStore,
-                                   @Mock final S3RequestProvider s3RequestProvider,
-                                   @Mock final Transformer2_1<Context, S3Object, JSON> s3JSONFileDataTransformer,
-                                   @Mock final JSON json){
+                                   @Mock final S3RequestProvider s3RequestProvider){
 
         when(context.getLogger()).thenReturn(lambdaLogger);
-        when(s3JSONFileDataTransformer.transform(any() ,any())).thenReturn(json);
+        when(fileLoader.retrieve(any())).thenReturn(Optional.of("{}"));
         when(jsonTransformer.transform(any())).thenReturn(transformedResult);
         when(transformedResult.map(any())).thenReturn(Optional.of(List.of("data1", "data2").toString()));
 
@@ -168,7 +159,7 @@ class HandleTransformationTest {
                                                  "Transformation-KeyName", "key");
 
         final HandleTransformation handleTransformation
-                = new HandleTransformation(fileLoader, jsonTransformer, fileStore, s3RequestProvider, s3JSONFileDataTransformer);
+                = new HandleTransformation(fileLoader, jsonTransformer, fileStore, s3RequestProvider);
 
         assertThrows(s3Exception.class, ()->handleTransformation.handleRequest(input, context));
 
@@ -186,12 +177,10 @@ class HandleTransformationTest {
              @Mock final Transformer1_1<JSON, mappable<List<String>, String, String>> jsonTransformer,
              @Mock final mappable<List<String>, String, String>  transformedResult,
              @Mock final Storable<S3Object, String, S3FileSaverState> fileStore,
-             @Mock final S3RequestProvider s3RequestProvider,
-             @Mock final Transformer2_1<Context, S3Object, JSON> s3JSONFileDataTransformer,
-             @Mock final JSON json){
+             @Mock final S3RequestProvider s3RequestProvider){
 
         when(context.getLogger()).thenReturn(lambdaLogger);
-        when(s3JSONFileDataTransformer.transform(any() ,any())).thenReturn(json);
+        when(fileLoader.retrieve(any())).thenReturn(Optional.of("{}"));
 
         when(jsonTransformer.transform(any())).thenReturn(transformedResult);
         when(transformedResult.map(any())).thenReturn(Optional.of(List.of("data1", "data2").toString()));
@@ -201,7 +190,7 @@ class HandleTransformationTest {
                                                  "Transformed-BucketName", "bucket2");
 
         final HandleTransformation handleTransformation
-                = new HandleTransformation(fileLoader, jsonTransformer, fileStore, s3RequestProvider, s3JSONFileDataTransformer);
+                = new HandleTransformation(fileLoader, jsonTransformer, fileStore, s3RequestProvider);
 
         assertThrows(s3Exception.class, ()->handleTransformation.handleRequest(input, context));
 
@@ -219,16 +208,13 @@ class HandleTransformationTest {
              @Mock final Transformer1_1<JSON, mappable<List<String>, String, String>> jsonTransformer,
              @Mock final mappable<List<String>, String, String>  transformedResult,
              @Mock final Storable<S3Object, String, S3FileSaverState> fileStore,
-             @Mock final S3RequestProvider s3RequestProvider,
-             @Mock final Transformer2_1<Context, S3Object, JSON> s3JSONFileDataTransformer,
-             @Mock final JSON json){
+             @Mock final S3RequestProvider s3RequestProvider){
 
         when(context.getLogger()).thenReturn(lambdaLogger);
-        when(s3JSONFileDataTransformer.transform(any() ,any())).thenReturn(json);
-
         when(jsonTransformer.transform(any())).thenReturn(transformedResult);
         when(transformedResult.map(any())).thenReturn(Optional.of(List.of("data1", "data2").toString()));
         when(fileStore.store(any(), any())).thenReturn(new S3FileSaverErrorState("Test Error"));
+        when(fileLoader.retrieve(any())).thenReturn(Optional.of("{}"));
 
         final Map<String, String> input = Map.of(
                 "Transformation-BucketName", "bucket1",
@@ -238,7 +224,7 @@ class HandleTransformationTest {
 
 
         final HandleTransformation handleTransformation
-                = new HandleTransformation(fileLoader, jsonTransformer, fileStore, s3RequestProvider, s3JSONFileDataTransformer);
+                = new HandleTransformation(fileLoader, jsonTransformer, fileStore, s3RequestProvider);
 
         assertThrows(s3Exception.class, ()->handleTransformation.handleRequest(input, context));
 
@@ -256,15 +242,13 @@ class HandleTransformationTest {
              @Mock final Transformer1_1<JSON, mappable<List<String>, String, String>> jsonTransformer,
              @Mock final mappable<List<String>, String, String>  transformedResult,
              @Mock final Storable<S3Object, String, S3FileSaverState> fileStore,
-             @Mock final S3RequestProvider s3RequestProvider,
-             @Mock final Transformer2_1<Context, S3Object, JSON> s3JSONFileDataTransformer,
-             @Mock final JSON json){
+             @Mock final S3RequestProvider s3RequestProvider){
 
         when(context.getLogger()).thenReturn(lambdaLogger);
-        when(s3JSONFileDataTransformer.transform(any() ,any())).thenReturn(json);
         when(jsonTransformer.transform(any())).thenReturn(transformedResult);
         when(transformedResult.map(any())).thenReturn(Optional.of(List.of("data1", "data2").toString()));
         when(fileStore.store(any(), any())).thenReturn(new S3FileSaverOKState());
+        when(fileLoader.retrieve(any())).thenReturn(Optional.of("{}"));
 
         final Map<String, String> input = Map.of(
                 "Transformation-BucketName", "bucket1",
@@ -273,7 +257,7 @@ class HandleTransformationTest {
                 "Transformed-KeyName", "key2");
 
         final HandleTransformation handleTransformation
-                = new HandleTransformation(fileLoader, jsonTransformer, fileStore, s3RequestProvider, s3JSONFileDataTransformer);
+                = new HandleTransformation(fileLoader, jsonTransformer, fileStore, s3RequestProvider);
 
         handleTransformation.handleRequest(input, context);
 

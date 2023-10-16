@@ -37,13 +37,12 @@ public class HandleTransformation implements RequestHandler<Map<String, String>,
     HandleTransformation(final Retrievable<S3Object, Optional<String>> fileLoader,
                          final Transformer1_1<JSON, mappable<List<String>, String, String>> jsonTransformer,
                          final Storable<S3Object, String, S3FileSaverState> fileStore,
-                         final S3RequestProvider s3RequestProvider,
-                         final Transformer2_1<Context, S3Object, JSON> s3JSONFileDataTransformer) {
+                         final S3RequestProvider s3RequestProvider) {
         this.fileLoader = fileLoader;
         this.jsonTransformer = jsonTransformer;
         this.fileStore = fileStore;
         this.s3RequestProvider = s3RequestProvider;
-        this.s3JSONFileDataTransformer = s3JSONFileDataTransformer;
+        this.s3JSONFileDataTransformer = new S3JSONFileDataTransformer(fileLoader);
     }
 
     public HandleTransformation() {

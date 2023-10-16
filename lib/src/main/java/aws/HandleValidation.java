@@ -30,12 +30,11 @@ public class HandleValidation implements RequestHandler<Map<String, String>, Voi
      */
     HandleValidation(final Validator<JSONSchema, JSON, Validation> validator,
                      final Retrievable<S3Object, Optional<String>> fileLoader,
-                     final S3RequestProvider s3RequestProvider,
-                     final Transformer2_1<Context, S3Object, JSON> s3JSONFileDataTransformer){
+                     final S3RequestProvider s3RequestProvider){
         this.validator = validator;
         this.fileLoader = fileLoader;
         this.s3RequestProvider = s3RequestProvider;
-        this.s3JSONFileDataTransformer = s3JSONFileDataTransformer;
+        this.s3JSONFileDataTransformer = new S3JSONFileDataTransformer(fileLoader);
     }
 
     public HandleValidation() {

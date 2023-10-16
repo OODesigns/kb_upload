@@ -30,9 +30,7 @@ public class HandleValidationTest {
                                     @Mock final Context context,
                                     @Mock final LambdaLogger lambdaLogger,
                                     @Mock final Validation validation,
-                                    @Mock final Validator<JSONSchema, JSON, Validation> validator,
-                                    @Mock final Transformer2_1<Context, S3Object, JSON> s3JSONFileDataTransformer,
-                                    @Mock final JSON json) {
+                                    @Mock final Validator<JSONSchema, JSON, Validation> validator) {
 
 
         final Map<String, String> input = Map.of("Validation-BucketName", "bucket",
@@ -40,13 +38,12 @@ public class HandleValidationTest {
 
         when(context.getLogger()).thenReturn(lambdaLogger);
         when(validator.validate(any(),any())).thenReturn(validation);
-        when(s3JSONFileDataTransformer.transform(any() ,any())).thenReturn(json);
 
         when(validation.state()).thenReturn(new ValidatedStateOK());
         when(validation.toString()).thenReturn("ValidatedStateOK");
 
         final RequestHandler<Map<String, String>, Void> requestHandler
-                = new HandleValidation(validator, __-> Optional.of(validJSON), s3RequestProvider, s3JSONFileDataTransformer);
+                = new HandleValidation(validator, __-> Optional.of(validJSON), s3RequestProvider);
 
         requestHandler.handleRequest(input, context);
 
@@ -62,9 +59,7 @@ public class HandleValidationTest {
                                       @Mock final Context context,
                                       @Mock final LambdaLogger lambdaLogger,
                                       @Mock final Validation validation,
-                                      @Mock final Validator<JSONSchema, JSON, Validation> validator,
-                                      @Mock final Transformer2_1<Context, S3Object, JSON> s3JSONFileDataTransformer,
-                                      @Mock final JSON json){
+                                      @Mock final Validator<JSONSchema, JSON, Validation> validator){
 
 
         final Map<String, String> input = Map.of("Validation-BucketName", "bucket",
@@ -72,7 +67,6 @@ public class HandleValidationTest {
 
         when(context.getLogger()).thenReturn(lambdaLogger);
         when(validator.validate(any(),any())).thenReturn(validation);
-        when(s3JSONFileDataTransformer.transform(any() ,any())).thenReturn(json);
 
         final List<String> messages = List.of("message1", "message2");
 
@@ -81,7 +75,7 @@ public class HandleValidationTest {
         when(validation.toString()).thenReturn("ValidatedStateError");
 
         final RequestHandler<Map<String, String>, Void> requestHandler
-                = new HandleValidation(validator, __-> Optional.of(validJSON), s3RequestProvider, s3JSONFileDataTransformer);
+                = new HandleValidation(validator, __-> Optional.of(validJSON), s3RequestProvider);
 
         assertThrows(s3Exception.class, ()->requestHandler.handleRequest(input, context));
 
@@ -100,17 +94,16 @@ public class HandleValidationTest {
     void handleRequestWithValidDataUnableToLoad(
                                     @Mock final S3RequestProvider s3RequestProvider,
                                     @Mock final Context context,
-                                    @Mock final Validator<JSONSchema, JSON, Validation> validator,
-                                    @Mock final Transformer2_1<Context, S3Object, JSON> s3JSONFileDataTransformer) {
+                                    @Mock final LambdaLogger lambdaLogger,
+                                    @Mock final Validator<JSONSchema, JSON, Validation> validator) {
 
 
         final Map<String, String> input = Map.of("Validation-BucketName", "bucket",
                                                  "Validation-KeyName", "key");
-
-        when(s3JSONFileDataTransformer.transform(any() ,any())).thenThrow(s3Exception.class);
+        when(context.getLogger()).thenReturn(lambdaLogger);
 
         final RequestHandler<Map<String, String>, Void> requestHandler
-                = new HandleValidation(validator, __-> Optional.empty(), s3RequestProvider, s3JSONFileDataTransformer);
+                = new HandleValidation(validator, __-> Optional.empty(), s3RequestProvider);
 
         assertThrows(s3Exception.class, ()->requestHandler.handleRequest(input, context));
     }
