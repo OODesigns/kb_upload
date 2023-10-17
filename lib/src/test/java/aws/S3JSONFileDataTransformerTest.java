@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoSettings;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Optional;
@@ -22,11 +23,11 @@ class S3JSONFileDataTransformerTest {
     public void testTransform_successfullyTransforms(
             final @Mock S3Object s3Object,
             final @Mock Retrievable<S3Object, Optional<InputStream>> fileLoaderMock,
-            final @Mock Context context,
-            final @Mock InputStream inputStream) throws IOException {
+            final @Mock Context context){
 
-        when(inputStream.readAllBytes()).thenReturn("{\"key\": \"value\"}".getBytes());
-        when(fileLoaderMock.retrieve(s3Object)).thenReturn(Optional.of(inputStream));
+        final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream("{\"key\": \"value\"}".getBytes());
+
+        when(fileLoaderMock.retrieve(s3Object)).thenReturn(Optional.of(byteArrayInputStream));
 
         final S3JSONFileDataTransformer transformer = new S3JSONFileDataTransformer(fileLoaderMock);
 
