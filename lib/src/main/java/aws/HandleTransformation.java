@@ -88,10 +88,10 @@ public class HandleTransformation implements RequestHandler<Map<String, String>,
     }
 
     private Function<JSON, Optional<ByteArrayOutputStream>> transformData(final Context context) {
-         return json -> jsonTransformer.transform(json)
+         return json -> Optional.ofNullable(jsonTransformer.transform(json)
                  .map(newLineForEachEntry())
-                 .map(transformToStream())
-                 .orElseThrow(()->new s3Exception(context, UNABLE_TO_TRANSFORM_DATA));
+                 .flatMap(transformToStream())
+                 .orElseThrow(() -> new s3Exception(context, UNABLE_TO_TRANSFORM_DATA)));
     }
 
     private static Function<String, Optional<ByteArrayOutputStream>> transformToStream() {

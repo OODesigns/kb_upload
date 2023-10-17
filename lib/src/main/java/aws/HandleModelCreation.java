@@ -18,6 +18,8 @@ public class HandleModelCreation implements RequestHandler<Map<String, String>, 
     private static final String MODEL_INPUT_BUCKET_NAME = "ModelInput-BucketName";
     private static final String MODEL_INPUT_KEY_NAME = "ModelInput-KeyName";
     private static final String MODEL_INPUT = "Model Input";
+    private static final String MODEL = "Model";
+
     private static final String MODEL_BUCKET_NAME = "Model-BucketName";
     private static final String MODEL_KEY_NAME = "Model-KeyName";
     private static final String UNABLE_TO_LOAD_FILE = "Unable to load file from bucket: %s and key: %s";
@@ -30,9 +32,9 @@ public class HandleModelCreation implements RequestHandler<Map<String, String>, 
     private final S3RequestProvider s3RequestProvider;
 
     HandleModelCreation(final Retrievable<S3Object, Optional<InputStream>> fileLoader,
+                        final Transformer1_1<InputStream, Optional<ByteArrayOutputStream>> modelMaker,
                         final Storable<S3Object, ByteArrayOutputStream, S3FileSaverState> fileStore,
-                        final S3RequestProvider s3RequestProvider,
-                        final Transformer1_1<InputStream, Optional<ByteArrayOutputStream>> modelMaker) {
+                        final S3RequestProvider s3RequestProvider) {
         this.fileLoader = fileLoader;
         this.s3RequestProvider = s3RequestProvider;
         this.fileStore = fileStore;
@@ -49,11 +51,11 @@ public class HandleModelCreation implements RequestHandler<Map<String, String>, 
     @Override
     public Void handleRequest(final Map<String, String> input, final Context context) {
         Optional.of(getS3ObjectForModelInput(input, context))
-                .map(createModel(context))
-                .orElseThrow(()->new s3Exception(context, UNABLE_TO_CREATE_A_MODEL))
+                .flatMap(createModel(context))
                 .map(stream -> saveToFile(stream, input, context ));
         return null;
     }
+
 
     private Object saveToFile(final ByteArrayOutputStream stream, final Map<String, String> input, final Context context) {
         Optional.of(getS3ObjectForModel(input, context))
@@ -78,15 +80,21 @@ public class HandleModelCreation implements RequestHandler<Map<String, String>, 
 
     private Function<S3Object, Optional<ByteArrayOutputStream>> createModel(final Context context) {
         return s3Object -> {
-            try (final InputStream dataStream = fileLoader.retrieve(s3Object)
-             .orElseThrow(() -> throwUnableToLoadFile(context, s3Object))) {
+            try (final InputStream dataStream =
+                         fileLoader.retrieve(s3Object)
+                                   .orElseThrow(() -> throwUnableToLoadFile(context, s3Object))) {
 
-             return modelMaker.transform(dataStream);
+             return Optional.ofNullable(modelMaker.transform(dataStream)
+                     .orElseThrow(() -> throwEnableToCreateModel(context)));
 
             } catch (final IOException e) {
                 return Optional.empty();
             }
         };
+    }
+
+    private s3Exception throwEnableToCreateModel(final Context context) {
+        return new s3Exception(context, UNABLE_TO_CREATE_A_MODEL);
     }
 
 
@@ -100,6 +108,6 @@ public class HandleModelCreation implements RequestHandler<Map<String, String>, 
     }
 
     private S3Object getS3ObjectForModel(final Map<String, String> input, final Context context) {
-        return new S3ObjectFactory(input, context, MODEL_BUCKET_NAME, MODEL_KEY_NAME, MODEL_INPUT);
+        return new S3ObjectFactory(input, context, MODEL_BUCKET_NAME, MODEL_KEY_NAME, MODEL);
     }
 }
