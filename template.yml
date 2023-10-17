@@ -7,11 +7,82 @@ Parameters:
     Type: String
     Default: "s3-knowledge-upload"
 
-  OutputBucketName:
+  StagingBucketName:
     Type: String
     Default: "s3-knowledge-staging"
+    
+  ModelBucketName:
+    Type: String
+    Default: "s3-knowledge-model"  
 
 Resources:
+  SourceBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref SourceBucketName
+      NotificationConfiguration:
+        EventBridgeConfiguration:
+          EventBridgeEnabled: True
+
+  S3EventBridgeRule:
+    Type: 'AWS::Events::Rule'
+    Properties:
+      Description: "Event rule for S3 bucket notifications"
+      EventPattern:
+        source:
+          - "aws.s3"
+        detail:
+          eventName:
+            - "PutObject"
+          requestParameters:
+            bucketName:
+              - !Ref SourceBucketName
+      State: "ENABLED"
+      Targets:
+        - Arn: !Ref ChatBotModelCreation
+          Id: "StateMachineTarget"
+          RoleArn: !GetAtt StateMachineTriggerRole.Arn
+          Input:
+            Fn::Sub:
+              '{"detail": {"requestParameters": {"bucketName": "${SourceBucketName}", "key": "${!input.detail.requestParameters.key}"}}}'
+
+  StateMachineTriggerRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - events.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: "StateMachineTriggerPolicy"
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - states:StartExecution
+                Resource: !Ref ChatBotModelCreation
+
+
+  BucketEventBridgePolicy:
+    Type: 'AWS::S3::BucketPolicy'
+    Properties:
+      Bucket: !Ref SourceBucketName
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - "events.amazonaws.com"
+            Action: "sts:AssumeRole"
+            Resource: "*"
+
+
   ValidationFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
@@ -48,12 +119,12 @@ Resources:
         - AWSLambda_ReadOnlyAccess
         - AWSLambdaVPCAccessExecutionRole
         - S3WritePolicy:
-            BucketName: !Ref OutputBucketName
+            BucketName: !Ref StagingBucketName
         - S3ReadPolicy:
             BucketName: !Ref SourceBucketName
       Tracing: PassThrough
 
-  S3WritePolicy:
+  S3StagingWritePolicy:
     Type: AWS::IAM::ManagedPolicy
     Properties:
       PolicyDocument:
@@ -62,146 +133,107 @@ Resources:
           - Effect: Allow
             Action: s3:PutObject
             Resource:
-              Fn::Sub: arn:aws:s3:::${OutputBucketName}/*
+              Fn::Sub: arn:aws:s3:::${StagingBucketName}/*
 
-  StepFunctionsExecutionRole:
-    Type: "AWS::IAM::Role"
+  ModelFunction:
+    Type: AWS::Serverless::Function
     Properties:
-      AssumeRolePolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: "Allow"
-            Principal:
-              Service:
-                - "states.amazonaws.com"
-            Action:
-              - "sts:AssumeRole"
+      CodeUri: lib/build/distributions/lib.zip
+      Handler: aws.HandleModelCreation
+      Runtime: java17
+      Description: Java function for Model Creation
+      MemorySize: 2048
+      Timeout: 10
       Policies:
-        - PolicyName: "InvokeLambdaPolicy"
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              - Effect: "Allow"
-                Action:
-                  - "lambda:InvokeFunction"
-                Resource:
-                  - !GetAtt ValidationFunction.Arn
-                  - !GetAtt TransformationFunction.Arn
+        - AWSLambdaBasicExecutionRole
+        - AWSLambda_ReadOnlyAccess
+        - AWSLambdaVPCAccessExecutionRole
+        - S3WritePolicy:
+            BucketName: !Ref ModelBucketName
+        - S3ReadPolicy:
+            BucketName: !Ref StagingBucketName
+      Tracing: PassThrough
 
-  ChatbotDefinitionStateMachine:
-    Type: "AWS::StepFunctions::StateMachine"
+  S3ModelWritePolicy:
+    Type: AWS::IAM::ManagedPolicy
     Properties:
-      DefinitionString: !Sub |
-        {
-          "Comment": "A state machine that validates and then transforms a chatbot file.",
-          "StartAt": "Validate",
-          "States": {
-            "Validate": {
-              "Type": "Task",
-              "Resource": "${ValidationFunction.Arn}",
-              "Next": "Transform"
-               "Parameters": {
-                 "Validation-BucketName": "$.detail.requestParameters.bucketName",
-                 "Validation-KeyName": "$.detail.requestParameters.key"
-                }
-            },
-            "Transform": {
-              "Type": "Task",
-              "Resource": "${TransformationFunction.Arn}",
-              "Parameters": {
-                "Transformation-BucketName": "${SourceBucketName}",
-                "Transformation-KeyName": "knowledge.json",
-                "Transformed-BucketName": "${OutputBucketName}",
-                "Transformed-KeyName": "cat.txt"
-              },
-              "End": true
-            }
-          }
-        }
-      RoleArn: !GetAtt StepFunctionsExecutionRole.Arn
-
-  StateMachineTriggerRule:
-    Type: "AWS::Events::Rule"
-    Properties:
-      Description: "Trigger state machine when a new file is uploaded to s3-knowledge-upload"
-      EventPattern:
-        source:
-          - "aws.s3"
-        detail-type:
-          - "AWS API Call via CloudTrail"
-        detail:
-          eventName:
-            - "PutObject"
-          requestParameters:
-            bucketName:
-              - !Ref SourceBucketName
-      State: "ENABLED"
-      Targets:
-        - Arn: !Ref ChatbotDefinitionStateMachine
-          Id: "StateMachineTarget"
-          RoleArn: !GetAtt EventBridgeExecutionRole.Arn
-
-  EventBridgeExecutionRole:
-    Type: "AWS::IAM::Role"
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: "Allow"
-            Principal:
-              Service:
-                - "events.amazonaws.com"
-            Action:
-              - "sts:AssumeRole"
-      Policies:
-        - PolicyName: "StartStateMachinePolicy"
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              - Effect: "Allow"
-                Action: "states:StartExecution"
-                Resource: !Ref ChatbotDefinitionStateMachine
-
-  TrailBucket:
-    Type: "AWS::S3::Bucket"
-    DeletionPolicy: Retain
-
-  CloudTrailForS3:
-    Type: "AWS::CloudTrail::Trail"
-    DependsOn: TrailBucket
-    Properties:
-      S3BucketName: !Ref TrailBucket
-      IsLogging: true
-      EventSelectors:
-        - DataResources:
-            - Type: "AWS::S3::Object"
-              Values:
-                - !Sub "${SourceBucketName}/"
-          IncludeManagementEvents: false
-          ReadWriteType: Write
-
-  TrailBucketPolicy:
-    Type: "AWS::S3::BucketPolicy"
-    Properties:
-      Bucket: !Ref TrailBucket
       PolicyDocument:
         Version: '2012-10-17'
         Statement:
-          - Sid: "AWSCloudTrailAclCheck"
-            Effect: "Allow"
+          - Effect: Allow
+            Action: s3:PutObject
+            Resource:
+              Fn::Sub: arn:aws:s3:::${ModelBucketName}/*
+
+  ChatBotModelCreation:
+    Type: AWS::StepFunctions::StateMachine
+    Properties:
+      DefinitionString:
+        Fn::Sub: |-
+          {
+            "Comment": "A state machine that validates, transforms and creates a chatbot cat model.",
+            "StartAt": "Validation",
+            "States": {
+              "Validation": {
+                "Type": "Task",
+                "Resource": "${ValidationFunction.Arn}",
+                "Next": "Transformation"
+                "Parameters": {
+                  "Validation-BucketName": "${SourceBucketName}",
+                  "Validation-KeyName": "knowledge.json",
+                }          
+              },
+              "Transformation": {
+                "Type": "Task",
+                "Resource": "${TransformationFunction.Arn}",
+                "Next": "ModelCreation"
+                "Parameters": {
+                  "Transformation-BucketName": "${SourceBucketName}",
+                  "Transformation-KeyName": "knowledge.json",
+                  "Transformed-BucketName": "${StagingBucketName}",
+                  "Transformed-KeyName": "cat.txt"
+                },          
+              },
+              "ModelCreation": {
+                "Type": "Task",
+                "Resource": "${ModelFunction.Arn}",
+                "End": true
+                "Parameters": {
+                  "ModelInput-BucketName": "${StagingBucketName}",
+                  "ModelInput-KeyName": "cat.txt",
+                  "Model-BucketName": "${ModelBucketName}",
+                  "Model-KeyName": "cat.bin"
+                },          
+              }
+            }
+          }
+      RoleArn:
+        Fn::GetAtt: [ StateMachineExecutionRole, Arn ]
+
+  StateMachineExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
             Principal:
-              Service: "cloudtrail.amazonaws.com"
-            Action: "s3:GetBucketAcl"
-            Resource: !GetAtt TrailBucket.Arn
-          - Sid: "AWSCloudTrailWrite"
-            Effect: "Allow"
-            Principal:
-              Service: "cloudtrail.amazonaws.com"
-            Action: "s3:PutObject"
-            Resource: !Sub "${TrailBucket.Arn}/AWSLogs/${AWS::AccountId}/*"
-            Condition:
-              StringEquals:
-                "s3:x-amz-acl": "bucket-owner-full-control"
+              Service:
+                - states.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: InvokeLambdaPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - lambda:InvokeFunction
+                Resource:
+                  - !GetAtt ValidationFunction.Arn
+                  - !GetAtt TransformationFunction.Arn
+                  - !GetAtt ModelFunction.Arn
+
 
 Outputs:
   ValidationLambdaFunctionArn:
@@ -212,9 +244,14 @@ Outputs:
     Description: "ARN of the Transformation Lambda function"
     Value: !GetAtt TransformationFunction.Arn
 
+  ModelFunctionLambdaFunctionArn:
+    Description: "ARN of the Model Lambda function"
+    Value: !GetAtt ModelFunction.Arn
+
   StateMachineArn:
-    Description: "ARN of the state machine"
-    Value: !Ref ChatbotDefinitionStateMachine
+    Description: "ARN of the ChatBot Model Creation"
+    Value: !GetAtt ChatBotModelCreation.Arn
+
 
 
 
