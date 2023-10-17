@@ -4,11 +4,9 @@ import org.junit.jupiter.api.Test;
 import org.mockito.junit.jupiter.MockitoSettings;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -19,16 +17,30 @@ import static org.mockito.Mockito.when;
 @MockitoSettings
 class ModelMakerTest {
 
+
     @Test
-    public void testTransformWithValidInput() {
-        // Create a mock input that simulates a valid input stream for training.
-        final String data = "Category1 This is sample training data.\nCategory2 This is another sample.";
-        final InputStream inputStream = new ByteArrayInputStream(data.getBytes(StandardCharsets.UTF_8));
+    public void testTransformWithINValidFileBadCatInput() {
+        final FileLoader fileLoader = new FileLoader("badcat.txt");
+        final InputStream inputStream = new ByteArrayInputStream(fileLoader.toString().getBytes(StandardCharsets.UTF_8));
 
         final ModelMaker modelMaker = new ModelMaker();
-        final Optional<ByteArrayOutputStream> result = modelMaker.transform(inputStream);
+        final ModelMakerResult transform = modelMaker.transform(inputStream);
 
-        assertThat(result).isPresent();
+        assertThat(transform.modelMakerState()).isInstanceOf(ModelMakerStateError.class);
+    }
+
+
+    @Test
+    public void testTransformWithValidInput() {
+        final FileLoader fileLoader = new FileLoader("cat.txt");
+
+        final InputStream inputStream = new ByteArrayInputStream(fileLoader.toString().getBytes(StandardCharsets.UTF_8));
+
+        final ModelMaker modelMaker = new ModelMaker();
+        final ModelMakerResult transform = modelMaker.transform(inputStream);
+
+        assertThat(transform.modelMakerState()).isInstanceOf(ModelMakerStateOK.class);
+        assertThat(transform.outputStream()).isNotNull();
     }
 
     @Test
@@ -38,10 +50,11 @@ class ModelMakerTest {
         final InputStream inputStream = new ByteArrayInputStream(data.getBytes(StandardCharsets.UTF_8));
 
         final ModelMaker modelMaker = new ModelMaker();
-        final Optional<ByteArrayOutputStream> result = modelMaker.transform(inputStream);
+        final ModelMakerResult transform = modelMaker.transform(inputStream);
 
         // In this example, we assume it would return an empty Optional.
-        assertThat(result).isEmpty();
+        assertThat(transform.modelMakerState()).isInstanceOf(ModelMakerStateError.class);
+        assertThat(transform.outputStream()).isNull();
     }
 
     @Test
@@ -51,20 +64,24 @@ class ModelMakerTest {
         final InputStream inputStream = new ByteArrayInputStream(data.getBytes(StandardCharsets.UTF_8));
 
         final ModelMaker modelMaker = new ModelMaker();
-        final Optional<ByteArrayOutputStream> result = modelMaker.transform(inputStream);
+        final ModelMakerResult transform = modelMaker.transform(inputStream);
 
         // Again, adjust based on expected behavior with empty input. Assuming it returns an empty Optional.
-        assertThat(result).isEmpty();
+        assertThat(transform.modelMakerState()).isInstanceOf(ModelMakerStateError.class);
+        assertThat(transform.outputStream()).isNull();
     }
 
     @Test
     public void testTransformWithException() throws Exception {
-        final InputStream mockStream = mock(InputStream.class);
-        when(mockStream.read(any(), anyInt(), anyInt())).thenThrow(new IOException("Forced exception"));
+        try(final InputStream mockStream = mock(InputStream.class)) {
 
-        final ModelMaker modelMaker = new ModelMaker();
-        final Optional<ByteArrayOutputStream> result = modelMaker.transform(mockStream);
+            when(mockStream.read(any(), anyInt(), anyInt())).thenThrow(new IOException("Forced exception"));
 
-        assertThat(result).isEmpty();
+            final ModelMaker modelMaker = new ModelMaker();
+            final ModelMakerResult transform = modelMaker.transform(mockStream);
+
+            assertThat(transform.modelMakerState()).isInstanceOf(ModelMakerStateError.class);
+            assertThat(transform.outputStream()).isNull();
+        }
     }
 }

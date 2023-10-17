@@ -20,19 +20,21 @@ public class HandleModelCreation implements RequestHandler<Map<String, String>, 
     private static final String MODEL_INPUT = "Model Input";
     private static final String MODEL = "Model";
 
+    private static final String RESULT = "RESULT: %s";
+
     private static final String MODEL_BUCKET_NAME = "Model-BucketName";
     private static final String MODEL_KEY_NAME = "Model-KeyName";
     private static final String UNABLE_TO_LOAD_FILE = "Unable to load file from bucket: %s and key: %s";
-    public static final String UNABLE_TO_CREATE_A_MODEL = "Unable To create a model";
+    public static final String UNABLE_TO_CREATE_A_MODEL = "Unable To create a model: %s";
     private static final String ERROR_UNABLE_TO_SAVE_MODEL_FILE = "Error unable to save model file: %s";
     private static final String OK_RESULT = "RESULT S3FileSaverOKState: Model Created";
     private final Retrievable<S3Object, Optional<InputStream>> fileLoader;
     private final Storable<S3Object, ByteArrayOutputStream, S3FileSaverState> fileStore;
-    private final Transformer1_1<InputStream, Optional<ByteArrayOutputStream>> modelMaker;
+    private final Transformer1_1<InputStream, ModelMakerResult> modelMaker;
     private final S3RequestProvider s3RequestProvider;
 
     HandleModelCreation(final Retrievable<S3Object, Optional<InputStream>> fileLoader,
-                        final Transformer1_1<InputStream, Optional<ByteArrayOutputStream>> modelMaker,
+                        final Transformer1_1<InputStream, ModelMakerResult> modelMaker,
                         final Storable<S3Object, ByteArrayOutputStream, S3FileSaverState> fileStore,
                         final S3RequestProvider s3RequestProvider) {
         this.fileLoader = fileLoader;
@@ -84,19 +86,27 @@ public class HandleModelCreation implements RequestHandler<Map<String, String>, 
                          fileLoader.retrieve(s3Object)
                                    .orElseThrow(() -> throwUnableToLoadFile(context, s3Object))) {
 
-             return Optional.ofNullable(modelMaker.transform(dataStream)
-                     .orElseThrow(() -> throwEnableToCreateModel(context)));
+                return modelMaker.transform(dataStream)
+                        .map(logResult(context))
+                        .throwOrReturn(t -> throwEnableToCreateModel(context, t));
 
             } catch (final IOException e) {
+                log(context, e.getMessage());
                 return Optional.empty();
             }
         };
     }
-
-    private s3Exception throwEnableToCreateModel(final Context context) {
-        return new s3Exception(context, UNABLE_TO_CREATE_A_MODEL);
+    private Function<ModelMakerResult, ModelMakerResult> logResult(final Context context) {
+        return v -> { log(context, v.Message()); return v; };
     }
 
+    private void log(final Context context, final String messages) {
+        context.getLogger().log(String.format(RESULT, messages));
+    }
+
+    private void throwEnableToCreateModel(final Context context, final ModelMakerResult modelMakerResult) {
+        throw new s3Exception(context, String.format(UNABLE_TO_CREATE_A_MODEL, modelMakerResult.Message()));
+    }
 
     private s3Exception throwUnableToLoadFile(final Context context, final S3Object s3Object) {
         return new s3Exception(context, String.format(UNABLE_TO_LOAD_FILE,

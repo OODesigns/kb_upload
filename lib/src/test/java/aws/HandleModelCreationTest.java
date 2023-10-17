@@ -2,8 +2,7 @@ package aws;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
-import kb_upload.Storable;
-import kb_upload.Transformer1_1;
+import kb_upload.*;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
@@ -29,7 +28,7 @@ class HandleModelCreationTest {
              @Mock final LambdaLogger lambdaLogger,
              @Mock final Storable<S3Object, ByteArrayOutputStream, S3FileSaverState> fileStore,
              @Mock final S3RequestProvider s3RequestProvider,
-             @Mock final Transformer1_1<InputStream, Optional<ByteArrayOutputStream>> modelMaker){
+             @Mock final Transformer1_1<InputStream, ModelMakerResult> modelMaker){
 
         when(context.getLogger()).thenReturn(lambdaLogger);
 
@@ -54,7 +53,7 @@ class HandleModelCreationTest {
              @Mock final LambdaLogger lambdaLogger,
              @Mock final Storable<S3Object, ByteArrayOutputStream, S3FileSaverState> fileStore,
              @Mock final S3RequestProvider s3RequestProvider,
-             @Mock final Transformer1_1<InputStream, Optional<ByteArrayOutputStream>> modelMaker){
+             @Mock final Transformer1_1<InputStream, ModelMakerResult> modelMaker){
 
         when(context.getLogger()).thenReturn(lambdaLogger);
 
@@ -82,7 +81,7 @@ class HandleModelCreationTest {
              @Mock final LambdaLogger lambdaLogger,
              @Mock final Storable<S3Object, ByteArrayOutputStream, S3FileSaverState> fileStore,
              @Mock final S3RequestProvider s3RequestProvider,
-             @Mock final Transformer1_1<InputStream, Optional<ByteArrayOutputStream>> modelMaker){
+             @Mock final Transformer1_1<InputStream, ModelMakerResult> modelMaker){
 
         when(context.getLogger()).thenReturn(lambdaLogger);
 
@@ -110,7 +109,7 @@ class HandleModelCreationTest {
              @Mock final LambdaLogger lambdaLogger,
              @Mock final Storable<S3Object, ByteArrayOutputStream, S3FileSaverState> fileStore,
              @Mock final S3RequestProvider s3RequestProvider,
-             @Mock final Transformer1_1<InputStream, Optional<ByteArrayOutputStream>> modelMaker){
+             @Mock final Transformer1_1<InputStream, ModelMakerResult> modelMaker){
 
         when(context.getLogger()).thenReturn(lambdaLogger);
 
@@ -138,10 +137,15 @@ class HandleModelCreationTest {
              @Mock final LambdaLogger lambdaLogger,
              @Mock final Storable<S3Object, ByteArrayOutputStream, S3FileSaverState> fileStore,
              @Mock final S3RequestProvider s3RequestProvider,
-             @Mock final Transformer1_1<InputStream, Optional<ByteArrayOutputStream>> modelMaker){
+             @Mock final Transformer1_1<InputStream, ModelMakerResult> modelMaker){
+
+        final ModelMakerResult modelMakerResult
+                = new ModelMakerResult(new ModelMakerStateError(),
+                                      "Error Message",
+                                      null);
 
         when(context.getLogger()).thenReturn(lambdaLogger);
-        when(modelMaker.transform(any())).thenReturn(Optional.empty());
+        when(modelMaker.transform(any())).thenReturn(modelMakerResult);
 
         final Map<String, String> input = Map.of(
                 "ModelInput-BucketName", "bucket1",
@@ -157,7 +161,7 @@ class HandleModelCreationTest {
         assertThrows(s3Exception.class, ()->handleModelCreation.handleRequest(input, context));
 
         final ArgumentCaptor<String> logData = ArgumentCaptor.forClass(String.class);
-        verify(lambdaLogger, times(1)).log(logData.capture());
+        verify(lambdaLogger, times(2)).log(logData.capture());
 
         assertThat(logData.getValue()).contains("Unable To create a model");
     }
@@ -168,11 +172,17 @@ class HandleModelCreationTest {
              @Mock final LambdaLogger lambdaLogger,
              @Mock final Storable<S3Object, ByteArrayOutputStream, S3FileSaverState> fileStore,
              @Mock final S3RequestProvider s3RequestProvider,
-             @Mock final Transformer1_1<InputStream, Optional<ByteArrayOutputStream>> modelMaker,
+             @Mock final Transformer1_1<InputStream, ModelMakerResult> modelMaker,
              @Mock final ByteArrayOutputStream outputStream){
 
         when(context.getLogger()).thenReturn(lambdaLogger);
-        when(modelMaker.transform(any())).thenReturn(Optional.of(outputStream));
+
+        final ModelMakerResult modelMakerResult
+                = new ModelMakerResult(new ModelMakerStateOK(),
+                "Model Created",
+                outputStream);
+
+        when(modelMaker.transform(any())).thenReturn(modelMakerResult);
 
         final Map<String, String> input = Map.of(
                 "ModelInput-BucketName", "bucket1",
@@ -188,7 +198,7 @@ class HandleModelCreationTest {
         assertThrows(s3Exception.class, ()->handleModelCreation.handleRequest(input, context));
 
         final ArgumentCaptor<String> logData = ArgumentCaptor.forClass(String.class);
-        verify(lambdaLogger, times(1)).log(logData.capture());
+        verify(lambdaLogger, times(2)).log(logData.capture());
 
         assertThat(logData.getValue()).contains("Bucket name for Model file is missing");
     }
@@ -198,11 +208,16 @@ class HandleModelCreationTest {
              @Mock final LambdaLogger lambdaLogger,
              @Mock final Storable<S3Object, ByteArrayOutputStream, S3FileSaverState> fileStore,
              @Mock final S3RequestProvider s3RequestProvider,
-             @Mock final Transformer1_1<InputStream, Optional<ByteArrayOutputStream>> modelMaker,
+             @Mock final Transformer1_1<InputStream, ModelMakerResult> modelMaker,
              @Mock final ByteArrayOutputStream outputStream){
 
+        final ModelMakerResult modelMakerResult
+                = new ModelMakerResult(new ModelMakerStateOK(),
+                "Model Created",
+                outputStream);
+
         when(context.getLogger()).thenReturn(lambdaLogger);
-        when(modelMaker.transform(any())).thenReturn(Optional.of(outputStream));
+        when(modelMaker.transform(any())).thenReturn(modelMakerResult);
 
         final Map<String, String> input = Map.of(
                 "ModelInput-BucketName", "bucket1",
@@ -219,7 +234,7 @@ class HandleModelCreationTest {
         assertThrows(s3Exception.class, ()->handleModelCreation.handleRequest(input, context));
 
         final ArgumentCaptor<String> logData = ArgumentCaptor.forClass(String.class);
-        verify(lambdaLogger, times(1)).log(logData.capture());
+        verify(lambdaLogger, times(2)).log(logData.capture());
 
         assertThat(logData.getValue()).contains("Key name for Model file is missing");
     }
@@ -230,12 +245,17 @@ class HandleModelCreationTest {
              @Mock final LambdaLogger lambdaLogger,
              @Mock final Storable<S3Object, ByteArrayOutputStream, S3FileSaverState> fileStore,
              @Mock final S3RequestProvider s3RequestProvider,
-             @Mock final Transformer1_1<InputStream, Optional<ByteArrayOutputStream>> modelMaker,
+             @Mock final Transformer1_1<InputStream, ModelMakerResult> modelMaker,
              @Mock final ByteArrayOutputStream outputStream){
+
+        final ModelMakerResult modelMakerResult
+                = new ModelMakerResult(new ModelMakerStateOK(),
+                "Model Created",
+                outputStream);
 
         when(context.getLogger()).thenReturn(lambdaLogger);
         when(fileStore.store(any(), any())).thenReturn(new S3FileSaverErrorState("Test Error"));
-        when(modelMaker.transform(any())).thenReturn(Optional.of(outputStream));
+        when(modelMaker.transform(any())).thenReturn(modelMakerResult);
 
         final Map<String, String> input = Map.of(
                 "ModelInput-BucketName", "bucket1",
@@ -256,7 +276,7 @@ class HandleModelCreationTest {
         final ArgumentCaptor<String> logData = ArgumentCaptor.forClass(String.class);
 
         verify(fileStore, times(1)).store(any(), data.capture());
-        verify(lambdaLogger, times(1)).log(logData.capture());
+        verify(lambdaLogger, times(2)).log(logData.capture());
 
         assertThat(logData.getValue()).contains("Test Error");
     }
@@ -266,12 +286,18 @@ class HandleModelCreationTest {
              @Mock final LambdaLogger lambdaLogger,
              @Mock final Storable<S3Object, ByteArrayOutputStream, S3FileSaverState> fileStore,
              @Mock final S3RequestProvider s3RequestProvider,
-             @Mock final Transformer1_1<InputStream, Optional<ByteArrayOutputStream>> modelMaker,
+             @Mock final Transformer1_1<InputStream, ModelMakerResult> modelMaker,
              @Mock final ByteArrayOutputStream outputStream){
+
+
+        final ModelMakerResult modelMakerResult
+                = new ModelMakerResult(new ModelMakerStateOK(),
+                "Model Created",
+                outputStream);
 
         when(context.getLogger()).thenReturn(lambdaLogger);
         when(fileStore.store(any(), any())).thenReturn(new S3FileSaverOKState());
-        when(modelMaker.transform(any())).thenReturn(Optional.of(outputStream));
+        when(modelMaker.transform(any())).thenReturn(modelMakerResult);
 
         final Map<String, String> input = Map.of(
                 "ModelInput-BucketName", "bucket1",
@@ -292,7 +318,7 @@ class HandleModelCreationTest {
         final ArgumentCaptor<String> logData = ArgumentCaptor.forClass(String.class);
 
         verify(fileStore, times(1)).store(any(), data.capture());
-        verify(lambdaLogger, times(1)).log(logData.capture());
+        verify(lambdaLogger, times(2)).log(logData.capture());
 
         assertThat(logData.getValue()).contains("Model Created");
     }

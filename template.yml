@@ -16,21 +16,16 @@ Parameters:
     Default: "s3-knowledge-model"  
 
 Resources:
-  SourceBucket:
-    Type: AWS::S3::Bucket
-    Properties:
-      BucketName: !Ref SourceBucketName
-      NotificationConfiguration:
-        EventBridgeConfiguration:
-          EventBridgeEnabled: True
-
   S3EventBridgeRule:
     Type: 'AWS::Events::Rule'
     Properties:
+      Name: S3ModelCreateTrigger
       Description: "Event rule for S3 bucket notifications"
       EventPattern:
         source:
           - "aws.s3"
+        detail-type:
+          - Object Created
         detail:
           eventName:
             - "PutObject"
@@ -42,9 +37,6 @@ Resources:
         - Arn: !Ref ChatBotModelCreation
           Id: "StateMachineTarget"
           RoleArn: !GetAtt StateMachineTriggerRole.Arn
-          Input:
-            Fn::Sub:
-              '{"detail": {"requestParameters": {"bucketName": "${SourceBucketName}", "key": "${!input.detail.requestParameters.key}"}}}'
 
   StateMachineTriggerRole:
     Type: 'AWS::IAM::Role'
@@ -66,22 +58,6 @@ Resources:
                 Action:
                   - states:StartExecution
                 Resource: !Ref ChatBotModelCreation
-
-
-  BucketEventBridgePolicy:
-    Type: 'AWS::S3::BucketPolicy'
-    Properties:
-      Bucket: !Ref SourceBucketName
-      PolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service:
-                - "events.amazonaws.com"
-            Action: "sts:AssumeRole"
-            Resource: "*"
-
 
   ValidationFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
@@ -171,41 +147,41 @@ Resources:
       DefinitionString:
         Fn::Sub: |-
           {
-            "Comment": "A state machine that validates, transforms and creates a chatbot cat model.",
-            "StartAt": "Validation",
-            "States": {
-              "Validation": {
-                "Type": "Task",
-                "Resource": "${ValidationFunction.Arn}",
-                "Next": "Transformation"
-                "Parameters": {
-                  "Validation-BucketName": "${SourceBucketName}",
-                  "Validation-KeyName": "knowledge.json",
-                }          
-              },
-              "Transformation": {
-                "Type": "Task",
-                "Resource": "${TransformationFunction.Arn}",
-                "Next": "ModelCreation"
-                "Parameters": {
-                  "Transformation-BucketName": "${SourceBucketName}",
-                  "Transformation-KeyName": "knowledge.json",
-                  "Transformed-BucketName": "${StagingBucketName}",
-                  "Transformed-KeyName": "cat.txt"
-                },          
-              },
-              "ModelCreation": {
-                "Type": "Task",
-                "Resource": "${ModelFunction.Arn}",
-                "End": true
-                "Parameters": {
-                  "ModelInput-BucketName": "${StagingBucketName}",
-                  "ModelInput-KeyName": "cat.txt",
-                  "Model-BucketName": "${ModelBucketName}",
-                  "Model-KeyName": "cat.bin"
-                },          
-              }
-            }
+          	"Comment": "A state machine that validates, transforms and creates a chatbot cat model.",
+          	"StartAt": "Validation",
+          	"States": {
+          		"Validation": {
+          			"Type": "Task",
+          			"Resource": "${ValidationFunction.Arn}",
+          			"Next": "Transformation",
+          			"Parameters": {
+          				"Validation-BucketName": "${SourceBucketName}",
+          				"Validation-KeyName": "knowledge.json"
+          			}
+          		},
+          		"Transformation": {
+          			"Type": "Task",
+          			"Resource": "${TransformationFunction.Arn}",
+          			"Next": "ModelCreation",
+          			"Parameters": {
+          				"Transformation-BucketName": "${SourceBucketName}",
+          				"Transformation-KeyName": "knowledge.json",
+          				"Transformed-BucketName": "${StagingBucketName}",
+          				"Transformed-KeyName": "cat.txt"
+                     }
+          		},
+          		"ModelCreation": {
+          			"Type": "Task",
+          			"Resource": "${ModelFunction.Arn}",
+          			"End": true,
+          			"Parameters": {
+          				"ModelInput-BucketName": "${StagingBucketName}",
+          				"ModelInput-KeyName": "cat.txt",
+          				"Model-BucketName": "${ModelBucketName}",
+          				"Model-KeyName": "cat.bin"
+          			}
+          		}
+          	}
           }
       RoleArn:
         Fn::GetAtt: [ StateMachineExecutionRole, Arn ]
