@@ -50,7 +50,7 @@ class S3JSONFileDataTransformerTest {
 
         final S3JSONFileDataTransformer transformer = new S3JSONFileDataTransformer(fileLoaderMock);
 
-        final s3Exception exception = assertThrows(s3Exception.class, () -> transformer.transform(context, s3Object));
+        final AWSS3Exception exception = assertThrows(AWSS3Exception.class, () -> transformer.transform(context, s3Object));
 
         assertEquals("Unable to load file from bucket: sample-bucket and key: sample-key", exception.getMessage());
     }

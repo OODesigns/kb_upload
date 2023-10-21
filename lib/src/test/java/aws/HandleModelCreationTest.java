@@ -39,7 +39,7 @@ class HandleModelCreationTest {
                 fileStore,
                 s3RequestProvider);
 
-        assertThrows(s3Exception.class, ()->handleModelCreation.handleRequest(null, context));
+        assertThrows(AWSS3Exception.class, ()->handleModelCreation.handleRequest(null, context));
 
         final ArgumentCaptor<String> logData = ArgumentCaptor.forClass(String.class);
         verify(lambdaLogger, times(1)).log(logData.capture());
@@ -67,7 +67,7 @@ class HandleModelCreationTest {
                 fileStore,
                 s3RequestProvider);
 
-        assertThrows(s3Exception.class, ()->handleModelCreation.handleRequest(input, context));
+        assertThrows(AWSS3Exception.class, ()->handleModelCreation.handleRequest(input, context));
 
         final ArgumentCaptor<String> logData = ArgumentCaptor.forClass(String.class);
         verify(lambdaLogger, times(1)).log(logData.capture());
@@ -95,7 +95,7 @@ class HandleModelCreationTest {
                 fileStore,
                 s3RequestProvider);
 
-        assertThrows(s3Exception.class, ()->handleModelCreation.handleRequest(input, context));
+        assertThrows(AWSS3Exception.class, ()->handleModelCreation.handleRequest(input, context));
 
         final ArgumentCaptor<String> logData = ArgumentCaptor.forClass(String.class);
         verify(lambdaLogger, times(1)).log(logData.capture());
@@ -123,7 +123,7 @@ class HandleModelCreationTest {
                 fileStore,
                 s3RequestProvider);
 
-        assertThrows(s3Exception.class, ()->handleModelCreation.handleRequest(input, context));
+        assertThrows(AWSS3Exception.class, ()->handleModelCreation.handleRequest(input, context));
 
         final ArgumentCaptor<String> logData = ArgumentCaptor.forClass(String.class);
         verify(lambdaLogger, times(1)).log(logData.capture());
@@ -158,7 +158,7 @@ class HandleModelCreationTest {
                 fileStore,
                 s3RequestProvider);
 
-        assertThrows(s3Exception.class, ()->handleModelCreation.handleRequest(input, context));
+        assertThrows(AWSS3Exception.class, ()->handleModelCreation.handleRequest(input, context));
 
         final ArgumentCaptor<String> logData = ArgumentCaptor.forClass(String.class);
         verify(lambdaLogger, times(2)).log(logData.capture());
@@ -195,7 +195,7 @@ class HandleModelCreationTest {
                 fileStore,
                 s3RequestProvider);
 
-        assertThrows(s3Exception.class, ()->handleModelCreation.handleRequest(input, context));
+        assertThrows(AWSS3Exception.class, ()->handleModelCreation.handleRequest(input, context));
 
         final ArgumentCaptor<String> logData = ArgumentCaptor.forClass(String.class);
         verify(lambdaLogger, times(2)).log(logData.capture());
@@ -231,7 +231,7 @@ class HandleModelCreationTest {
                 fileStore,
                 s3RequestProvider);
 
-        assertThrows(s3Exception.class, ()->handleModelCreation.handleRequest(input, context));
+        assertThrows(AWSS3Exception.class, ()->handleModelCreation.handleRequest(input, context));
 
         final ArgumentCaptor<String> logData = ArgumentCaptor.forClass(String.class);
         verify(lambdaLogger, times(2)).log(logData.capture());
@@ -270,7 +270,7 @@ class HandleModelCreationTest {
                 fileStore,
                 s3RequestProvider);
 
-        assertThrows(s3Exception.class, ()->handleModelCreation.handleRequest(input, context));
+        assertThrows(AWSS3Exception.class, ()->handleModelCreation.handleRequest(input, context));
 
         final ArgumentCaptor<ByteArrayOutputStream> data = ArgumentCaptor.forClass(ByteArrayOutputStream.class);
         final ArgumentCaptor<String> logData = ArgumentCaptor.forClass(String.class);
@@ -339,7 +339,7 @@ class HandleModelCreationTest {
         final HandleModelCreation handleModelCreation
                 = new HandleModelCreation();
 
-        assertThrows(s3Exception.class, ()-> handleModelCreation.handleRequest(input, context));
+        assertThrows(AWSS3Exception.class, ()-> handleModelCreation.handleRequest(input, context));
     }
 
 }

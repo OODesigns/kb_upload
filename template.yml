@@ -21,18 +21,16 @@ Resources:
     Properties:
       Name: S3ModelCreateTrigger
       Description: "Event rule for S3 bucket notifications"
+      EventBusName: default
       EventPattern:
         source:
-          - "aws.s3"
+          - aws.s3
         detail-type:
           - Object Created
         detail:
-          eventName:
-            - "PutObject"
-          requestParameters:
-            bucketName:
+          bucket:
+            name:
               - !Ref SourceBucketName
-      State: "ENABLED"
       Targets:
         - Arn: !Ref ChatBotModelCreation
           Id: "StateMachineTarget"

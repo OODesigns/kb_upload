@@ -71,7 +71,7 @@ public class HandleModelCreation implements RequestHandler<Map<String, String>, 
 
     private static Consumer<S3FileSaverState> throwSaveException(final Context context) {
         return error -> {
-            throw new s3Exception(context,
+            throw new AWSS3Exception(context,
                     String.format(ERROR_UNABLE_TO_SAVE_MODEL_FILE, error));
         };
     }
@@ -105,11 +105,11 @@ public class HandleModelCreation implements RequestHandler<Map<String, String>, 
     }
 
     private void throwEnableToCreateModel(final Context context, final ModelMakerResult modelMakerResult) {
-        throw new s3Exception(context, String.format(UNABLE_TO_CREATE_A_MODEL, modelMakerResult.Message()));
+        throw new AWSS3Exception(context, String.format(UNABLE_TO_CREATE_A_MODEL, modelMakerResult.Message()));
     }
 
-    private s3Exception throwUnableToLoadFile(final Context context, final S3Object s3Object) {
-        return new s3Exception(context, String.format(UNABLE_TO_LOAD_FILE,
+    private AWSS3Exception throwUnableToLoadFile(final Context context, final S3Object s3Object) {
+        return new AWSS3Exception(context, String.format(UNABLE_TO_LOAD_FILE,
                 s3Object.getBucketName(), s3Object.getKeyName()));
     }
 

@@ -83,7 +83,7 @@ public class HandleValidationTest {
                 __-> Optional.of(new ByteArrayInputStream(validJSON.getBytes())),
                 s3RequestProvider);
 
-        assertThrows(s3Exception.class, ()->requestHandler.handleRequest(input, context));
+        assertThrows(AWSS3Exception.class, ()->requestHandler.handleRequest(input, context));
 
         final ArgumentCaptor<String> logData = ArgumentCaptor.forClass(String.class);
         verify(lambdaLogger, times(2)).log(logData.capture());
@@ -111,7 +111,7 @@ public class HandleValidationTest {
         final RequestHandler<Map<String, String>, Void> requestHandler
                 = new HandleValidation(validator, __-> Optional.empty(), s3RequestProvider);
 
-        assertThrows(s3Exception.class, ()->requestHandler.handleRequest(input, context));
+        assertThrows(AWSS3Exception.class, ()->requestHandler.handleRequest(input, context));
     }
 
 
@@ -126,6 +126,6 @@ public class HandleValidationTest {
         final RequestHandler<Map<String, String>, Void> requestHandler
                 = new HandleValidation();
 
-        assertThrows(s3Exception.class, ()->requestHandler.handleRequest(input, context));
+        assertThrows(AWSS3Exception.class, ()->requestHandler.handleRequest(input, context));
     }
 }

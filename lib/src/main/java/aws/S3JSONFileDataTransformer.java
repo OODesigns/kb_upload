@@ -14,7 +14,7 @@ import java.util.Optional;
 
 public class S3JSONFileDataTransformer implements Transformer2_1<Context, S3Object, JSON> {
     private static final String UNABLE_TO_LOAD_FILE = "Unable to load file from bucket: %s and key: %s";
-    public static final String MISSING_DATA_WHEN_CREATING_JSON = "UnExpected missing Data when creating JSON";
+    private static final String MISSING_DATA_WHEN_CREATING_JSON = "UnExpected missing Data when creating JSON";
     private final Retrievable<S3Object, Optional<InputStream>> fileloader;
 
     public S3JSONFileDataTransformer(final Retrievable<S3Object, Optional<InputStream>> fileloader) {
@@ -33,12 +33,13 @@ public class S3JSONFileDataTransformer implements Transformer2_1<Context, S3Obje
                               .orElseThrow(() -> throwUnableToLoadFile(context, s3Object))){
             return Optional.of(IOUtils.toString(filestream, StandardCharsets.UTF_8));
         } catch (final IOException e) {
+            context.getLogger().log(e.getMessage());
             return Optional.empty();
         }
     }
 
-    private s3Exception throwUnableToLoadFile(final Context context, final S3Object s3Object) {
-        return new s3Exception(context, String.format(UNABLE_TO_LOAD_FILE,
+    private AWSS3Exception throwUnableToLoadFile(final Context context, final S3Object s3Object) {
+        return new AWSS3Exception(context, String.format(UNABLE_TO_LOAD_FILE,
                 s3Object.getBucketName(), s3Object.getKeyName()));
     }
 }

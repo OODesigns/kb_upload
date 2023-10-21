@@ -66,7 +66,7 @@ public class HandleValidation implements RequestHandler<Map<String, String>, Voi
     }
 
     private void throwInvalidDataException(final Context context, final Validation validation) {
-        throw new s3Exception(context, validation.messages().toString());
+        throw new AWSS3Exception(context, validation.messages().toString());
     }
 
     private static Predicate<Validation> notValidFile() {

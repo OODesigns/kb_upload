@@ -40,7 +40,7 @@ class S3ObjectFactoryTest {
     public void testMissingBucketName() {
         input.put("keyNameKey", "test-key");
 
-        assertThrows(s3Exception.class, () ->
+        assertThrows(AWSS3Exception.class, () ->
                 new S3ObjectFactory(input, context, "bucketNameKey", "keyNameKey", "testArea")
         );
     }
@@ -49,7 +49,7 @@ class S3ObjectFactoryTest {
     public void testMissingKeyName() {
         input.put("bucketNameKey", "test-bucket");
 
-        assertThrows(s3Exception.class, () ->
+        assertThrows(AWSS3Exception.class, () ->
                 new S3ObjectFactory(input, context, "bucketNameKey", "keyNameKey", "testArea")
         );
     }

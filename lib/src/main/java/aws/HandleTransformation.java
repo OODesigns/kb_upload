@@ -82,7 +82,7 @@ public class HandleTransformation implements RequestHandler<Map<String, String>,
 
     private static Consumer<S3FileSaverState> throwSaveException(final Context context) {
         return error -> {
-            throw new s3Exception(context,
+            throw new AWSS3Exception(context,
                     String.format(ERROR_UNABLE_TO_SAVE_TRANSFORMED_FILE, error));
         };
     }
@@ -91,7 +91,7 @@ public class HandleTransformation implements RequestHandler<Map<String, String>,
          return json -> Optional.ofNullable(jsonTransformer.transform(json)
                  .map(newLineForEachEntry())
                  .flatMap(transformToStream())
-                 .orElseThrow(() -> new s3Exception(context, UNABLE_TO_TRANSFORM_DATA)));
+                 .orElseThrow(() -> new AWSS3Exception(context, UNABLE_TO_TRANSFORM_DATA)));
     }
 
     private static Function<String, Optional<ByteArrayOutputStream>> transformToStream() {

@@ -25,7 +25,7 @@ public class S3ObjectFactory implements S3Object{
         try {
             return constructor.create(input.get(key));
         } catch (final RuntimeException e) {
-            throw new s3Exception(context, errorMessage);
+            throw new AWSS3Exception(context, errorMessage);
         }
     }
 
