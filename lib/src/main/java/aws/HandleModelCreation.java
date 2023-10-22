@@ -87,8 +87,8 @@ public class HandleModelCreation implements RequestHandler<Map<String, String>, 
                                    .orElseThrow(() -> throwUnableToLoadFile(context, s3Object))) {
 
                 return modelMaker.transform(dataStream)
-                        .map(logResult(context))
-                        .throwOrReturn(t -> throwEnableToCreateModel(context, t));
+                        .calling(logResult(context))
+                        .orElseMapThrow(t -> newEnableToCreateModel(context, t));
 
             } catch (final IOException e) {
                 log(context, e.getMessage());
@@ -104,8 +104,8 @@ public class HandleModelCreation implements RequestHandler<Map<String, String>, 
         context.getLogger().log(String.format(RESULT, messages));
     }
 
-    private void throwEnableToCreateModel(final Context context, final ModelMakerResult modelMakerResult) {
-        throw new AWSS3Exception(context, String.format(UNABLE_TO_CREATE_A_MODEL, modelMakerResult.Message()));
+    private AWSS3Exception newEnableToCreateModel(final Context context, final ModelMakerResult modelMakerResult) {
+        return new AWSS3Exception(context, String.format(UNABLE_TO_CREATE_A_MODEL, modelMakerResult.Message()));
     }
 
     private AWSS3Exception throwUnableToLoadFile(final Context context, final S3Object s3Object) {

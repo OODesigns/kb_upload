@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
-public class JsonTransformationResult implements mappable<List<String>, String, String> {
+public class JsonTransformationResult implements Mappable<List<String>, String, String> {
 
     private final List<String> value;
 

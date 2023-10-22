@@ -26,7 +26,7 @@ class HandleTransformationTest {
     void errorExpectedTransformationBucketNameNullParameters(
                                        @Mock final Context context,
                                        @Mock final LambdaLogger lambdaLogger,
-                                       @Mock final Transformer1_1<JSON, mappable<List<String>, String, String>> jsonTransformer,
+                                       @Mock final Transformer1_1<JSON, Mappable<List<String>, String, String>> jsonTransformer,
                                        @Mock final Storable<S3Object, ByteArrayOutputStream, S3FileSaverState> fileStore,
                                        @Mock final S3RequestProvider s3RequestProvider){
 
@@ -50,7 +50,7 @@ class HandleTransformationTest {
     @Test
     void errorExpectedTransformationBucketNameMissing(@Mock final Context context,
                                               @Mock final LambdaLogger lambdaLogger,
-                                              @Mock final Transformer1_1<JSON, mappable<List<String>, String, String>> jsonTransformer,
+                                              @Mock final Transformer1_1<JSON, Mappable<List<String>, String, String>> jsonTransformer,
                                               @Mock final Storable<S3Object, ByteArrayOutputStream, S3FileSaverState> fileStore,
                                               @Mock final S3RequestProvider s3RequestProvider){
 
@@ -76,7 +76,7 @@ class HandleTransformationTest {
     @Test
     void errorExpectedTransformationBucketNameMissingData(@Mock final Context context,
                                               @Mock final LambdaLogger lambdaLogger,
-                                              @Mock final Transformer1_1<JSON, mappable<List<String>, String, String>> jsonTransformer,
+                                              @Mock final Transformer1_1<JSON, Mappable<List<String>, String, String>> jsonTransformer,
                                               @Mock final Storable<S3Object, ByteArrayOutputStream, S3FileSaverState> fileStore,
                                               @Mock final S3RequestProvider s3RequestProvider){
 
@@ -102,7 +102,7 @@ class HandleTransformationTest {
     @Test
     void errorExpectedTransformationKeyNameMissing(@Mock final Context context,
                                                    @Mock final LambdaLogger lambdaLogger,
-                                                   @Mock final Transformer1_1<JSON, mappable<List<String>, String, String>> jsonTransformer,
+                                                   @Mock final Transformer1_1<JSON, Mappable<List<String>, String, String>> jsonTransformer,
                                                    @Mock final Storable<S3Object, ByteArrayOutputStream, S3FileSaverState> fileStore,
                                                    @Mock final S3RequestProvider s3RequestProvider){
 
@@ -128,8 +128,8 @@ class HandleTransformationTest {
     @Test
     void errorUnableTransformData(@Mock final Context context,
                                @Mock final LambdaLogger lambdaLogger,
-                               @Mock final Transformer1_1<JSON, mappable<List<String>, String, String>> jsonTransformer,
-                               @Mock final mappable<List<String>, String, String>  transformedResult,
+                               @Mock final Transformer1_1<JSON, Mappable<List<String>, String, String>> jsonTransformer,
+                               @Mock final Mappable<List<String>, String, String> transformedResult,
                                @Mock final Storable<S3Object, ByteArrayOutputStream, S3FileSaverState> fileStore,
                                @Mock final S3RequestProvider s3RequestProvider){
 
@@ -159,8 +159,8 @@ class HandleTransformationTest {
     void errorBucketNameForTransFormedFileIsMissing
                                   (@Mock final Context context,
                                    @Mock final LambdaLogger lambdaLogger,
-                                   @Mock final Transformer1_1<JSON, mappable<List<String>, String, String>> jsonTransformer,
-                                   @Mock final mappable<List<String>, String, String>  transformedResult,
+                                   @Mock final Transformer1_1<JSON, Mappable<List<String>, String, String>> jsonTransformer,
+                                   @Mock final Mappable<List<String>, String, String> transformedResult,
                                    @Mock final Storable<S3Object, ByteArrayOutputStream, S3FileSaverState> fileStore,
                                    @Mock final S3RequestProvider s3RequestProvider){
 
@@ -190,8 +190,8 @@ class HandleTransformationTest {
     void errorKeyNameForTransFormedIsMissing
             (@Mock final Context context,
              @Mock final LambdaLogger lambdaLogger,
-             @Mock final Transformer1_1<JSON, mappable<List<String>, String, String>> jsonTransformer,
-             @Mock final mappable<List<String>, String, String>  transformedResult,
+             @Mock final Transformer1_1<JSON, Mappable<List<String>, String, String>> jsonTransformer,
+             @Mock final Mappable<List<String>, String, String> transformedResult,
              @Mock final Storable<S3Object, ByteArrayOutputStream, S3FileSaverState> fileStore,
              @Mock final S3RequestProvider s3RequestProvider){
 
@@ -222,8 +222,8 @@ class HandleTransformationTest {
     void errorSavingFile
             (@Mock final Context context,
              @Mock final LambdaLogger lambdaLogger,
-             @Mock final Transformer1_1<JSON, mappable<List<String>, String, String>> jsonTransformer,
-             @Mock final mappable<List<String>, String, String>  transformedResult,
+             @Mock final Transformer1_1<JSON, Mappable<List<String>, String, String>> jsonTransformer,
+             @Mock final Mappable<List<String>, String, String> transformedResult,
              @Mock final Storable<S3Object, ByteArrayOutputStream, S3FileSaverState> fileStore,
              @Mock final S3RequestProvider s3RequestProvider){
 
@@ -258,8 +258,8 @@ class HandleTransformationTest {
     void SavingFileWithOutIssue
             (@Mock final Context context,
              @Mock final LambdaLogger lambdaLogger,
-             @Mock final Transformer1_1<JSON, mappable<List<String>, String, String>> jsonTransformer,
-             @Mock final mappable<List<String>, String, String>  transformedResult,
+             @Mock final Transformer1_1<JSON, Mappable<List<String>, String, String>> jsonTransformer,
+             @Mock final Mappable<List<String>, String, String> transformedResult,
              @Mock final Storable<S3Object, ByteArrayOutputStream, S3FileSaverState> fileStore,
              @Mock final S3RequestProvider s3RequestProvider){
 

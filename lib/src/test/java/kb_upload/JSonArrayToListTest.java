@@ -29,7 +29,7 @@ class JSonArrayToListTest {
 
         final JSonArrayToList transformer = new JSonArrayToList("person");
 
-        final mappable<List<String>, String, String> transform = transformer.transform(new JSONData(jsonData));
+        final Mappable<List<String>, String, String> transform = transformer.transform(new JSONData(jsonData));
 
         transform.map(l->String.join("\n",l))
                 .ifPresentOrElse(t->assertThat(t).contains(expectedResult),

@@ -29,7 +29,7 @@ public class HandleTransformation implements RequestHandler<Map<String, String>,
     private static final String TRANSFORMED = "transformed";
     private final Retrievable<S3Object, Optional<InputStream>> fileLoader;
 
-    private final Transformer1_1<JSON, mappable<List<String>, String, String>> jsonTransformer;
+    private final Transformer1_1<JSON, Mappable<List<String>, String, String>> jsonTransformer;
 
     private final Storable<S3Object, ByteArrayOutputStream, S3FileSaverState> fileStore;
 
@@ -39,7 +39,7 @@ public class HandleTransformation implements RequestHandler<Map<String, String>,
 
     //Used for testing purposes only
     HandleTransformation(final Retrievable<S3Object, Optional<InputStream>> fileLoader,
-                         final Transformer1_1<JSON, mappable<List<String>, String, String>> jsonTransformer,
+                         final Transformer1_1<JSON, Mappable<List<String>, String, String>> jsonTransformer,
                          final Storable<S3Object, ByteArrayOutputStream, S3FileSaverState> fileStore,
                          final S3RequestProvider s3RequestProvider) {
         this.fileLoader = fileLoader;
