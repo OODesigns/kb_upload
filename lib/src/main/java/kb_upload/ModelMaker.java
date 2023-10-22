@@ -7,12 +7,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
-public class ModelMaker implements Transformer1_1<InputStream, ModelMakerResult>{
+public class ModelMaker implements Transformer1_1<InputStream, ModelMakerState<ModelMakerStateResult>>{
 
     public static final String MODEL_SUCCESSFULLY_CREATED = "Model Successfully created";
 
     @Override
-    public ModelMakerResult transform(final InputStream input) {
+    public ModelMakerState<ModelMakerStateResult> transform(final InputStream input) {
 
         final TrainingParameters params = TrainingParameters.defaultParams();
         params.put(TrainingParameters.CUTOFF_PARAM, "0");
@@ -26,10 +26,11 @@ public class ModelMaker implements Transformer1_1<InputStream, ModelMakerResult>
 
             trained.serialize(modelOut);
 
-            return new ModelMakerResult(new ModelMakerStateOK() , MODEL_SUCCESSFULLY_CREATED, modelOut);
+            return new ModelMakerStateOK(MODEL_SUCCESSFULLY_CREATED, modelOut);
 
         } catch (final IOException e) {
-            return new ModelMakerResult(new ModelMakerStateError() , e.getMessage(), null);
+
+            return new ModelMakerStateError(e.getMessage());
         }
     }
 }

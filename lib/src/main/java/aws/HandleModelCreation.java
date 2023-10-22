@@ -30,11 +30,11 @@ public class HandleModelCreation implements RequestHandler<Map<String, String>, 
     private static final String OK_RESULT = "RESULT S3FileSaverOKState: Model Created";
     private final Retrievable<S3Object, Optional<InputStream>> fileLoader;
     private final Storable<S3Object, ByteArrayOutputStream, S3FileSaverState> fileStore;
-    private final Transformer1_1<InputStream, ModelMakerResult> modelMaker;
+    private final Transformer1_1<InputStream, ModelMakerState<ModelMakerStateResult>> modelMaker;
     private final S3RequestProvider s3RequestProvider;
 
     HandleModelCreation(final Retrievable<S3Object, Optional<InputStream>> fileLoader,
-                        final Transformer1_1<InputStream, ModelMakerResult> modelMaker,
+                        final Transformer1_1<InputStream, ModelMakerState<ModelMakerStateResult>> modelMaker,
                         final Storable<S3Object, ByteArrayOutputStream, S3FileSaverState> fileStore,
                         final S3RequestProvider s3RequestProvider) {
         this.fileLoader = fileLoader;
@@ -96,16 +96,16 @@ public class HandleModelCreation implements RequestHandler<Map<String, String>, 
             }
         };
     }
-    private Function<ModelMakerResult, ModelMakerResult> logResult(final Context context) {
-        return v -> { log(context, v.Message()); return v; };
+    private Function<ModelMakerStateResult, ModelMakerStateResult> logResult(final Context context) {
+        return v -> { log(context, v.getMessage()); return v; };
     }
 
     private void log(final Context context, final String messages) {
         context.getLogger().log(String.format(RESULT, messages));
     }
 
-    private AWSS3Exception newEnableToCreateModel(final Context context, final ModelMakerResult modelMakerResult) {
-        return new AWSS3Exception(context, String.format(UNABLE_TO_CREATE_A_MODEL, modelMakerResult.Message()));
+    private AWSS3Exception newEnableToCreateModel(final Context context, final ModelMakerStateResult modelMakerState) {
+        return new AWSS3Exception(context, String.format(UNABLE_TO_CREATE_A_MODEL, modelMakerState.getMessage()));
     }
 
     private AWSS3Exception throwUnableToLoadFile(final Context context, final S3Object s3Object) {

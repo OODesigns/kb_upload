@@ -28,7 +28,7 @@ class HandleModelCreationTest {
              @Mock final LambdaLogger lambdaLogger,
              @Mock final Storable<S3Object, ByteArrayOutputStream, S3FileSaverState> fileStore,
              @Mock final S3RequestProvider s3RequestProvider,
-             @Mock final Transformer1_1<InputStream, ModelMakerResult> modelMaker){
+             @Mock final Transformer1_1<InputStream, ModelMakerState<ModelMakerStateResult>> modelMaker){
 
         when(context.getLogger()).thenReturn(lambdaLogger);
 
@@ -53,7 +53,7 @@ class HandleModelCreationTest {
              @Mock final LambdaLogger lambdaLogger,
              @Mock final Storable<S3Object, ByteArrayOutputStream, S3FileSaverState> fileStore,
              @Mock final S3RequestProvider s3RequestProvider,
-             @Mock final Transformer1_1<InputStream, ModelMakerResult> modelMaker){
+             @Mock final Transformer1_1<InputStream, ModelMakerState<ModelMakerStateResult>> modelMaker){
 
         when(context.getLogger()).thenReturn(lambdaLogger);
 
@@ -81,7 +81,7 @@ class HandleModelCreationTest {
              @Mock final LambdaLogger lambdaLogger,
              @Mock final Storable<S3Object, ByteArrayOutputStream, S3FileSaverState> fileStore,
              @Mock final S3RequestProvider s3RequestProvider,
-             @Mock final Transformer1_1<InputStream, ModelMakerResult> modelMaker){
+             @Mock final Transformer1_1<InputStream, ModelMakerState<ModelMakerStateResult>> modelMaker){
 
         when(context.getLogger()).thenReturn(lambdaLogger);
 
@@ -109,7 +109,7 @@ class HandleModelCreationTest {
              @Mock final LambdaLogger lambdaLogger,
              @Mock final Storable<S3Object, ByteArrayOutputStream, S3FileSaverState> fileStore,
              @Mock final S3RequestProvider s3RequestProvider,
-             @Mock final Transformer1_1<InputStream, ModelMakerResult> modelMaker){
+             @Mock final Transformer1_1<InputStream, ModelMakerState<ModelMakerStateResult>> modelMaker){
 
         when(context.getLogger()).thenReturn(lambdaLogger);
 
@@ -137,15 +137,13 @@ class HandleModelCreationTest {
              @Mock final LambdaLogger lambdaLogger,
              @Mock final Storable<S3Object, ByteArrayOutputStream, S3FileSaverState> fileStore,
              @Mock final S3RequestProvider s3RequestProvider,
-             @Mock final Transformer1_1<InputStream, ModelMakerResult> modelMaker){
+             @Mock final Transformer1_1<InputStream, ModelMakerState<ModelMakerStateResult>> modelMaker){
 
-        final ModelMakerResult modelMakerResult
-                = new ModelMakerResult(new ModelMakerStateError(),
-                                      "Error Message",
-                                      null);
+        final ModelMakerState<ModelMakerStateResult> modelMakerState
+                = new ModelMakerStateError("Error Message");
 
         when(context.getLogger()).thenReturn(lambdaLogger);
-        when(modelMaker.transform(any())).thenReturn(modelMakerResult);
+        when(modelMaker.transform(any())).thenReturn(modelMakerState);
 
         final Map<String, String> input = Map.of(
                 "ModelInput-BucketName", "bucket1",
@@ -172,17 +170,15 @@ class HandleModelCreationTest {
              @Mock final LambdaLogger lambdaLogger,
              @Mock final Storable<S3Object, ByteArrayOutputStream, S3FileSaverState> fileStore,
              @Mock final S3RequestProvider s3RequestProvider,
-             @Mock final Transformer1_1<InputStream, ModelMakerResult> modelMaker,
+             @Mock final Transformer1_1<InputStream, ModelMakerState<ModelMakerStateResult>> modelMaker,
              @Mock final ByteArrayOutputStream outputStream){
 
         when(context.getLogger()).thenReturn(lambdaLogger);
 
-        final ModelMakerResult modelMakerResult
-                = new ModelMakerResult(new ModelMakerStateOK(),
-                "Model Created",
-                outputStream);
+        final ModelMakerState<ModelMakerStateResult> modelMakerState
+                = new ModelMakerStateOK( "Model Created", outputStream);
 
-        when(modelMaker.transform(any())).thenReturn(modelMakerResult);
+        when(modelMaker.transform(any())).thenReturn(modelMakerState);
 
         final Map<String, String> input = Map.of(
                 "ModelInput-BucketName", "bucket1",
@@ -208,16 +204,14 @@ class HandleModelCreationTest {
              @Mock final LambdaLogger lambdaLogger,
              @Mock final Storable<S3Object, ByteArrayOutputStream, S3FileSaverState> fileStore,
              @Mock final S3RequestProvider s3RequestProvider,
-             @Mock final Transformer1_1<InputStream, ModelMakerResult> modelMaker,
+             @Mock final Transformer1_1<InputStream, ModelMakerState<ModelMakerStateResult>> modelMaker,
              @Mock final ByteArrayOutputStream outputStream){
 
-        final ModelMakerResult modelMakerResult
-                = new ModelMakerResult(new ModelMakerStateOK(),
-                "Model Created",
-                outputStream);
+        final ModelMakerState<ModelMakerStateResult> modelMakerState
+                = new ModelMakerStateOK( "Model Created", outputStream);
 
         when(context.getLogger()).thenReturn(lambdaLogger);
-        when(modelMaker.transform(any())).thenReturn(modelMakerResult);
+        when(modelMaker.transform(any())).thenReturn(modelMakerState);
 
         final Map<String, String> input = Map.of(
                 "ModelInput-BucketName", "bucket1",
@@ -245,17 +239,15 @@ class HandleModelCreationTest {
              @Mock final LambdaLogger lambdaLogger,
              @Mock final Storable<S3Object, ByteArrayOutputStream, S3FileSaverState> fileStore,
              @Mock final S3RequestProvider s3RequestProvider,
-             @Mock final Transformer1_1<InputStream, ModelMakerResult> modelMaker,
+             @Mock final Transformer1_1<InputStream, ModelMakerState<ModelMakerStateResult>> modelMaker,
              @Mock final ByteArrayOutputStream outputStream){
 
-        final ModelMakerResult modelMakerResult
-                = new ModelMakerResult(new ModelMakerStateOK(),
-                "Model Created",
-                outputStream);
+        final ModelMakerState<ModelMakerStateResult> modelMakerState
+                = new ModelMakerStateOK( "Model Created", outputStream);
 
         when(context.getLogger()).thenReturn(lambdaLogger);
         when(fileStore.store(any(), any())).thenReturn(new S3FileSaverErrorState("Test Error"));
-        when(modelMaker.transform(any())).thenReturn(modelMakerResult);
+        when(modelMaker.transform(any())).thenReturn(modelMakerState);
 
         final Map<String, String> input = Map.of(
                 "ModelInput-BucketName", "bucket1",
@@ -286,18 +278,16 @@ class HandleModelCreationTest {
              @Mock final LambdaLogger lambdaLogger,
              @Mock final Storable<S3Object, ByteArrayOutputStream, S3FileSaverState> fileStore,
              @Mock final S3RequestProvider s3RequestProvider,
-             @Mock final Transformer1_1<InputStream, ModelMakerResult> modelMaker,
+             @Mock final Transformer1_1<InputStream, ModelMakerState<ModelMakerStateResult>> modelMaker,
              @Mock final ByteArrayOutputStream outputStream){
 
 
-        final ModelMakerResult modelMakerResult
-                = new ModelMakerResult(new ModelMakerStateOK(),
-                "Model Created",
-                outputStream);
+        final ModelMakerState<ModelMakerStateResult> modelMakerState
+                = new ModelMakerStateOK( "Model Created", outputStream);
 
         when(context.getLogger()).thenReturn(lambdaLogger);
         when(fileStore.store(any(), any())).thenReturn(new S3FileSaverOKState());
-        when(modelMaker.transform(any())).thenReturn(modelMakerResult);
+        when(modelMaker.transform(any())).thenReturn(modelMakerState);
 
         final Map<String, String> input = Map.of(
                 "ModelInput-BucketName", "bucket1",
