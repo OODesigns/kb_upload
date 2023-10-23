@@ -53,6 +53,7 @@ public class HandleModelCreation implements RequestHandler<Map<String, String>, 
     @Override
     public Void handleRequest(final Map<String, String> input, final Context context) {
         Optional.of(getS3ObjectForModelInput(input, context))
+                .map(getFileData(context))
                 .flatMap(createModel(context))
                 .map(stream -> saveToFile(stream, input, context ));
         return null;
@@ -80,13 +81,11 @@ public class HandleModelCreation implements RequestHandler<Map<String, String>, 
         return s3FileSaverState -> s3FileSaverState instanceof S3FileSaverErrorState;
     }
 
-    private Function<S3Object, Optional<ByteArrayOutputStream>> createModel(final Context context) {
-        return s3Object -> {
-            try (final InputStream dataStream =
-                         fileLoader.retrieve(s3Object)
-                                   .orElseThrow(() -> throwUnableToLoadFile(context, s3Object))) {
+    private Function<InputStream, Optional<ByteArrayOutputStream>> createModel(final Context context) {
+        return inputStream -> {
+            try(inputStream){
 
-                return modelMaker.transform(dataStream)
+                return modelMaker.transform(inputStream)
                         .calling(logResult(context))
                         .orElseMapThrow(t -> newEnableToCreateModel(context, t));
 
@@ -95,7 +94,14 @@ public class HandleModelCreation implements RequestHandler<Map<String, String>, 
                 return Optional.empty();
             }
         };
+
     }
+
+    private Function<S3Object, InputStream>  getFileData(final Context context){
+        return s3Object -> fileLoader.retrieve(s3Object).orElseThrow(() -> throwUnableToLoadFile(context, s3Object));
+    }
+
+
     private Function<ModelMakerStateResult, ModelMakerStateResult> logResult(final Context context) {
         return v -> { log(context, v.getMessage()); return v; };
     }
