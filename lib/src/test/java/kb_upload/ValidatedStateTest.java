@@ -9,8 +9,8 @@ class ValidatedStateTest {
     @Test
     void validationClassesReturnClassName(){
 
-        assertThat(new ValidatedStateOK().toString()).contains("ValidatedStateOK");
-        assertThat(new ValidatedStateError().toString()).contains("ValidatedStateError");
+        assertThat(new ValidatedStateOK().toString()).contains("State OK");
+        assertThat(new ValidatedStateError("").toString()).contains("State Error");
 
     }
 

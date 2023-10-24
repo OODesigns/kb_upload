@@ -1,8 +1,15 @@
 package kb_upload;
 
-public class ValidatedStateOK implements ValidatedState{
+import aws.AWSS3Exception;
+import java.util.function.Function;
+
+public class ValidatedStateOK extends ValidationResult{
+    public ValidatedStateOK() {
+        super("Validation State OK");
+    }
+
     @Override
-    public String toString() {
-        return "ValidatedStateOK";
+    public ValidationResult orElseThrow(final Function<ValidationResult, AWSS3Exception> functionException) throws AWSS3Exception {
+        return this;
     }
 }

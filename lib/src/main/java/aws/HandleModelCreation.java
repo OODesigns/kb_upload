@@ -30,11 +30,11 @@ public class HandleModelCreation implements RequestHandler<Map<String, String>, 
     private static final String OK_RESULT = "RESULT S3FileSaverOKState: Model Created";
     private final Retrievable<S3Object, Optional<InputStream>> fileLoader;
     private final Storable<S3Object, ByteArrayOutputStream, S3FileSaverState> fileStore;
-    private final Transformer1_1<InputStream, ModelMakerState<ModelMakerStateResult>> modelMaker;
+    private final Transformer1_1<InputStream, ModelMakerState<ModelMakerResult>> modelMaker;
     private final S3RequestProvider s3RequestProvider;
 
     HandleModelCreation(final Retrievable<S3Object, Optional<InputStream>> fileLoader,
-                        final Transformer1_1<InputStream, ModelMakerState<ModelMakerStateResult>> modelMaker,
+                        final Transformer1_1<InputStream, ModelMakerState<ModelMakerResult>> modelMaker,
                         final Storable<S3Object, ByteArrayOutputStream, S3FileSaverState> fileStore,
                         final S3RequestProvider s3RequestProvider) {
         this.fileLoader = fileLoader;
@@ -55,19 +55,17 @@ public class HandleModelCreation implements RequestHandler<Map<String, String>, 
         Optional.of(getS3ObjectForModelInput(input, context))
                 .map(getFileData(context))
                 .flatMap(createModel(context))
-                .map(stream -> saveToFile(stream, input, context ));
+                .ifPresent(outputStream -> saveToFile(outputStream, input, context));
         return null;
     }
 
 
-    private Object saveToFile(final ByteArrayOutputStream stream, final Map<String, String> input, final Context context) {
+    private void saveToFile(final ByteArrayOutputStream stream, final Map<String, String> input, final Context context) {
         Optional.of(getS3ObjectForModel(input, context))
                 .map(s->fileStore.store(s, stream))
                 .filter(hasErrorState())
                 .ifPresentOrElse(throwSaveException(context),
                 ()->context.getLogger().log(OK_RESULT));
-
-        return null;
     }
 
     private static Consumer<S3FileSaverState> throwSaveException(final Context context) {
@@ -87,7 +85,7 @@ public class HandleModelCreation implements RequestHandler<Map<String, String>, 
 
                 return modelMaker.transform(inputStream)
                         .calling(logResult(context))
-                        .orElseMapThrow(t -> newEnableToCreateModel(context, t));
+                        .orElseMapThrow(newEnableToCreateModel(context));
 
             } catch (final IOException e) {
                 log(context, e.getMessage());
@@ -102,7 +100,7 @@ public class HandleModelCreation implements RequestHandler<Map<String, String>, 
     }
 
 
-    private Function<ModelMakerStateResult, ModelMakerStateResult> logResult(final Context context) {
+    private Function<ModelMakerResult, ModelMakerResult> logResult(final Context context) {
         return v -> { log(context, v.getMessage()); return v; };
     }
 
@@ -110,8 +108,8 @@ public class HandleModelCreation implements RequestHandler<Map<String, String>, 
         context.getLogger().log(String.format(RESULT, messages));
     }
 
-    private AWSS3Exception newEnableToCreateModel(final Context context, final ModelMakerStateResult modelMakerState) {
-        return new AWSS3Exception(context, String.format(UNABLE_TO_CREATE_A_MODEL, modelMakerState.getMessage()));
+    private Function<ModelMakerResult, AWSS3Exception> newEnableToCreateModel(final Context context) {
+         return modelMakerStateResult ->  new AWSS3Exception(context, String.format(UNABLE_TO_CREATE_A_MODEL, modelMakerStateResult.getMessage()));
     }
 
     private AWSS3Exception throwUnableToLoadFile(final Context context, final S3Object s3Object) {

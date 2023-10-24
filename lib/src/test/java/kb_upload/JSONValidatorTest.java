@@ -16,7 +16,7 @@ import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.Mockito.when;
 
 @MockitoSettings
-class KnowledgeValidationTest {
+class JSONValidatorTest {
 
     static private final String missingName = """           
                 {
@@ -86,13 +86,13 @@ class KnowledgeValidationTest {
         when(json.get()).thenReturn(missingName);
         when(jsonSchema.get()).thenReturn(new FileLoader("knowledgeSchema.json").toString());
 
-        final Validator<JSONSchema, JSON, Validation> validator = new JSONValidator(()->
+        final JSONValidator jsonValidator = new JSONValidator(() ->
                 JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V4));
 
-        Optional.of(validator.validate(jsonSchema, json))
-                .ifPresentOrElse(validation -> {
-                    assertThat(validation.state()).isInstanceOf(ValidatedStateError.class);
-                    assertThat(validation.messages()).anyMatch(m->m.contains("name: is missing but it is required"));}
+        Optional.of(jsonValidator.validate(jsonSchema, json))
+                .ifPresentOrElse(v -> {
+                    assertThat(v).isInstanceOf(ValidatedStateError.class);
+                    assertThat(v.getMessage()).contains("name: is missing but it is required");}
                    ,()->fail("Expected Error Validation but got null"));
     }
 
@@ -102,13 +102,13 @@ class KnowledgeValidationTest {
         when(json.get()).thenReturn(missingEntry);
         when(jsonSchema.get()).thenReturn(new FileLoader("knowledgeSchema.json").toString());
 
-        final Validator<JSONSchema, JSON, Validation> validator = new JSONValidator(()->
+        final JSONValidator jsonValidator = new JSONValidator(() ->
                 JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V4));
 
-        Optional.of(validator.validate(jsonSchema, json))
+        Optional.of(jsonValidator.validate(jsonSchema, json))
                 .ifPresentOrElse(v -> {
-                            assertThat(v.state()).isInstanceOf(ValidatedStateError.class);
-                            assertThat(v.messages()).anyMatch(m->m.contains("entries: is missing but it is required"));}
+                            assertThat(v).isInstanceOf(ValidatedStateError.class);
+                            assertThat(v.getMessage()).contains("entries: is missing but it is required");}
                         ,()->fail("Expected Error Validation but got null"));
     }
 
@@ -119,15 +119,15 @@ class KnowledgeValidationTest {
         when(json.get()).thenReturn(missingNameEntry);
         when(jsonSchema.get()).thenReturn(new FileLoader("knowledgeSchema.json").toString());
 
-        final Validator<JSONSchema, JSON, Validation> validator = new JSONValidator(()->
+        final JSONValidator jsonValidator = new JSONValidator(() ->
                 JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V4));
 
-        Optional.of(validator.validate(jsonSchema, json))
+        Optional.of(jsonValidator.validate(jsonSchema, json))
                 .ifPresentOrElse(v -> {
-                            assertThat(v.state()).isInstanceOf(ValidatedStateError.class);
-                            assertThat(v.messages())
-                                    .anyMatch(m->m.contains("entries: is missing but it is required"))
-                                    .anyMatch(m->m.contains("name: is missing but it is required"));}
+                            assertThat(v).isInstanceOf(ValidatedStateError.class);
+                            assertThat(v.getMessage())
+                                    .contains("entries: is missing but it is required")
+                                    .contains("name: is missing but it is required");}
                         ,()->fail("Expected Error Validation but got null"));
 
     }
@@ -138,13 +138,13 @@ class KnowledgeValidationTest {
         when(json.get()).thenReturn(validJSON);
         when(jsonSchema.get()).thenReturn(new FileLoader("knowledgeSchema.json").toString());
 
-        final Validator<JSONSchema, JSON, Validation> validator = new JSONValidator(()->
+        final JSONValidator jsonValidator = new JSONValidator(() ->
                 JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V4));
 
-        Optional.of(validator.validate(jsonSchema, json))
+        Optional.of(jsonValidator.validate(jsonSchema, json))
                 .ifPresentOrElse(v -> {
-                            assertThat(v.state()).isInstanceOf(ValidatedStateOK.class);
-                            assertThat(v.messages()).isEmpty();}
+                            assertThat(v).isInstanceOf(ValidatedStateOK.class);
+                            assertThat(v.getMessage()).contains("Validation State OK");}
                         ,()->fail("Expected Valid Validation but got null"));
 
     }
@@ -155,10 +155,9 @@ class KnowledgeValidationTest {
         when(json.get()).thenReturn(inValidJSON);
         when(jsonSchema.get()).thenReturn(new FileLoader("knowledgeSchema.json").toString());
 
-        final Validator<JSONSchema, JSON, Validation> validator = new JSONValidator(()->
+        final JSONValidator jsonValidator = new JSONValidator(() ->
                 JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V4));
 
-        assertThat(validator.validate(jsonSchema, json).state()).isInstanceOf(ValidatedStateError.class);
-
+        assertThat(jsonValidator.validate(jsonSchema, json)).isInstanceOf(ValidatedStateError.class);
     }
 }

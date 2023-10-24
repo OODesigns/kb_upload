@@ -30,20 +30,16 @@ public class HandleValidationTest {
     void handleRequestWithValidData(@Mock final S3RequestProvider s3RequestProvider,
                                     @Mock final Context context,
                                     @Mock final LambdaLogger lambdaLogger,
-                                    @Mock final Validation validation,
-                                    @Mock final Validator<JSONSchema, JSON, Validation> validator) {
+                                    @Mock final Validator<JSONSchema, JSON, ValidationResult> validator) {
 
 
         final Map<String, String> input = Map.of("Validation-BucketName", "bucket",
                                                  "Validation-KeyName", "key");
 
         when(context.getLogger()).thenReturn(lambdaLogger);
-        when(validator.validate(any(),any())).thenReturn(validation);
+        when(validator.validate(any(),any())).thenReturn(new ValidatedStateOK());
 
-        when(validation.state()).thenReturn(new ValidatedStateOK());
-        when(validation.toString()).thenReturn("ValidatedStateOK");
-
-        final RequestHandler<Map<String, String>, Void> requestHandler
+        final RequestHandler<Map<String, String>, ValidationResult> requestHandler
                 = new HandleValidation(validator,
                 __-> Optional.of(new ByteArrayInputStream(validJSON.getBytes())),
                 s3RequestProvider);
@@ -53,7 +49,7 @@ public class HandleValidationTest {
         final ArgumentCaptor<String> logData = ArgumentCaptor.forClass(String.class);
         verify(lambdaLogger, times(1)).log(logData.capture());
 
-        assertThat(logData.getValue()).contains("ValidatedStateOK");
+        assertThat(logData.getValue()).contains("State OK");
 
     }
 
@@ -61,24 +57,17 @@ public class HandleValidationTest {
     void handleRequestWithINValidData(@Mock final S3RequestProvider s3RequestProvider,
                                       @Mock final Context context,
                                       @Mock final LambdaLogger lambdaLogger,
-                                      @Mock final Validation validation,
-                                      @Mock final Validator<JSONSchema, JSON, Validation> validator){
+                                      @Mock final Validator<JSONSchema, JSON, ValidationResult> validator){
 
 
         final Map<String, String> input = Map.of("Validation-BucketName", "bucket",
                                                  "Validation-KeyName", "key");
 
         when(context.getLogger()).thenReturn(lambdaLogger);
-        when(validator.validate(any(),any())).thenReturn(validation);
-
         final List<String> messages = List.of("message1", "message2");
+        when(validator.validate(any(),any())).thenReturn(new ValidatedStateError(messages));
 
-        when(validation.state()).thenReturn(new ValidatedStateError());
-        when(validation.messages()).thenReturn(messages);
-        //Passing valid JSON, so it does not throw an error,
-        when(validation.toString()).thenReturn("ValidatedStateError");
-        //The validation however returns an error state
-        final RequestHandler<Map<String, String>, Void> requestHandler
+        final RequestHandler<Map<String, String>, ValidationResult> requestHandler
                 = new HandleValidation(validator,
                 __-> Optional.of(new ByteArrayInputStream(validJSON.getBytes())),
                 s3RequestProvider);
@@ -90,7 +79,7 @@ public class HandleValidationTest {
 
         final List<String> errors = logData.getAllValues();
 
-        assertThat(errors.get(0)).contains("ValidatedStateError");
+        assertThat(errors.get(0)).contains("State Error");
         assertThat(errors.get(1)).contains("message1");
         assertThat(errors.get(1)).contains("message2");
     }
@@ -101,14 +90,14 @@ public class HandleValidationTest {
                                     @Mock final S3RequestProvider s3RequestProvider,
                                     @Mock final Context context,
                                     @Mock final LambdaLogger lambdaLogger,
-                                    @Mock final Validator<JSONSchema, JSON, Validation> validator) {
+                                    @Mock final Validator<JSONSchema, JSON, ValidationResult> validator) {
 
 
         final Map<String, String> input = Map.of("Validation-BucketName", "bucket",
                                                  "Validation-KeyName", "key");
         when(context.getLogger()).thenReturn(lambdaLogger);
 
-        final RequestHandler<Map<String, String>, Void> requestHandler
+        final RequestHandler<Map<String, String>, ValidationResult> requestHandler
                 = new HandleValidation(validator, __-> Optional.empty(), s3RequestProvider);
 
         assertThrows(AWSS3Exception.class, ()->requestHandler.handleRequest(input, context));
@@ -123,7 +112,7 @@ public class HandleValidationTest {
                                                  "Validation-KeyName", "key");
         when(context.getLogger()).thenReturn(lambdaLogger);
 
-        final RequestHandler<Map<String, String>, Void> requestHandler
+        final RequestHandler<Map<String, String>, ValidationResult> requestHandler
                 = new HandleValidation();
 
         assertThrows(AWSS3Exception.class, ()->requestHandler.handleRequest(input, context));

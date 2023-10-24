@@ -7,12 +7,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
-public class ModelMaker implements Transformer1_1<InputStream, ModelMakerState<ModelMakerStateResult>>{
+public class ModelMaker implements Transformer1_1<InputStream, ModelMakerState<ModelMakerResult>>{
 
     public static final String MODEL_SUCCESSFULLY_CREATED = "Model Successfully created";
 
     @Override
-    public ModelMakerState<ModelMakerStateResult> transform(final InputStream input) {
+    public ModelMakerState<ModelMakerResult> transform(final InputStream input) {
 
         final TrainingParameters params = TrainingParameters.defaultParams();
         params.put(TrainingParameters.CUTOFF_PARAM, "0");

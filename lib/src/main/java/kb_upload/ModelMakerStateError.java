@@ -4,8 +4,9 @@ import aws.AWSS3Exception;
 
 import java.io.ByteArrayOutputStream;
 import java.util.Optional;
+import java.util.function.Function;
 
-public class ModelMakerStateError extends ModelMakerStateResult {
+public class ModelMakerStateError extends ModelMakerResult {
     public ModelMakerStateError(final String message) {
         super(message);
     }
@@ -16,9 +17,8 @@ public class ModelMakerStateError extends ModelMakerStateResult {
     }
 
     @Override
-    public Optional<ByteArrayOutputStream> orElseMapThrow(final Retrievable<ModelMakerStateResult, AWSS3Exception> retrievableException) throws AWSS3Exception {
-        throw retrievableException.retrieve(this);
+    public Optional<ByteArrayOutputStream> orElseMapThrow(final Function<ModelMakerResult, AWSS3Exception> functionException) throws AWSS3Exception {
+        throw functionException.apply(this);
     }
-
 }
 

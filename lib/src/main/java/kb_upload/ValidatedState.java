@@ -1,3 +1,5 @@
 package kb_upload;
 
-public interface ValidatedState {}
+import aws.AWSS3Exception;
+
+public interface ValidatedState<T> extends Callable<T>, ThrowableElse<T, T, AWSS3Exception> {}

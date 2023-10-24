@@ -4,8 +4,9 @@ import aws.AWSS3Exception;
 
 import java.io.ByteArrayOutputStream;
 import java.util.Optional;
+import java.util.function.Function;
 
-public class ModelMakerStateOK extends ModelMakerStateResult {
+public class ModelMakerStateOK extends ModelMakerResult {
 
     private final ByteArrayOutputStream outputStream;
 
@@ -20,7 +21,7 @@ public class ModelMakerStateOK extends ModelMakerStateResult {
     }
 
     @Override
-    public Optional<ByteArrayOutputStream> orElseMapThrow(final Retrievable<ModelMakerStateResult, AWSS3Exception> retrievableException) throws AWSS3Exception {
+    public Optional<ByteArrayOutputStream> orElseMapThrow(final Function<ModelMakerResult, AWSS3Exception> functionException) throws AWSS3Exception {
         return Optional.of(outputStream);
     }
 }
