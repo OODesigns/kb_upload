@@ -60,6 +60,7 @@ Resources:
   ValidationFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
+      AutoPublishAlias: SnapStart
       CodeUri: lib/build/distributions/lib.zip
       Handler: aws.HandleValidation
       Runtime: java17
@@ -78,10 +79,13 @@ Resources:
         - S3ReadPolicy:
              BucketName: !Ref SourceBucketName
       Tracing: PassThrough
+      SnapStart:
+        ApplyOn: PublishedVersions
 
   TransformationFunction:
     Type: AWS::Serverless::Function
     Properties:
+      AutoPublishAlias: SnapStart
       CodeUri: lib/build/distributions/lib.zip
       Handler: aws.HandleTransformation
       Runtime: java17
@@ -97,6 +101,8 @@ Resources:
         - S3ReadPolicy:
             BucketName: !Ref SourceBucketName
       Tracing: PassThrough
+      SnapStart:
+        ApplyOn: PublishedVersions
 
   S3StagingWritePolicy:
     Type: AWS::IAM::ManagedPolicy
@@ -112,6 +118,7 @@ Resources:
   ModelFunction:
     Type: AWS::Serverless::Function
     Properties:
+      AutoPublishAlias: SnapStart
       CodeUri: lib/build/distributions/lib.zip
       Handler: aws.HandleModelCreation
       Runtime: java17
@@ -127,6 +134,8 @@ Resources:
         - S3ReadPolicy:
             BucketName: !Ref StagingBucketName
       Tracing: PassThrough
+      SnapStart:
+        ApplyOn: PublishedVersions
 
   S3ModelWritePolicy:
     Type: AWS::IAM::ManagedPolicy
