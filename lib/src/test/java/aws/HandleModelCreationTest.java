@@ -159,7 +159,7 @@ class HandleModelCreationTest {
         assertThrows(AWSS3Exception.class, ()->handleModelCreation.handleRequest(input, context));
 
         final ArgumentCaptor<String> logData = ArgumentCaptor.forClass(String.class);
-        verify(lambdaLogger, times(2)).log(logData.capture());
+        verify(lambdaLogger, times(1)).log(logData.capture());
 
         assertThat(logData.getValue()).contains("Unable To create a model");
     }

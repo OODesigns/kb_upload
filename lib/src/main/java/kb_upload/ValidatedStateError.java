@@ -1,9 +1,8 @@
 package kb_upload;
 
-import aws.AWSS3Exception;
-
 import java.util.List;
 import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 public class ValidatedStateError extends ValidationResult{
 
@@ -18,7 +17,12 @@ public class ValidatedStateError extends ValidationResult{
     }
 
     @Override
-    public ValidationResult orElseThrow(final Function<ValidationResult, AWSS3Exception> functionException) throws AWSS3Exception {
+    public ValidationResult orElseThrow(final Function<ValidationResult, RuntimeException> functionException) throws RuntimeException {
         throw functionException.apply(this);
+    }
+
+    @Override
+    public ValidationResult calling(final UnaryOperator<ValidationResult> function) {
+        return this;
     }
 }

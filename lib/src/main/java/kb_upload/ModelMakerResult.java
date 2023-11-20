@@ -1,7 +1,5 @@
 package kb_upload;
 
-import java.util.function.Function;
-
 public abstract class ModelMakerResult implements  ModelMakerState<ModelMakerResult>{
 
     private final String message;
@@ -10,14 +8,8 @@ public abstract class ModelMakerResult implements  ModelMakerState<ModelMakerRes
         this.message = message;
     }
 
-    public ModelMakerResult calling(final Function<ModelMakerResult, ModelMakerResult> function) {
-        return function.apply(this);
-    }
-
     @Override
     public String getMessage() {
         return message;
     }
-
-
 }

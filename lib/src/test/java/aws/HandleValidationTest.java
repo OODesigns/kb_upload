@@ -75,13 +75,11 @@ public class HandleValidationTest {
         assertThrows(AWSS3Exception.class, ()->requestHandler.handleRequest(input, context));
 
         final ArgumentCaptor<String> logData = ArgumentCaptor.forClass(String.class);
-        verify(lambdaLogger, times(2)).log(logData.capture());
+        verify(lambdaLogger, times(1)).log(logData.capture());
 
         final List<String> errors = logData.getAllValues();
 
-        assertThat(errors.get(0)).contains("State Error");
-        assertThat(errors.get(1)).contains("message1");
-        assertThat(errors.get(1)).contains("message2");
+        assertThat(errors.get(0)).contains("State Error").contains("message1").contains("message2");
     }
 
 

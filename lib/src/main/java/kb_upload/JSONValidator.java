@@ -10,6 +10,7 @@ import com.networknt.schema.ValidationMessage;
 
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -23,10 +24,8 @@ public class JSONValidator implements Validator<JSONSchema, JSON, ValidationResu
 
     @Override
     public ValidationResult validate(final JSONSchema jsonSchema, final JSON json) {
-        final TransformationResult transformationResult = transformDataToJsonNodes(jsonSchema, json);
-
-        return transformationResult.validationResult
-                        .orElseGet(()-> getSchemaValidationResult(transformationResult.jsonNodes));
+        return transformDataToJsonNodes(jsonSchema, json)
+                .map(this::getSchemaValidationResult);
     }
 
     private ValidationResult getSchemaValidationResult(final JSONNodes jsonNodes) {
@@ -55,14 +54,23 @@ public class JSONValidator implements Validator<JSONSchema, JSON, ValidationResu
     private TransformationResult transformDataToJsonNodes(final JSONSchema jsonSchemaData, final JSON knowledgeData){
         try
         {
-            return new TransformationResult(Optional.empty(), new JSONNodes(getSchemaNode(jsonSchemaData), getNode(knowledgeData)));
+            return new TransformationResult(new ValidatedStateOK(), new JSONNodes(getSchemaNode(jsonSchemaData), getNode(knowledgeData)));
         } catch (final JsonProcessingException | JsonSchemaException ex) {
-            return new TransformationResult(Optional.of(new ValidatedStateError(ex.getMessage())), null);
+            return new TransformationResult(new ValidatedStateError(ex.getMessage()), null);
         }
     }
 
-    private record TransformationResult(Optional<ValidationResult> validationResult, JSONNodes jsonNodes){}
+    private record TransformationResult(ValidationResult validationResult, JSONNodes jsonNodes){
+        public ValidationResult map(final Function<JSONNodes, ValidationResult> function) {
+            return validationResult.calling(new FunctionHandler(function, jsonNodes)::handleValidation);
+        }
 
+        private record FunctionHandler(Function<JSONNodes, ValidationResult> function, JSONNodes jsonNodes) {
+            public ValidationResult handleValidation(final ValidationResult notUsed) {
+                return function.apply(jsonNodes);
+            }
+        }
+    }
 
     private record JSONNodes(JsonSchema schema, JsonNode node){}
 

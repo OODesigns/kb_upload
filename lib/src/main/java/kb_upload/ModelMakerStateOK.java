@@ -1,10 +1,8 @@
 package kb_upload;
-
-import aws.AWSS3Exception;
-
 import java.io.ByteArrayOutputStream;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 public class ModelMakerStateOK extends ModelMakerResult {
 
@@ -21,7 +19,12 @@ public class ModelMakerStateOK extends ModelMakerResult {
     }
 
     @Override
-    public Optional<ByteArrayOutputStream> orElseMapThrow(final Function<ModelMakerResult, AWSS3Exception> functionException) throws AWSS3Exception {
+    public Optional<ByteArrayOutputStream> orElseMapThrow(final Function<ModelMakerResult, RuntimeException> functionException) throws RuntimeException {
         return Optional.of(outputStream);
+    }
+
+    @Override
+    public ModelMakerResult calling(final UnaryOperator<ModelMakerResult> function) {
+        return function.apply(this);
     }
 }

@@ -10,10 +10,8 @@ import software.amazon.awssdk.services.s3.S3Client;
 import java.io.InputStream;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
 
 public class HandleValidation implements RequestHandler<Map<String, String>, ValidationResult> {
-    private static final String RESULT = "RESULT: %s";
     private static final String VALIDATION_KEY_NAME = "Validation-KeyName";
     private static final String VALIDATION_BUCKET_NAME = "Validation-BucketName";
     public static final FileLoader FILE_LOADER = new FileLoader("knowledgeSchema.json");
@@ -56,16 +54,9 @@ public class HandleValidation implements RequestHandler<Map<String, String>, Val
 
     }
      private ValidationResult validateData(final JSON fileData, final Context context) {
-        return validator.validate(JSON_SCHEMA, fileData)
-                .calling(logResult(context))
-                .orElseThrow(newInvalidDataException(context));
+        return AWSContextDecorator
+                .of(context, validator)
+                .validate(JSON_SCHEMA, fileData);
     }
 
-    private Function<ValidationResult, AWSS3Exception> newInvalidDataException(final Context context) {
-        return validationResult -> new AWSS3Exception(context, validationResult.getMessage());
-    }
-
-    private Function<ValidationResult, ValidationResult> logResult(final Context context) {
-        return v -> { context.getLogger().log(String.format(RESULT, v)); return v; };
-    }
 }

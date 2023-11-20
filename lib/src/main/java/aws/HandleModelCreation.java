@@ -12,6 +12,7 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.UnaryOperator;
 
 public class HandleModelCreation implements RequestHandler<Map<String, String>, Void> {
 
@@ -85,7 +86,7 @@ public class HandleModelCreation implements RequestHandler<Map<String, String>, 
 
                 return modelMaker.transform(inputStream)
                         .calling(logResult(context))
-                        .orElseMapThrow(newEnableToCreateModel(context));
+                        .orElseMapThrow(UnEnableToCreateModel(context));
 
             } catch (final IOException e) {
                 log(context, e.getMessage());
@@ -100,7 +101,7 @@ public class HandleModelCreation implements RequestHandler<Map<String, String>, 
     }
 
 
-    private Function<ModelMakerResult, ModelMakerResult> logResult(final Context context) {
+    private UnaryOperator<ModelMakerResult> logResult(final Context context) {
         return v -> { log(context, v.getMessage()); return v; };
     }
 
@@ -108,7 +109,7 @@ public class HandleModelCreation implements RequestHandler<Map<String, String>, 
         context.getLogger().log(String.format(RESULT, messages));
     }
 
-    private Function<ModelMakerResult, AWSS3Exception> newEnableToCreateModel(final Context context) {
+    private Function<ModelMakerResult, RuntimeException> UnEnableToCreateModel(final Context context) {
          return modelMakerStateResult ->  new AWSS3Exception(context, String.format(UNABLE_TO_CREATE_A_MODEL, modelMakerStateResult.getMessage()));
     }
 

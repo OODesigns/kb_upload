@@ -1,7 +1,7 @@
 package kb_upload;
 
-import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 public interface Callable<T>{
-    T calling(Function<T, T> function);
+    T calling(UnaryOperator<T> function);
 }
