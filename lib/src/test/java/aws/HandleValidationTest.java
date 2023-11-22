@@ -27,8 +27,7 @@ public class HandleValidationTest {
             """;
 
     @Test
-    void handleRequestWithValidData(@Mock final S3RequestProvider s3RequestProvider,
-                                    @Mock final Context context,
+    void handleRequestWithValidData(@Mock final Context context,
                                     @Mock final LambdaLogger lambdaLogger,
                                     @Mock final Validator<JSONSchema, JSON, ValidationResult> validator) {
 
@@ -41,8 +40,7 @@ public class HandleValidationTest {
 
         final RequestHandler<Map<String, String>, ValidationResult> requestHandler
                 = new HandleValidation(validator,
-                __-> Optional.of(new ByteArrayInputStream(validJSON.getBytes())),
-                s3RequestProvider);
+                __-> Optional.of(new ByteArrayInputStream(validJSON.getBytes())));
 
         requestHandler.handleRequest(input, context);
 
@@ -54,8 +52,7 @@ public class HandleValidationTest {
     }
 
     @Test
-    void handleRequestWithINValidData(@Mock final S3RequestProvider s3RequestProvider,
-                                      @Mock final Context context,
+    void handleRequestWithINValidData(@Mock final Context context,
                                       @Mock final LambdaLogger lambdaLogger,
                                       @Mock final Validator<JSONSchema, JSON, ValidationResult> validator){
 
@@ -69,8 +66,7 @@ public class HandleValidationTest {
 
         final RequestHandler<Map<String, String>, ValidationResult> requestHandler
                 = new HandleValidation(validator,
-                __-> Optional.of(new ByteArrayInputStream(validJSON.getBytes())),
-                s3RequestProvider);
+                __-> Optional.of(new ByteArrayInputStream(validJSON.getBytes())));
 
         assertThrows(AWSS3Exception.class, ()->requestHandler.handleRequest(input, context));
 
@@ -84,9 +80,7 @@ public class HandleValidationTest {
 
 
     @Test
-    void handleRequestWithValidDataUnableToLoad(
-                                    @Mock final S3RequestProvider s3RequestProvider,
-                                    @Mock final Context context,
+    void handleRequestWithValidDataUnableToLoad(@Mock final Context context,
                                     @Mock final LambdaLogger lambdaLogger,
                                     @Mock final Validator<JSONSchema, JSON, ValidationResult> validator) {
 
@@ -96,7 +90,7 @@ public class HandleValidationTest {
         when(context.getLogger()).thenReturn(lambdaLogger);
 
         final RequestHandler<Map<String, String>, ValidationResult> requestHandler
-                = new HandleValidation(validator, __-> Optional.empty(), s3RequestProvider);
+                = new HandleValidation(validator, __-> Optional.empty());
 
         assertThrows(AWSS3Exception.class, ()->requestHandler.handleRequest(input, context));
     }

@@ -12,7 +12,6 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.function.UnaryOperator;
 
 public class HandleModelCreation implements RequestHandler<Map<String, String>, Void> {
 
@@ -84,9 +83,11 @@ public class HandleModelCreation implements RequestHandler<Map<String, String>, 
         return inputStream -> {
             try(inputStream){
 
-                return modelMaker.transform(inputStream)
-                        .calling(logResult(context))
-                        .orElseMapThrow(UnEnableToCreateModel(context));
+                final ModelMakerState<ModelMakerResult> transform = modelMaker.transform(inputStream);
+
+                return Optional.of(new HandleResultContextDecorator<ModelMakerResult, ByteArrayOutputStream>(context)
+                        .calling(()->transform)
+                        .orElseThrow(()->transform, UNABLE_TO_CREATE_A_MODEL));
 
             } catch (final IOException e) {
                 log(context, e.getMessage());
@@ -99,20 +100,9 @@ public class HandleModelCreation implements RequestHandler<Map<String, String>, 
     private Function<S3Object, InputStream>  getFileData(final Context context){
         return s3Object -> fileLoader.retrieve(s3Object).orElseThrow(() -> throwUnableToLoadFile(context, s3Object));
     }
-
-
-    private UnaryOperator<ModelMakerResult> logResult(final Context context) {
-        return v -> { log(context, v.getMessage()); return v; };
-    }
-
     private void log(final Context context, final String messages) {
         context.getLogger().log(String.format(RESULT, messages));
     }
-
-    private Function<ModelMakerResult, RuntimeException> UnEnableToCreateModel(final Context context) {
-         return modelMakerStateResult ->  new AWSS3Exception(context, String.format(UNABLE_TO_CREATE_A_MODEL, modelMakerStateResult.getMessage()));
-    }
-
     private AWSS3Exception throwUnableToLoadFile(final Context context, final S3Object s3Object) {
         return new AWSS3Exception(context, String.format(UNABLE_TO_LOAD_FILE,
                 s3Object.getBucketName(), s3Object.getKeyName()));

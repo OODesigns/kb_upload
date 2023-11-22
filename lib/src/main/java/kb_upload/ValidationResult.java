@@ -7,12 +7,8 @@ public abstract class ValidationResult implements ValidatedState<ValidationResul
         this.message = message;
     }
 
-    public String getMessage() {
-        return message;
-    }
-
     @Override
     public String toString() {
-        return getMessage();
+        return message;
     }
 }

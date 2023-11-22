@@ -1,6 +1,5 @@
 package kb_upload;
 import java.io.ByteArrayOutputStream;
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
@@ -15,7 +14,7 @@ public class ModelMakerStateError extends ModelMakerResult {
     }
 
     @Override
-    public Optional<ByteArrayOutputStream> orElseMapThrow(final Function<ModelMakerResult, RuntimeException> functionException) throws RuntimeException {
+    public ByteArrayOutputStream orElseThrow(final Function<ModelMakerResult, RuntimeException> functionException) throws RuntimeException {
         throw functionException.apply(this);
     }
 

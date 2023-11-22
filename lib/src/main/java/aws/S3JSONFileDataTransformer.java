@@ -4,7 +4,6 @@ import com.amazonaws.services.lambda.runtime.Context;
 import kb_upload.JSON;
 import kb_upload.JSONData;
 import kb_upload.Retrievable;
-import kb_upload.Transformer2_1;
 import org.apache.commons.io.IOUtils;
 
 import java.io.IOException;
@@ -12,7 +11,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
-public class S3JSONFileDataTransformer implements Transformer2_1<Context, S3Object, JSON> {
+public class S3JSONFileDataTransformer implements S3ObjectToJSON {
     private static final String UNABLE_TO_LOAD_FILE = "Unable to load file from bucket: %s and key: %s";
     private static final String MISSING_DATA_WHEN_CREATING_JSON = "UnExpected missing Data when creating JSON";
     private final Retrievable<S3Object, Optional<InputStream>> fileloader;

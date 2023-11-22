@@ -3,6 +3,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.junit.jupiter.MockitoSettings;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -39,7 +40,7 @@ class ModelMakerTest {
         final ModelMakerState<ModelMakerResult> transform = modelMaker.transform(inputStream);
 
         assertThat(transform).isInstanceOf(ModelMakerStateOK.class);
-        assertThat(transform.orElseMapThrow(null)).isNotEmpty();
+        assertThat(transform.orElseThrow(null)).isInstanceOf(ByteArrayOutputStream.class);
     }
 
     @Test

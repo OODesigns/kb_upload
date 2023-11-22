@@ -92,7 +92,7 @@ class JSONValidatorTest {
         Optional.of(jsonValidator.validate(jsonSchema, json))
                 .ifPresentOrElse(v -> {
                     assertThat(v).isInstanceOf(ValidatedStateError.class);
-                    assertThat(v.getMessage()).contains("name: is missing but it is required");}
+                    assertThat(v.toString()).contains("name: is missing but it is required");}
                    ,()->fail("Expected Error Validation but got null"));
     }
 
@@ -108,7 +108,7 @@ class JSONValidatorTest {
         Optional.of(jsonValidator.validate(jsonSchema, json))
                 .ifPresentOrElse(v -> {
                             assertThat(v).isInstanceOf(ValidatedStateError.class);
-                            assertThat(v.getMessage()).contains("entries: is missing but it is required");}
+                            assertThat(v.toString()).contains("entries: is missing but it is required");}
                         ,()->fail("Expected Error Validation but got null"));
     }
 
@@ -125,7 +125,7 @@ class JSONValidatorTest {
         Optional.of(jsonValidator.validate(jsonSchema, json))
                 .ifPresentOrElse(v -> {
                             assertThat(v).isInstanceOf(ValidatedStateError.class);
-                            assertThat(v.getMessage())
+                            assertThat(v.toString())
                                     .contains("entries: is missing but it is required")
                                     .contains("name: is missing but it is required");}
                         ,()->fail("Expected Error Validation but got null"));
@@ -144,7 +144,7 @@ class JSONValidatorTest {
         Optional.of(jsonValidator.validate(jsonSchema, json))
                 .ifPresentOrElse(v -> {
                             assertThat(v).isInstanceOf(ValidatedStateOK.class);
-                            assertThat(v.getMessage()).contains("Validation State OK");}
+                            assertThat(v.toString()).contains("Validation State OK");}
                         ,()->fail("Expected Valid Validation but got null"));
 
     }

@@ -34,7 +34,7 @@ public class HandleTransformation implements RequestHandler<Map<String, String>,
     private final Storable<S3Object, ByteArrayOutputStream, S3FileSaverState> fileStore;
 
     private final S3RequestProvider s3RequestProvider;
-    private final Transformer2_1<Context, S3Object, JSON> s3JSONFileDataTransformer;
+    private final S3ObjectToJSON s3JSONFileDataTransformer;
 
 
     //Used for testing purposes only
