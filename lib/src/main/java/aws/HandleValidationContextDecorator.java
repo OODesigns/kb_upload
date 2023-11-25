@@ -3,7 +3,6 @@ package aws;
 import com.amazonaws.services.lambda.runtime.Context;
 import kb_upload.*;
 
-import java.io.InputStream;
 import java.util.Map;
 import java.util.Optional;
 
@@ -35,7 +34,7 @@ public class HandleValidationContextDecorator {
                 .orElseThrow();
     }
 
-    private JSON getFileData(S3Object s) {
+    private JSON getFileData(final S3Object s) {
         return s3JSONFileDataTransformer.transform(context, s);
     }
 
