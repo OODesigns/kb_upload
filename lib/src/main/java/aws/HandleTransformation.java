@@ -27,34 +27,24 @@ public class HandleTransformation implements RequestHandler<Map<String, String>,
     private static final String OK_RESULT = "RESULT S3FileSaverOKState";
     private static final String TRANSFORMATION = "transformation";
     private static final String TRANSFORMED = "transformed";
-    private final Retrievable<S3Object, Optional<InputStream>> fileLoader;
-
+    private static final S3Client s3Client = S3Client.builder().build();
+    private static final S3Request s3Request= new S3Request();
     private final Transformer1_1<JSON, Mappable<List<String>, String, String>> jsonTransformer;
-
     private final Storable<S3Object, ByteArrayOutputStream, S3FileSaverState> fileStore;
-
-    private final S3RequestProvider s3RequestProvider;
     private final S3ObjectToJSON s3JSONFileDataTransformer;
 
-
-    //Used for testing purposes only
     HandleTransformation(final Retrievable<S3Object, Optional<InputStream>> fileLoader,
                          final Transformer1_1<JSON, Mappable<List<String>, String, String>> jsonTransformer,
-                         final Storable<S3Object, ByteArrayOutputStream, S3FileSaverState> fileStore,
-                         final S3RequestProvider s3RequestProvider) {
-        this.fileLoader = fileLoader;
+                         final Storable<S3Object, ByteArrayOutputStream, S3FileSaverState> fileStore) {
         this.jsonTransformer = jsonTransformer;
         this.fileStore = fileStore;
-        this.s3RequestProvider = s3RequestProvider;
         this.s3JSONFileDataTransformer = new S3JSONFileDataTransformer(fileLoader);
     }
 
     public HandleTransformation() {
-        this.s3RequestProvider = new S3Request();
-        this.fileLoader = new S3StreamLoader(()-> S3Client.builder().build() , s3RequestProvider);
-        this.fileStore =  new S3StreamSaver(()-> S3Client.builder().build(), s3RequestProvider);
-        this.jsonTransformer = new JSonArrayToList(UTTERANCE);
-        this.s3JSONFileDataTransformer = new S3JSONFileDataTransformer(fileLoader);
+        this(new S3StreamLoader(()->s3Client, s3Request),
+             new JSonArrayToList(UTTERANCE),
+             new S3StreamSaver(()-> s3Client, s3Request));
     }
 
 
