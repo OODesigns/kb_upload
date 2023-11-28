@@ -42,9 +42,9 @@ public class HandleTransformation implements RequestHandler<Map<String, String>,
     }
 
     public HandleTransformation() {
-        this(new S3StreamLoader(()->s3Client, s3Request),
+        this(new S3StreamLoader(s3Client, s3Request),
              new JSonArrayToList(UTTERANCE),
-             new S3StreamSaver(()-> s3Client, s3Request));
+             new S3StreamSaver(s3Client, s3Request));
     }
 
 

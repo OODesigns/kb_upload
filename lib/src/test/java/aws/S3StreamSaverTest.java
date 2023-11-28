@@ -31,7 +31,7 @@ class S3StreamSaverTest {
         when(s3RequestProvider.getPutRequest(any())).thenReturn(putObjectRequest);
         when(streamContents.toByteArray()).thenReturn("someData".getBytes());
 
-        final S3StreamSaver s3StreamSaver = new S3StreamSaver(()->s3Client, s3RequestProvider);
+        final S3StreamSaver s3StreamSaver = new S3StreamSaver(s3Client, s3RequestProvider);
 
         assertThat(s3StreamSaver.store(s3Object, streamContents)).isInstanceOf(S3FileSaverOKState.class);
 
@@ -59,7 +59,7 @@ class S3StreamSaverTest {
         when(s3Client.putObject(any(PutObjectRequest.class), any(RequestBody.class) )).thenThrow(SdkException.class);
         when(streamContents.toByteArray()).thenReturn("someData".getBytes());
 
-        final S3StreamSaver s3StreamSaver = new S3StreamSaver(()->s3Client, s3RequestProvider);
+        final S3StreamSaver s3StreamSaver = new S3StreamSaver(s3Client, s3RequestProvider);
 
         assertThat(s3StreamSaver.store(s3ObjectFactory, streamContents)).isInstanceOf(S3FileSaverErrorState.class);
 

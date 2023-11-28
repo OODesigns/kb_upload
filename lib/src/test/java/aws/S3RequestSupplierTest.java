@@ -15,7 +15,7 @@ class S3RequestSupplierTest {
                                   @Mock final S3RequestProvider s3RequestProvider,
                                   @Mock final S3Object s3Object) {
 
-        final S3RequestSupplier s3RequestSupplier = new S3RequestSupplier(() -> S3client, s3RequestProvider);
+        final S3RequestSupplier s3RequestSupplier = new S3RequestSupplier(S3client, s3RequestProvider);
 
         final PutObjectRequest putRequest = PutObjectRequest.builder().bucket("test-bucket").key("test-key").build();
         when(s3RequestProvider.getPutRequest(s3Object)).thenReturn(putRequest);
@@ -31,7 +31,7 @@ class S3RequestSupplierTest {
 
         final GetObjectRequest getRequest = GetObjectRequest.builder().bucket("test-bucket").key("test-key").build();
 
-        final S3RequestSupplier s3RequestSupplier = new S3RequestSupplier(() -> S3client, s3RequestProvider);
+        final S3RequestSupplier s3RequestSupplier = new S3RequestSupplier(S3client, s3RequestProvider);
 
         when(s3RequestProvider.getGetRequest(s3Object)).thenReturn(getRequest);
 

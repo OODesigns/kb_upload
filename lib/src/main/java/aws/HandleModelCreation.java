@@ -45,8 +45,8 @@ public class HandleModelCreation implements RequestHandler<Map<String, String>, 
 
     public HandleModelCreation() {
         this.s3RequestProvider = new S3Request();
-        this.fileLoader = new S3StreamLoader(()-> S3Client.builder().build() , s3RequestProvider);
-        this.fileStore =  new S3StreamSaver(()-> S3Client.builder().build(), s3RequestProvider);
+        this.fileLoader = new S3StreamLoader(S3Client.builder().build() , s3RequestProvider);
+        this.fileStore =  new S3StreamSaver(S3Client.builder().build(), s3RequestProvider);
         this.modelMaker = new ModelMaker();
     }
 

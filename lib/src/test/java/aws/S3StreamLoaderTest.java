@@ -35,7 +35,7 @@ class S3StreamLoaderTest {
         when(s3RequestProvider.getGetRequest(any())).thenReturn(getObjectRequest);
 
         // Act
-        final S3StreamLoader s3StreamLoader = new S3StreamLoader(()->s3Client, s3RequestProvider);
+        final S3StreamLoader s3StreamLoader = new S3StreamLoader(s3Client, s3RequestProvider);
         final Optional<InputStream> result = s3StreamLoader.retrieve(s3Object);
 
         // Assert
@@ -56,7 +56,7 @@ class S3StreamLoaderTest {
         when(s3RequestProvider.getGetRequest(any())).thenReturn(getObjectRequest);
 
         // Act
-        final S3StreamLoader s3StreamLoader = new S3StreamLoader(()->s3Client, s3RequestProvider);
+        final S3StreamLoader s3StreamLoader = new S3StreamLoader(s3Client, s3RequestProvider);
         final Optional<InputStream> result = s3StreamLoader.retrieve(s3Object);
 
         // Assert
@@ -77,7 +77,7 @@ class S3StreamLoaderTest {
         when(s3RequestProvider.getGetRequest(any())).thenReturn(getObjectRequest);
 
         // Act
-        final S3StreamLoader s3StreamLoader = new S3StreamLoader(()->s3Client, s3RequestProvider);
+        final S3StreamLoader s3StreamLoader = new S3StreamLoader(s3Client, s3RequestProvider);
         final Optional<InputStream> result = s3StreamLoader.retrieve(s3Object);
 
         // Assert

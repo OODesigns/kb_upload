@@ -14,6 +14,14 @@ import java.util.Optional;
 public class HandleValidation implements RequestHandler<Map<String, String>, ValidationResult> {
     private final Validator<JSONSchema, JSON, ValidationResult> validator;
     private final S3ObjectToJSON s3JSONFileDataTransformer;
+    private static final Validator<JSONSchema, JSON, ValidationResult> defaultValidator
+            = new JSONValidator(()->JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V4));
+
+    private static final S3Client s3Client = S3Client.builder().build();
+    private static final S3Request s3Request= new S3Request();
+
+    private static final Retrievable<S3Object, Optional<InputStream>> defaultFileLoader
+            = new S3StreamLoader(s3Client , s3Request);
 
     HandleValidation(final Validator<JSONSchema, JSON, ValidationResult> validator,
                      final Retrievable<S3Object, Optional<InputStream>> fileLoader){
@@ -22,10 +30,7 @@ public class HandleValidation implements RequestHandler<Map<String, String>, Val
         this.s3JSONFileDataTransformer = new S3JSONFileDataTransformer(fileLoader);
     }
 
-    public HandleValidation() {
-        this(new JSONValidator(()->JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V4)),
-             new S3StreamLoader(()-> S3Client.builder().build() , new S3Request()));
-    }
+    public HandleValidation() {this(defaultValidator, defaultFileLoader);}
 
      @Override
     public ValidationResult handleRequest(final Map<String, String> input, final Context context) {
