@@ -27,7 +27,6 @@ class HandleModelCreationTest {
             (@Mock final Context context,
              @Mock final LambdaLogger lambdaLogger,
              @Mock final Storable<S3Object, ByteArrayOutputStream, S3FileSaverState> fileStore,
-             @Mock final S3RequestProvider s3RequestProvider,
              @Mock final Transformer1_1<InputStream, ModelMakerState<ModelMakerResult>> modelMaker){
 
         when(context.getLogger()).thenReturn(lambdaLogger);
@@ -36,8 +35,7 @@ class HandleModelCreationTest {
                 = new HandleModelCreation(
                 __-> Optional.of(new ByteArrayInputStream("{}".getBytes())),
                 modelMaker,
-                fileStore,
-                s3RequestProvider);
+                fileStore);
 
         assertThrows(AWSS3Exception.class, ()->handleModelCreation.handleRequest(null, context));
 
@@ -52,7 +50,6 @@ class HandleModelCreationTest {
             (@Mock final Context context,
              @Mock final LambdaLogger lambdaLogger,
              @Mock final Storable<S3Object, ByteArrayOutputStream, S3FileSaverState> fileStore,
-             @Mock final S3RequestProvider s3RequestProvider,
              @Mock final Transformer1_1<InputStream, ModelMakerState<ModelMakerResult>> modelMaker){
 
         when(context.getLogger()).thenReturn(lambdaLogger);
@@ -64,8 +61,7 @@ class HandleModelCreationTest {
                 = new HandleModelCreation(
                 __-> Optional.of(new ByteArrayInputStream("{}".getBytes())),
                 modelMaker,
-                fileStore,
-                s3RequestProvider);
+                fileStore);
 
         assertThrows(AWSS3Exception.class, ()->handleModelCreation.handleRequest(input, context));
 
@@ -80,7 +76,6 @@ class HandleModelCreationTest {
             (@Mock final Context context,
              @Mock final LambdaLogger lambdaLogger,
              @Mock final Storable<S3Object, ByteArrayOutputStream, S3FileSaverState> fileStore,
-             @Mock final S3RequestProvider s3RequestProvider,
              @Mock final Transformer1_1<InputStream, ModelMakerState<ModelMakerResult>> modelMaker){
 
         when(context.getLogger()).thenReturn(lambdaLogger);
@@ -92,8 +87,7 @@ class HandleModelCreationTest {
                 = new HandleModelCreation(
                 __-> Optional.of(new ByteArrayInputStream("{}".getBytes())),
                 modelMaker,
-                fileStore,
-                s3RequestProvider);
+                fileStore);
 
         assertThrows(AWSS3Exception.class, ()->handleModelCreation.handleRequest(input, context));
 
@@ -108,7 +102,6 @@ class HandleModelCreationTest {
             (@Mock final Context context,
              @Mock final LambdaLogger lambdaLogger,
              @Mock final Storable<S3Object, ByteArrayOutputStream, S3FileSaverState> fileStore,
-             @Mock final S3RequestProvider s3RequestProvider,
              @Mock final Transformer1_1<InputStream, ModelMakerState<ModelMakerResult>> modelMaker){
 
         when(context.getLogger()).thenReturn(lambdaLogger);
@@ -120,8 +113,7 @@ class HandleModelCreationTest {
                 = new HandleModelCreation(
                 __-> Optional.of(new ByteArrayInputStream("{}".getBytes())),
                 modelMaker,
-                fileStore,
-                s3RequestProvider);
+                fileStore);
 
         assertThrows(AWSS3Exception.class, ()->handleModelCreation.handleRequest(input, context));
 
@@ -136,7 +128,6 @@ class HandleModelCreationTest {
             (@Mock final Context context,
              @Mock final LambdaLogger lambdaLogger,
              @Mock final Storable<S3Object, ByteArrayOutputStream, S3FileSaverState> fileStore,
-             @Mock final S3RequestProvider s3RequestProvider,
              @Mock final Transformer1_1<InputStream, ModelMakerState<ModelMakerResult>> modelMaker){
 
         final ModelMakerState<ModelMakerResult> modelMakerState
@@ -153,8 +144,7 @@ class HandleModelCreationTest {
                 = new HandleModelCreation(
                 __-> Optional.of(new ByteArrayInputStream("{}".getBytes())),
                 modelMaker,
-                fileStore,
-                s3RequestProvider);
+                fileStore);
 
         assertThrows(AWSS3Exception.class, ()->handleModelCreation.handleRequest(input, context));
 
@@ -169,7 +159,6 @@ class HandleModelCreationTest {
             (@Mock final Context context,
              @Mock final LambdaLogger lambdaLogger,
              @Mock final Storable<S3Object, ByteArrayOutputStream, S3FileSaverState> fileStore,
-             @Mock final S3RequestProvider s3RequestProvider,
              @Mock final Transformer1_1<InputStream, ModelMakerState<ModelMakerResult>> modelMaker,
              @Mock final ByteArrayOutputStream outputStream){
 
@@ -188,8 +177,7 @@ class HandleModelCreationTest {
                 = new HandleModelCreation(
                 __-> Optional.of(new ByteArrayInputStream("{}".getBytes())),
                 modelMaker,
-                fileStore,
-                s3RequestProvider);
+                fileStore);
 
         assertThrows(AWSS3Exception.class, ()->handleModelCreation.handleRequest(input, context));
 
@@ -203,7 +191,6 @@ class HandleModelCreationTest {
             (@Mock final Context context,
              @Mock final LambdaLogger lambdaLogger,
              @Mock final Storable<S3Object, ByteArrayOutputStream, S3FileSaverState> fileStore,
-             @Mock final S3RequestProvider s3RequestProvider,
              @Mock final Transformer1_1<InputStream, ModelMakerState<ModelMakerResult>> modelMaker,
              @Mock final ByteArrayOutputStream outputStream){
 
@@ -222,8 +209,7 @@ class HandleModelCreationTest {
                 = new HandleModelCreation(
                 __-> Optional.of(new ByteArrayInputStream("{}".getBytes())),
                 modelMaker,
-                fileStore,
-                s3RequestProvider);
+                fileStore);
 
         assertThrows(AWSS3Exception.class, ()->handleModelCreation.handleRequest(input, context));
 
@@ -238,7 +224,6 @@ class HandleModelCreationTest {
             (@Mock final Context context,
              @Mock final LambdaLogger lambdaLogger,
              @Mock final Storable<S3Object, ByteArrayOutputStream, S3FileSaverState> fileStore,
-             @Mock final S3RequestProvider s3RequestProvider,
              @Mock final Transformer1_1<InputStream, ModelMakerState<ModelMakerResult>> modelMaker,
              @Mock final ByteArrayOutputStream outputStream){
 
@@ -259,8 +244,7 @@ class HandleModelCreationTest {
                 = new HandleModelCreation(
                 __-> Optional.of(new ByteArrayInputStream("{}".getBytes())),
                 modelMaker,
-                fileStore,
-                s3RequestProvider);
+                fileStore);
 
         assertThrows(AWSS3Exception.class, ()->handleModelCreation.handleRequest(input, context));
 
@@ -277,7 +261,6 @@ class HandleModelCreationTest {
             (@Mock final Context context,
              @Mock final LambdaLogger lambdaLogger,
              @Mock final Storable<S3Object, ByteArrayOutputStream, S3FileSaverState> fileStore,
-             @Mock final S3RequestProvider s3RequestProvider,
              @Mock final Transformer1_1<InputStream, ModelMakerState<ModelMakerResult>> modelMaker,
              @Mock final ByteArrayOutputStream outputStream){
 
@@ -299,8 +282,7 @@ class HandleModelCreationTest {
                 = new HandleModelCreation(
                 __-> Optional.of(new ByteArrayInputStream("{}".getBytes())),
                 modelMaker,
-                fileStore,
-                s3RequestProvider);
+                fileStore);
 
         handleModelCreation.handleRequest(input, context);
 

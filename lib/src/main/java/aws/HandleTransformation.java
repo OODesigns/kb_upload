@@ -28,7 +28,6 @@ public class HandleTransformation implements RequestHandler<Map<String, String>,
     private static final String TRANSFORMATION = "transformation";
     private static final String TRANSFORMED = "transformed";
     private static final S3Client s3Client = S3Client.builder().build();
-    private static final S3Request s3Request= new S3Request();
     private final Transformer1_1<JSON, Mappable<List<String>, String, String>> jsonTransformer;
     private final Storable<S3Object, ByteArrayOutputStream, S3FileSaverState> fileStore;
     private final S3ObjectToJSON s3JSONFileDataTransformer;
@@ -42,9 +41,9 @@ public class HandleTransformation implements RequestHandler<Map<String, String>,
     }
 
     public HandleTransformation() {
-        this(new S3StreamLoader(s3Client, s3Request),
+        this(new S3StreamLoader(s3Client),
              new JSonArrayToList(UTTERANCE),
-             new S3StreamSaver(s3Client, s3Request));
+             new S3StreamSaver(s3Client));
     }
 
 

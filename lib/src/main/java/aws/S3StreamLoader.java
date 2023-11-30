@@ -4,19 +4,18 @@ import kb_upload.Retrievable;
 import software.amazon.awssdk.core.ResponseInputStream;
 import software.amazon.awssdk.core.exception.SdkException;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectResponse;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Optional;
 import java.util.function.Function;
 
-public class S3StreamLoader extends S3RequestSupplier implements Retrievable<S3Object, Optional<InputStream>> {
+public class S3StreamLoader extends S3ClientSupplier implements Retrievable<S3Object, Optional<InputStream>> {
 
-
-    public S3StreamLoader(final S3Client s3Client, final S3RequestProvider s3RequestProvider) {
-        super(s3Client, s3RequestProvider);
+    public S3StreamLoader(final S3Client s3Client) {
+        super(s3Client);
     }
 
     @Override
@@ -40,5 +39,12 @@ public class S3StreamLoader extends S3RequestSupplier implements Retrievable<S3O
                 return Optional.empty();
             }
         };
+    }
+
+    private GetObjectRequest getGetRequest(final S3Object s3Object) {
+        return GetObjectRequest.builder()
+                .bucket(s3Object.getBucketName())
+                .key(s3Object.getKeyName())
+                .build();
     }
 }

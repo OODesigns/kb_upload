@@ -23,19 +23,15 @@ class S3StreamLoaderTest {
     @Test
     void testRetrieveSuccess(@Mock final S3Object s3Object,
                              @Mock final S3Client s3Client,
-                             @Mock final S3RequestProvider s3RequestProvider,
-                             @Mock final ResponseInputStream<GetObjectResponse> responseBytes,
-                             @Mock final GetObjectRequest getObjectRequest
-                             ) throws IOException {
+                             @Mock final ResponseInputStream<GetObjectResponse> responseBytes) throws IOException {
 
         final byte[] testData = "Hello, World!".getBytes();
 
         when(s3Client.getObject(any(GetObjectRequest.class))).thenReturn(responseBytes);
         when(responseBytes.readAllBytes()).thenReturn(testData);
-        when(s3RequestProvider.getGetRequest(any())).thenReturn(getObjectRequest);
 
         // Act
-        final S3StreamLoader s3StreamLoader = new S3StreamLoader(s3Client, s3RequestProvider);
+        final S3StreamLoader s3StreamLoader = new S3StreamLoader(s3Client);
         final Optional<InputStream> result = s3StreamLoader.retrieve(s3Object);
 
         // Assert
@@ -47,16 +43,12 @@ class S3StreamLoaderTest {
     @Test
     void testRetrieveSdkException(
                              @Mock final S3Object s3Object,
-                             @Mock final S3Client s3Client,
-                             @Mock final S3RequestProvider s3RequestProvider,
-                             @Mock final GetObjectRequest getObjectRequest){
+                             @Mock final S3Client s3Client){
 
         when(s3Client.getObject(any(GetObjectRequest.class))).thenThrow(SdkException.class);
 
-        when(s3RequestProvider.getGetRequest(any())).thenReturn(getObjectRequest);
-
         // Act
-        final S3StreamLoader s3StreamLoader = new S3StreamLoader(s3Client, s3RequestProvider);
+        final S3StreamLoader s3StreamLoader = new S3StreamLoader(s3Client);
         final Optional<InputStream> result = s3StreamLoader.retrieve(s3Object);
 
         // Assert
@@ -67,17 +59,13 @@ class S3StreamLoaderTest {
     void testRetrieveIOException(
             @Mock final S3Object s3Object,
             @Mock final S3Client s3Client,
-            @Mock final S3RequestProvider s3RequestProvider,
-            @Mock final GetObjectRequest getObjectRequest,
             @Mock final ResponseInputStream<GetObjectResponse> objectResponseResponseInputStream) throws IOException {
 
         when(s3Client.getObject(any(GetObjectRequest.class))).thenReturn(objectResponseResponseInputStream);
         when(objectResponseResponseInputStream.readAllBytes()).thenThrow(IOException.class);
 
-        when(s3RequestProvider.getGetRequest(any())).thenReturn(getObjectRequest);
-
         // Act
-        final S3StreamLoader s3StreamLoader = new S3StreamLoader(s3Client, s3RequestProvider);
+        final S3StreamLoader s3StreamLoader = new S3StreamLoader(s3Client);
         final Optional<InputStream> result = s3StreamLoader.retrieve(s3Object);
 
         // Assert

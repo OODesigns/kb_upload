@@ -31,22 +31,18 @@ public class HandleModelCreation implements RequestHandler<Map<String, String>, 
     private final Retrievable<S3Object, Optional<InputStream>> fileLoader;
     private final Storable<S3Object, ByteArrayOutputStream, S3FileSaverState> fileStore;
     private final Transformer1_1<InputStream, ModelMakerState<ModelMakerResult>> modelMaker;
-    private final S3RequestProvider s3RequestProvider;
 
     HandleModelCreation(final Retrievable<S3Object, Optional<InputStream>> fileLoader,
                         final Transformer1_1<InputStream, ModelMakerState<ModelMakerResult>> modelMaker,
-                        final Storable<S3Object, ByteArrayOutputStream, S3FileSaverState> fileStore,
-                        final S3RequestProvider s3RequestProvider) {
+                        final Storable<S3Object, ByteArrayOutputStream, S3FileSaverState> fileStore) {
         this.fileLoader = fileLoader;
-        this.s3RequestProvider = s3RequestProvider;
         this.fileStore = fileStore;
         this.modelMaker = modelMaker;
     }
 
     public HandleModelCreation() {
-        this.s3RequestProvider = new S3Request();
-        this.fileLoader = new S3StreamLoader(S3Client.builder().build() , s3RequestProvider);
-        this.fileStore =  new S3StreamSaver(S3Client.builder().build(), s3RequestProvider);
+        this.fileLoader = new S3StreamLoader(S3Client.builder().build());
+        this.fileStore =  new S3StreamSaver(S3Client.builder().build());
         this.modelMaker = new ModelMaker();
     }
 

@@ -33,9 +33,9 @@ class BucketNameTest {
     @Test
     public void testInvalidBucketStartOrEnd() {
         assertThrows(InvalidBucketNameException.class,
-                () -> new BucketName("-invalidstart"));
+                () -> new BucketName("-invalidStart"));
         assertThrows(InvalidBucketNameException.class,
-                () -> new BucketName("invalidend-"));
+                () -> new BucketName("invalidEnd-"));
     }
 
     @Test
