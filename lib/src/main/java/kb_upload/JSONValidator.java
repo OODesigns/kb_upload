@@ -12,13 +12,12 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 
 public class JSONValidator implements Validator<JSONSchema, JSON, ValidationResult> {
 
-    private final Supplier<JsonSchemaFactory> schemaFactory;
+    private final JsonSchemaFactory schemaFactory;
 
-    public JSONValidator(final Supplier<JsonSchemaFactory> factory) {
+    public JSONValidator(final JsonSchemaFactory factory) {
         this.schemaFactory = factory;
     }
 
@@ -79,6 +78,6 @@ public class JSONValidator implements Validator<JSONSchema, JSON, ValidationResu
     }
 
     private JsonSchema getSchemaNode(final JSONSchema jsonSchemaData) throws JsonSchemaException{
-        return schemaFactory.get().getSchema(jsonSchemaData.get());
+        return schemaFactory.getSchema(jsonSchemaData.get());
     }
 }

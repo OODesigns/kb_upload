@@ -86,7 +86,7 @@ class JSONValidatorTest {
         when(json.get()).thenReturn(missingName);
         when(jsonSchema.get()).thenReturn(new FileLoader("knowledgeSchema.json").toString());
 
-        final JSONValidator jsonValidator = new JSONValidator(() ->
+        final JSONValidator jsonValidator = new JSONValidator(
                 JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V4));
 
         Optional.of(jsonValidator.validate(jsonSchema, json))
@@ -102,7 +102,7 @@ class JSONValidatorTest {
         when(json.get()).thenReturn(missingEntry);
         when(jsonSchema.get()).thenReturn(new FileLoader("knowledgeSchema.json").toString());
 
-        final JSONValidator jsonValidator = new JSONValidator(() ->
+        final JSONValidator jsonValidator = new JSONValidator(
                 JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V4));
 
         Optional.of(jsonValidator.validate(jsonSchema, json))
@@ -119,7 +119,7 @@ class JSONValidatorTest {
         when(json.get()).thenReturn(missingNameEntry);
         when(jsonSchema.get()).thenReturn(new FileLoader("knowledgeSchema.json").toString());
 
-        final JSONValidator jsonValidator = new JSONValidator(() ->
+        final JSONValidator jsonValidator = new JSONValidator(
                 JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V4));
 
         Optional.of(jsonValidator.validate(jsonSchema, json))
@@ -138,7 +138,7 @@ class JSONValidatorTest {
         when(json.get()).thenReturn(validJSON);
         when(jsonSchema.get()).thenReturn(new FileLoader("knowledgeSchema.json").toString());
 
-        final JSONValidator jsonValidator = new JSONValidator(() ->
+        final JSONValidator jsonValidator = new JSONValidator(
                 JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V4));
 
         Optional.of(jsonValidator.validate(jsonSchema, json))
@@ -155,7 +155,7 @@ class JSONValidatorTest {
         when(json.get()).thenReturn(inValidJSON);
         when(jsonSchema.get()).thenReturn(new FileLoader("knowledgeSchema.json").toString());
 
-        final JSONValidator jsonValidator = new JSONValidator(() ->
+        final JSONValidator jsonValidator = new JSONValidator(
                 JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V4));
 
         assertThat(jsonValidator.validate(jsonSchema, json)).isInstanceOf(ValidatedStateError.class);
