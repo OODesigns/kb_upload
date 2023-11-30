@@ -21,7 +21,7 @@ import static org.mockito.Mockito.when;
 class S3StreamLoaderTest {
 
     @Test
-    void testRetrieveSuccess(@Mock final S3Object s3Object,
+    void testRetrieveSuccess(@Mock final S3ObjectReference s3ObjectReference,
                              @Mock final S3Client s3Client,
                              @Mock final ResponseInputStream<GetObjectResponse> responseBytes) throws IOException {
 
@@ -32,7 +32,7 @@ class S3StreamLoaderTest {
 
         // Act
         final S3StreamLoader s3StreamLoader = new S3StreamLoader(s3Client);
-        final Optional<InputStream> result = s3StreamLoader.retrieve(s3Object);
+        final Optional<InputStream> result = s3StreamLoader.retrieve(s3ObjectReference);
 
         // Assert
         assertThat(result).isPresent();
@@ -42,14 +42,14 @@ class S3StreamLoaderTest {
 
     @Test
     void testRetrieveSdkException(
-                             @Mock final S3Object s3Object,
+                             @Mock final S3ObjectReference s3ObjectReference,
                              @Mock final S3Client s3Client){
 
         when(s3Client.getObject(any(GetObjectRequest.class))).thenThrow(SdkException.class);
 
         // Act
         final S3StreamLoader s3StreamLoader = new S3StreamLoader(s3Client);
-        final Optional<InputStream> result = s3StreamLoader.retrieve(s3Object);
+        final Optional<InputStream> result = s3StreamLoader.retrieve(s3ObjectReference);
 
         // Assert
         assertThat(result).isEmpty();
@@ -57,7 +57,7 @@ class S3StreamLoaderTest {
 
     @Test
     void testRetrieveIOException(
-            @Mock final S3Object s3Object,
+            @Mock final S3ObjectReference s3ObjectReference,
             @Mock final S3Client s3Client,
             @Mock final ResponseInputStream<GetObjectResponse> objectResponseResponseInputStream) throws IOException {
 
@@ -66,7 +66,7 @@ class S3StreamLoaderTest {
 
         // Act
         final S3StreamLoader s3StreamLoader = new S3StreamLoader(s3Client);
-        final Optional<InputStream> result = s3StreamLoader.retrieve(s3Object);
+        final Optional<InputStream> result = s3StreamLoader.retrieve(s3ObjectReference);
 
         // Assert
         assertThat(result).isEmpty();

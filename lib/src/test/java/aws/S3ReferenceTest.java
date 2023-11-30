@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-class S3ObjectFactoryTest {
+class S3ReferenceTest {
 
     private Map<String, String> input;
     private Context context;
@@ -30,7 +30,7 @@ class S3ObjectFactoryTest {
         input.put("bucketNameKey", "test-bucket");
         input.put("keyNameKey", "test-key");
 
-        final S3ObjectFactory factory = new S3ObjectFactory(input, context, "bucketNameKey", "keyNameKey", "testArea");
+        final S3Reference factory = new S3Reference(input, context, "bucketNameKey", "keyNameKey", "testArea");
 
         assertEquals("test-bucket", factory.getBucketName());
         assertEquals("test-key", factory.getKeyName());
@@ -41,7 +41,7 @@ class S3ObjectFactoryTest {
         input.put("keyNameKey", "test-key");
 
         assertThrows(AWSS3Exception.class, () ->
-                new S3ObjectFactory(input, context, "bucketNameKey", "keyNameKey", "testArea")
+                new S3Reference(input, context, "bucketNameKey", "keyNameKey", "testArea")
         );
     }
 
@@ -50,7 +50,7 @@ class S3ObjectFactoryTest {
         input.put("bucketNameKey", "test-bucket");
 
         assertThrows(AWSS3Exception.class, () ->
-                new S3ObjectFactory(input, context, "bucketNameKey", "keyNameKey", "testArea")
+                new S3Reference(input, context, "bucketNameKey", "keyNameKey", "testArea")
         );
     }
 }

@@ -27,7 +27,7 @@ class HandleTransformationTest {
                                        @Mock final Context context,
                                        @Mock final LambdaLogger lambdaLogger,
                                        @Mock final Transformer1_1<JSON, Mappable<List<String>, String, String>> jsonTransformer,
-                                       @Mock final Storable<S3Object, ByteArrayOutputStream, S3FileSaverState> fileStore){
+                                       @Mock final Storable<S3ObjectReference, ByteArrayOutputStream, S3FileSaverState> fileStore){
 
         when(context.getLogger()).thenReturn(lambdaLogger);
 
@@ -49,7 +49,7 @@ class HandleTransformationTest {
     void errorExpectedTransformationBucketNameMissing(@Mock final Context context,
                                               @Mock final LambdaLogger lambdaLogger,
                                               @Mock final Transformer1_1<JSON, Mappable<List<String>, String, String>> jsonTransformer,
-                                              @Mock final Storable<S3Object, ByteArrayOutputStream, S3FileSaverState> fileStore){
+                                              @Mock final Storable<S3ObjectReference, ByteArrayOutputStream, S3FileSaverState> fileStore){
 
         when(context.getLogger()).thenReturn(lambdaLogger);
 
@@ -73,7 +73,7 @@ class HandleTransformationTest {
     void errorExpectedTransformationBucketNameMissingData(@Mock final Context context,
                                               @Mock final LambdaLogger lambdaLogger,
                                               @Mock final Transformer1_1<JSON, Mappable<List<String>, String, String>> jsonTransformer,
-                                              @Mock final Storable<S3Object, ByteArrayOutputStream, S3FileSaverState> fileStore){
+                                              @Mock final Storable<S3ObjectReference, ByteArrayOutputStream, S3FileSaverState> fileStore){
 
         when(context.getLogger()).thenReturn(lambdaLogger);
 
@@ -97,7 +97,7 @@ class HandleTransformationTest {
     void errorExpectedTransformationKeyNameMissing(@Mock final Context context,
                                                    @Mock final LambdaLogger lambdaLogger,
                                                    @Mock final Transformer1_1<JSON, Mappable<List<String>, String, String>> jsonTransformer,
-                                                   @Mock final Storable<S3Object, ByteArrayOutputStream, S3FileSaverState> fileStore){
+                                                   @Mock final Storable<S3ObjectReference, ByteArrayOutputStream, S3FileSaverState> fileStore){
 
         when(context.getLogger()).thenReturn(lambdaLogger);
 
@@ -122,7 +122,7 @@ class HandleTransformationTest {
                                @Mock final LambdaLogger lambdaLogger,
                                @Mock final Transformer1_1<JSON, Mappable<List<String>, String, String>> jsonTransformer,
                                @Mock final Mappable<List<String>, String, String> transformedResult,
-                               @Mock final Storable<S3Object, ByteArrayOutputStream, S3FileSaverState> fileStore){
+                               @Mock final Storable<S3ObjectReference, ByteArrayOutputStream, S3FileSaverState> fileStore){
 
         when(context.getLogger()).thenReturn(lambdaLogger);
         when(jsonTransformer.transform(any())).thenReturn(transformedResult);
@@ -151,7 +151,7 @@ class HandleTransformationTest {
                                    @Mock final LambdaLogger lambdaLogger,
                                    @Mock final Transformer1_1<JSON, Mappable<List<String>, String, String>> jsonTransformer,
                                    @Mock final Mappable<List<String>, String, String> transformedResult,
-                                   @Mock final Storable<S3Object, ByteArrayOutputStream, S3FileSaverState> fileStore){
+                                   @Mock final Storable<S3ObjectReference, ByteArrayOutputStream, S3FileSaverState> fileStore){
 
         when(context.getLogger()).thenReturn(lambdaLogger);
         when(jsonTransformer.transform(any())).thenReturn(transformedResult);
@@ -180,7 +180,7 @@ class HandleTransformationTest {
              @Mock final LambdaLogger lambdaLogger,
              @Mock final Transformer1_1<JSON, Mappable<List<String>, String, String>> jsonTransformer,
              @Mock final Mappable<List<String>, String, String> transformedResult,
-             @Mock final Storable<S3Object, ByteArrayOutputStream, S3FileSaverState> fileStore){
+             @Mock final Storable<S3ObjectReference, ByteArrayOutputStream, S3FileSaverState> fileStore){
 
         when(context.getLogger()).thenReturn(lambdaLogger);
         when(jsonTransformer.transform(any())).thenReturn(transformedResult);
@@ -210,7 +210,7 @@ class HandleTransformationTest {
              @Mock final LambdaLogger lambdaLogger,
              @Mock final Transformer1_1<JSON, Mappable<List<String>, String, String>> jsonTransformer,
              @Mock final Mappable<List<String>, String, String> transformedResult,
-             @Mock final Storable<S3Object, ByteArrayOutputStream, S3FileSaverState> fileStore){
+             @Mock final Storable<S3ObjectReference, ByteArrayOutputStream, S3FileSaverState> fileStore){
 
         when(context.getLogger()).thenReturn(lambdaLogger);
         when(jsonTransformer.transform(any())).thenReturn(transformedResult);
@@ -244,7 +244,7 @@ class HandleTransformationTest {
              @Mock final LambdaLogger lambdaLogger,
              @Mock final Transformer1_1<JSON, Mappable<List<String>, String, String>> jsonTransformer,
              @Mock final Mappable<List<String>, String, String> transformedResult,
-             @Mock final Storable<S3Object, ByteArrayOutputStream, S3FileSaverState> fileStore){
+             @Mock final Storable<S3ObjectReference, ByteArrayOutputStream, S3FileSaverState> fileStore){
 
         when(context.getLogger()).thenReturn(lambdaLogger);
         when(jsonTransformer.transform(any())).thenReturn(transformedResult);

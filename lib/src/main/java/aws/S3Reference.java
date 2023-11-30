@@ -3,15 +3,15 @@ package aws;
 import com.amazonaws.services.lambda.runtime.Context;
 import java.util.Map;
 
-public class S3ObjectFactory implements S3Object{
+public class S3Reference implements S3ObjectReference {
     private static final String BUCKET_NAME_IS_MISSING = "Bucket name for %s file is missing";
     private static final String KEY_NAME_IS_MISSING = "Key name for %s file is missing";
     private final String bucketName;
     private final String keyName;
 
 
-    public S3ObjectFactory(final Map<String, String> input, final Context context,
-                           final String bucketNameKey, final String keyNameKey, final String area) {
+    public S3Reference(final Map<String, String> input, final Context context,
+                       final String bucketNameKey, final String keyNameKey, final String area) {
 
         this.bucketName = getBucketNameProvider(bucketNameKey, area, input, context).get();
         this.keyName = getKeyNameProvider(keyNameKey, area, input, context).get();

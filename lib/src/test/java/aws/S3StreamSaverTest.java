@@ -23,14 +23,14 @@ import static org.mockito.Mockito.*;
 class S3StreamSaverTest {
     @Test
     void savingReturnsOKState(@Mock final S3Client s3Client,
-                              @Mock final S3Object s3Object,
+                              @Mock final S3ObjectReference s3ObjectReference,
                               @Mock final ByteArrayOutputStream streamContents){
 
         when(streamContents.toByteArray()).thenReturn("someData".getBytes());
 
         final S3StreamSaver s3StreamSaver = new S3StreamSaver(s3Client);
 
-        assertThat(s3StreamSaver.store(s3Object, streamContents)).isInstanceOf(S3FileSaverOKState.class);
+        assertThat(s3StreamSaver.store(s3ObjectReference, streamContents)).isInstanceOf(S3FileSaverOKState.class);
 
         final ArgumentCaptor<RequestBody> contents = ArgumentCaptor.forClass(RequestBody.class);
 
@@ -47,7 +47,7 @@ class S3StreamSaverTest {
 
     @Test
     void errorSavingReturnsErrorState(@Mock final S3Client s3Client,
-                                      @Mock final S3ObjectFactory s3ObjectFactory,
+                                      @Mock final S3Reference s3Reference,
                                       @Mock final ByteArrayOutputStream streamContents){
 
         when(s3Client.putObject(any(PutObjectRequest.class), any(RequestBody.class) )).thenThrow(SdkException.class);
@@ -55,7 +55,7 @@ class S3StreamSaverTest {
 
         final S3StreamSaver s3StreamSaver = new S3StreamSaver(s3Client);
 
-        assertThat(s3StreamSaver.store(s3ObjectFactory, streamContents)).isInstanceOf(S3FileSaverErrorState.class);
+        assertThat(s3StreamSaver.store(s3Reference, streamContents)).isInstanceOf(S3FileSaverErrorState.class);
 
     }
 

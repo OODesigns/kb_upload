@@ -12,17 +12,17 @@ import java.io.InputStream;
 import java.util.Optional;
 import java.util.function.Function;
 
-public class S3StreamLoader extends S3ClientSupplier implements Retrievable<S3Object, Optional<InputStream>> {
+public class S3StreamLoader extends S3ClientSupplier implements Retrievable<S3ObjectReference, Optional<InputStream>> {
 
     public S3StreamLoader(final S3Client s3Client) {
         super(s3Client);
     }
 
     @Override
-    public Optional<InputStream> retrieve(final S3Object s3Object) {
+    public Optional<InputStream> retrieve(final S3ObjectReference s3ObjectReference) {
         // Do not close s3Client as it can be used across multiple invocations
         try {
-            return Optional.of(getGetRequest(s3Object))
+            return Optional.of(getGetRequest(s3ObjectReference))
                     .map(s3Client::getObject)
                     .flatMap(getResponse())
                     .map(ByteArrayInputStream::new);
@@ -41,10 +41,10 @@ public class S3StreamLoader extends S3ClientSupplier implements Retrievable<S3Ob
         };
     }
 
-    private GetObjectRequest getGetRequest(final S3Object s3Object) {
+    private GetObjectRequest getGetRequest(final S3ObjectReference s3ObjectReference) {
         return GetObjectRequest.builder()
-                .bucket(s3Object.getBucketName())
-                .key(s3Object.getKeyName())
+                .bucket(s3ObjectReference.getBucketName())
+                .key(s3ObjectReference.getKeyName())
                 .build();
     }
 }

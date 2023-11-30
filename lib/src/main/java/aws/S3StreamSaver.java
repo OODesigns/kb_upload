@@ -8,7 +8,7 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-public class S3StreamSaver extends S3ClientSupplier implements Storable<S3Object, ByteArrayOutputStream, S3FileSaverState> {
+public class S3StreamSaver extends S3ClientSupplier implements Storable<S3ObjectReference, ByteArrayOutputStream, S3FileSaverState> {
 
     public S3StreamSaver(final S3Client s3Client) {
         super(s3Client);
@@ -25,14 +25,14 @@ public class S3StreamSaver extends S3ClientSupplier implements Storable<S3Object
     }
 
     @Override
-    public S3FileSaverState store(final S3Object s3Object, final ByteArrayOutputStream contents) {
-        return saveContents(getPutRequest(s3Object), contents);
+    public S3FileSaverState store(final S3ObjectReference s3ObjectReference, final ByteArrayOutputStream contents) {
+        return saveContents(getPutRequest(s3ObjectReference), contents);
     }
 
-    private PutObjectRequest getPutRequest(final S3Object s3Object) {
+    private PutObjectRequest getPutRequest(final S3ObjectReference s3ObjectReference) {
         return PutObjectRequest.builder()
-                .bucket(s3Object.getBucketName())
-                .key(s3Object.getKeyName())
+                .bucket(s3ObjectReference.getBucketName())
+                .key(s3ObjectReference.getKeyName())
                 .build();
     }
 }

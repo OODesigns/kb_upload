@@ -20,37 +20,37 @@ import static org.mockito.Mockito.when;
 class S3JSONFileDataTransformerTest {
     @Test
     public void testTransform_successfullyTransforms(
-            final @Mock S3Object s3Object,
-            final @Mock Retrievable<S3Object, Optional<InputStream>> fileLoaderMock,
+            final @Mock S3ObjectReference s3ObjectReference,
+            final @Mock Retrievable<S3ObjectReference, Optional<InputStream>> fileLoaderMock,
             final @Mock Context context){
 
         final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream("{\"key\": \"value\"}".getBytes());
 
-        when(fileLoaderMock.retrieve(s3Object)).thenReturn(Optional.of(byteArrayInputStream));
+        when(fileLoaderMock.retrieve(s3ObjectReference)).thenReturn(Optional.of(byteArrayInputStream));
 
         final S3JSONFileDataTransformer transformer = new S3JSONFileDataTransformer(fileLoaderMock);
 
-        final JSON result = transformer.transform(context, s3Object);
+        final JSON result = transformer.transform(context, s3ObjectReference);
 
         assertThat(result.get()).contains("{\"key\": \"value\"}");
     }
 
     @Test
     public void testTransform_throwsExceptionWhenFileNotLoaded(
-            final @Mock S3Object s3Object,
-            final @Mock Retrievable<S3Object, Optional<InputStream>> fileLoaderMock,
+            final @Mock S3ObjectReference s3ObjectReference,
+            final @Mock Retrievable<S3ObjectReference, Optional<InputStream>> fileLoaderMock,
             final @Mock Context context,
             final @Mock LambdaLogger lambdaLogger) {
 
-        when(s3Object.getBucketName()).thenReturn("sample-bucket");
-        when(s3Object.getKeyName()).thenReturn("sample-key");
+        when(s3ObjectReference.getBucketName()).thenReturn("sample-bucket");
+        when(s3ObjectReference.getKeyName()).thenReturn("sample-key");
         when(context.getLogger()).thenReturn(lambdaLogger);
 
-        when(fileLoaderMock.retrieve(s3Object)).thenReturn(Optional.empty());
+        when(fileLoaderMock.retrieve(s3ObjectReference)).thenReturn(Optional.empty());
 
         final S3JSONFileDataTransformer transformer = new S3JSONFileDataTransformer(fileLoaderMock);
 
-        final AWSS3Exception exception = assertThrows(AWSS3Exception.class, () -> transformer.transform(context, s3Object));
+        final AWSS3Exception exception = assertThrows(AWSS3Exception.class, () -> transformer.transform(context, s3ObjectReference));
 
         assertEquals("Unable to load file from bucket: sample-bucket and key: sample-key", exception.getMessage());
     }

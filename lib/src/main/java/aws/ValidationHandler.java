@@ -35,13 +35,13 @@ public class ValidationHandler {
                 .orElseThrow();
     }
 
-    private Function<S3Object, JSON> getFileData(final Context context) {
+    private Function<S3ObjectReference, JSON> getFileData(final Context context) {
         return s -> s3JSONFileDataTransformer.transform(context, s);
     }
 
-    private Optional<S3Object> getS3ObjectForValidation(final Map<String, String> input,
-                                                        final Context context) {
-        return Optional.of(new S3ObjectFactory(input, context, VALIDATION_BUCKET_NAME, VALIDATION_KEY_NAME, VALIDATION));
+    private Optional<S3ObjectReference> getS3ObjectForValidation(final Map<String, String> input,
+                                                                 final Context context) {
+        return Optional.of(new S3Reference(input, context, VALIDATION_BUCKET_NAME, VALIDATION_KEY_NAME, VALIDATION));
     }
 
     private Function<JSON, ValidationResult> validateData(final Context context) {

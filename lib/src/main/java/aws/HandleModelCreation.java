@@ -28,13 +28,13 @@ public class HandleModelCreation implements RequestHandler<Map<String, String>, 
     public static final String UNABLE_TO_CREATE_A_MODEL = "Unable To create a model: %s";
     private static final String ERROR_UNABLE_TO_SAVE_MODEL_FILE = "Error unable to save model file: %s";
     private static final String OK_RESULT = "RESULT S3FileSaverOKState: Model Created";
-    private final Retrievable<S3Object, Optional<InputStream>> fileLoader;
-    private final Storable<S3Object, ByteArrayOutputStream, S3FileSaverState> fileStore;
+    private final Retrievable<S3ObjectReference, Optional<InputStream>> fileLoader;
+    private final Storable<S3ObjectReference, ByteArrayOutputStream, S3FileSaverState> fileStore;
     private final Transformer1_1<InputStream, ModelMakerState<ModelMakerResult>> modelMaker;
 
-    HandleModelCreation(final Retrievable<S3Object, Optional<InputStream>> fileLoader,
+    HandleModelCreation(final Retrievable<S3ObjectReference, Optional<InputStream>> fileLoader,
                         final Transformer1_1<InputStream, ModelMakerState<ModelMakerResult>> modelMaker,
-                        final Storable<S3Object, ByteArrayOutputStream, S3FileSaverState> fileStore) {
+                        final Storable<S3ObjectReference, ByteArrayOutputStream, S3FileSaverState> fileStore) {
         this.fileLoader = fileLoader;
         this.fileStore = fileStore;
         this.modelMaker = modelMaker;
@@ -93,22 +93,22 @@ public class HandleModelCreation implements RequestHandler<Map<String, String>, 
 
     }
 
-    private Function<S3Object, InputStream>  getFileData(final Context context){
+    private Function<S3ObjectReference, InputStream>  getFileData(final Context context){
         return s3Object -> fileLoader.retrieve(s3Object).orElseThrow(() -> throwUnableToLoadFile(context, s3Object));
     }
     private void log(final Context context, final String messages) {
         context.getLogger().log(String.format(RESULT, messages));
     }
-    private AWSS3Exception throwUnableToLoadFile(final Context context, final S3Object s3Object) {
+    private AWSS3Exception throwUnableToLoadFile(final Context context, final S3ObjectReference s3ObjectReference) {
         return new AWSS3Exception(context, String.format(UNABLE_TO_LOAD_FILE,
-                s3Object.getBucketName(), s3Object.getKeyName()));
+                s3ObjectReference.getBucketName(), s3ObjectReference.getKeyName()));
     }
 
-    private S3Object getS3ObjectForModelInput(final Map<String, String> input, final Context context) {
-        return new S3ObjectFactory(input, context, MODEL_INPUT_BUCKET_NAME, MODEL_INPUT_KEY_NAME, MODEL_INPUT);
+    private S3ObjectReference getS3ObjectForModelInput(final Map<String, String> input, final Context context) {
+        return new S3Reference(input, context, MODEL_INPUT_BUCKET_NAME, MODEL_INPUT_KEY_NAME, MODEL_INPUT);
     }
 
-    private S3Object getS3ObjectForModel(final Map<String, String> input, final Context context) {
-        return new S3ObjectFactory(input, context, MODEL_BUCKET_NAME, MODEL_KEY_NAME, MODEL);
+    private S3ObjectReference getS3ObjectForModel(final Map<String, String> input, final Context context) {
+        return new S3Reference(input, context, MODEL_BUCKET_NAME, MODEL_KEY_NAME, MODEL);
     }
 }

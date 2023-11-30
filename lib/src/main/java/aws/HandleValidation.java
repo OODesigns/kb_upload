@@ -14,12 +14,12 @@ import java.util.Optional;
 public class HandleValidation implements RequestHandler<Map<String, String>, ValidationResult> {
     private static final Validator<JSONSchema, JSON, ValidationResult> defaultValidator
             = new JSONValidator(JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V4));
-    private static final Retrievable<S3Object, Optional<InputStream>> defaultFileLoader
+    private static final Retrievable<S3ObjectReference, Optional<InputStream>> defaultFileLoader
             = new S3StreamLoader(S3Client.builder().build());
     private final ValidationHandler validationHandler;
 
     HandleValidation(final Validator<JSONSchema, JSON, ValidationResult> validator,
-                     final Retrievable<S3Object, Optional<InputStream>> fileLoader){
+                     final Retrievable<S3ObjectReference, Optional<InputStream>> fileLoader){
 
         this.validationHandler = new ValidationHandler(validator, new S3JSONFileDataTransformer(fileLoader));
     }

@@ -14,22 +14,22 @@ import java.util.Optional;
 public class S3JSONFileDataTransformer implements S3ObjectToJSON {
     private static final String UNABLE_TO_LOAD_FILE = "Unable to load file from bucket: %s and key: %s";
     private static final String MISSING_DATA_WHEN_CREATING_JSON = "UnExpected missing Data when creating JSON";
-    private final Retrievable<S3Object, Optional<InputStream>> fileloader;
+    private final Retrievable<S3ObjectReference, Optional<InputStream>> fileLoader;
 
-    public S3JSONFileDataTransformer(final Retrievable<S3Object, Optional<InputStream>> fileloader) {
-        this.fileloader = fileloader;
+    public S3JSONFileDataTransformer(final Retrievable<S3ObjectReference, Optional<InputStream>> fileLoader) {
+        this.fileLoader = fileLoader;
     }
 
-    public JSON transform(final Context context, final S3Object s3Object) {
-        return getData(context, s3Object)
+    public JSON transform(final Context context, final S3ObjectReference s3ObjectReference) {
+        return getData(context, s3ObjectReference)
                     .map(JSONData::new)
                     .orElseThrow(()->new RuntimeException(MISSING_DATA_WHEN_CREATING_JSON));
     }
 
-    private Optional<String> getData(final Context context, final S3Object s3Object) {
+    private Optional<String> getData(final Context context, final S3ObjectReference s3ObjectReference) {
         try(final InputStream filestream =
-                    fileloader.retrieve(s3Object)
-                              .orElseThrow(() -> throwUnableToLoadFile(context, s3Object))){
+                    fileLoader.retrieve(s3ObjectReference)
+                              .orElseThrow(() -> throwUnableToLoadFile(context, s3ObjectReference))){
             return Optional.of(IOUtils.toString(filestream, StandardCharsets.UTF_8));
         } catch (final IOException e) {
             context.getLogger().log(e.getMessage());
@@ -37,8 +37,8 @@ public class S3JSONFileDataTransformer implements S3ObjectToJSON {
         }
     }
 
-    private AWSS3Exception throwUnableToLoadFile(final Context context, final S3Object s3Object) {
+    private AWSS3Exception throwUnableToLoadFile(final Context context, final S3ObjectReference s3ObjectReference) {
         return new AWSS3Exception(context, String.format(UNABLE_TO_LOAD_FILE,
-                s3Object.getBucketName(), s3Object.getKeyName()));
+                s3ObjectReference.getBucketName(), s3ObjectReference.getKeyName()));
     }
 }
