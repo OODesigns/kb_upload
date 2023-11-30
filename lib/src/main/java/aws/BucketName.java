@@ -4,7 +4,7 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 
 
-public class BucketName implements BucketNameProvider {
+public class BucketName implements BucketNameSupplier {
     private static final int MIN_NAME_LENGTH = 3;
     private static final int MAX_NAME_LENGTH = 63;
     private static final String INVALID_NAME = "Invalid AWS bucket name: %s";

@@ -33,7 +33,7 @@ public class S3Reference implements S3ObjectReference {
         T create(String input) throws RuntimeException;
     }
 
-    private static BucketNameProvider getBucketNameProvider(final String key,
+    private static BucketNameSupplier getBucketNameProvider(final String key,
                                                             final String area,
                                                             final Map<String, String> input,
                                                             final Context context) {
@@ -46,7 +46,7 @@ public class S3Reference implements S3ObjectReference {
         );
     }
 
-    private static KeyNameProvider getKeyNameProvider(final String key,
+    private static KeyNameSupplier getKeyNameProvider(final String key,
                                                       final String area,
                                                       final Map<String, String> input,
                                                       final Context context) {

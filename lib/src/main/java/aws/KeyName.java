@@ -3,14 +3,14 @@ package aws;
 import java.util.Optional;
 import java.util.function.Predicate;
 
-public class KeyName implements KeyNameProvider {
+public class KeyName implements KeyNameSupplier {
     public static final String INVALID_OBJECT_KEY = "Invalid S3 Object Key: %s";
-    private final String keyname;
+    private final String keyName;
 
-    public KeyName(final String keyname) {
+    public KeyName(final String keyName) {
 
-        this.keyname = isValidObjectKey(keyname)
-                .orElseThrow(()->new InvalidS3ObjectKeyException(String.format(INVALID_OBJECT_KEY,keyname)));
+        this.keyName = isValidObjectKey(keyName)
+                .orElseThrow(()->new InvalidS3ObjectKeyException(String.format(INVALID_OBJECT_KEY, keyName)));
     }
 
     private Optional<String> isValidObjectKey(final String keyname) {
@@ -32,6 +32,6 @@ public class KeyName implements KeyNameProvider {
 
     @Override
     public String get() {
-        return keyname;
+        return keyName;
     }
 }
