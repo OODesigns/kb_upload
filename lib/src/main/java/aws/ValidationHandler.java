@@ -1,7 +1,12 @@
 package aws;
 
 import com.amazonaws.services.lambda.runtime.Context;
-import kb_upload.*;
+import kb_upload.FileLoader;
+import kb_upload.JSON;
+import kb_upload.JSONSchema;
+import kb_upload.JSONSchemaData;
+import kb_upload.ValidationResult;
+import kb_upload.Validator;
 
 import java.util.Map;
 import java.util.Optional;
