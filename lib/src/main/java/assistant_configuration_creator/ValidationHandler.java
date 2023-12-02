@@ -24,8 +24,7 @@ public class ValidationHandler {
     public void handleRequest(final CloudObjectReference input) {
         Optional.of(input)
                 .map(this::getFileData)
-                .map(this::validateData)
-                .orElseThrow();
+                .map(this::validateData);
     }
 
     private JSON getFileData(final CloudObjectReference input) {
