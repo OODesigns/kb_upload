@@ -1,5 +1,5 @@
 package aws;
-import kb_upload.Retrievable;
+import maker.Retrievable;
 import software.amazon.awssdk.core.exception.SdkException;
 import software.amazon.awssdk.core.sync.ResponseTransformer;
 import software.amazon.awssdk.services.s3.S3Client;

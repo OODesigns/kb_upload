@@ -1,9 +1,11 @@
 package aws;
 
+import aws.root.AWSS3Exception;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
-import kb_upload.*;
+import general.Validator;
+import json.*;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
@@ -29,16 +31,16 @@ public class HandleValidationTest {
     @Test
     void handleRequestWithValidData(@Mock final Context context,
                                     @Mock final LambdaLogger lambdaLogger,
-                                    @Mock final Validator<JSONSchema, JSON, ValidationResult> validator) {
+                                    @Mock final Validator<JSONSchema, JSON, JSONValidationResult> validator) {
 
 
         final Map<String, String> input = Map.of("Validation-BucketName", "bucket",
                                                  "Validation-KeyName", "key");
 
         when(context.getLogger()).thenReturn(lambdaLogger);
-        when(validator.validate(any(),any())).thenReturn(new ValidatedStateOK());
+        when(validator.validate(any(),any())).thenReturn(new JSONValidatedStateOK());
 
-        final RequestHandler<Map<String, String>, ValidationResult> requestHandler
+        final RequestHandler<Map<String, String>, Void> requestHandler
                 = new HandleValidation(validator,
                 __-> Optional.of(new ByteArrayInputStream(validJSON.getBytes())));
 
@@ -54,7 +56,7 @@ public class HandleValidationTest {
     @Test
     void handleRequestWithINValidData(@Mock final Context context,
                                       @Mock final LambdaLogger lambdaLogger,
-                                      @Mock final Validator<JSONSchema, JSON, ValidationResult> validator){
+                                      @Mock final Validator<JSONSchema, JSON, JSONValidationResult> validator){
 
 
         final Map<String, String> input = Map.of("Validation-BucketName", "bucket",
@@ -62,9 +64,9 @@ public class HandleValidationTest {
 
         when(context.getLogger()).thenReturn(lambdaLogger);
         final List<String> messages = List.of("message1", "message2");
-        when(validator.validate(any(),any())).thenReturn(new ValidatedStateError(messages));
+        when(validator.validate(any(),any())).thenReturn(new JSONValidatedStateError(messages));
 
-        final RequestHandler<Map<String, String>, ValidationResult> requestHandler
+        final RequestHandler<Map<String, String>, Void> requestHandler
                 = new HandleValidation(validator,
                 __-> Optional.of(new ByteArrayInputStream(validJSON.getBytes())));
 
@@ -82,14 +84,14 @@ public class HandleValidationTest {
     @Test
     void handleRequestWithValidDataUnableToLoad(@Mock final Context context,
                                     @Mock final LambdaLogger lambdaLogger,
-                                    @Mock final Validator<JSONSchema, JSON, ValidationResult> validator) {
+                                    @Mock final Validator<JSONSchema, JSON, JSONValidationResult> validator) {
 
 
         final Map<String, String> input = Map.of("Validation-BucketName", "bucket",
                                                  "Validation-KeyName", "key");
         when(context.getLogger()).thenReturn(lambdaLogger);
 
-        final RequestHandler<Map<String, String>, ValidationResult> requestHandler
+        final RequestHandler<Map<String, String>, Void> requestHandler
                 = new HandleValidation(validator, __-> Optional.empty());
 
         assertThrows(AWSS3Exception.class, ()->requestHandler.handleRequest(input, context));
@@ -104,7 +106,7 @@ public class HandleValidationTest {
                                                  "Validation-KeyName", "key");
         when(context.getLogger()).thenReturn(lambdaLogger);
 
-        final RequestHandler<Map<String, String>, ValidationResult> requestHandler
+        final RequestHandler<Map<String, String>, Void> requestHandler
                 = new HandleValidation();
 
         assertThrows(AWSS3Exception.class, ()->requestHandler.handleRequest(input, context));

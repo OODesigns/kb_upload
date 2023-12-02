@@ -1,5 +1,5 @@
 package aws;
-import kb_upload.Storable;
+import maker.Storable;
 import software.amazon.awssdk.core.exception.SdkException;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;

@@ -2,8 +2,8 @@ package aws;
 
 import com.amazonaws.services.lambda.runtime.events.S3Event;
 import com.amazonaws.services.lambda.runtime.events.models.s3.S3EventNotification;
-import kb_upload.Retrievable;
-import kb_upload.Transformer;
+import maker.Retrievable;
+import maker.Transformer;
 
 import java.util.List;
 import java.util.Optional;
