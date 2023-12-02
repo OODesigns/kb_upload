@@ -1,9 +1,9 @@
 package cloud;
 
-public abstract class CloudStreamSaverResult implements CloudStreamSaverState<CloudStreamSaverResult>{
+public abstract class CloudSaverResult implements CloudSaverState<CloudSaverResult> {
     private final String message;
 
-    protected CloudStreamSaverResult(final String message) {
+    protected CloudSaverResult(final String message) {
         this.message = message;
     }
 

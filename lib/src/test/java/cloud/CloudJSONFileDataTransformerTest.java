@@ -28,7 +28,7 @@ class CloudJSONFileDataTransformerTest {
 
         when(fileLoaderMock.retrieve(cloudObjectReference)).thenReturn(Optional.of(byteArrayInputStream));
 
-        final CloudJSONFileDataTransformer cloudJSONFileDataTransformer = new CloudJSONFileDataTransformer(new CloudStreamLoader<>(fileLoaderMock));
+        final CloudJSONFileDataTransformer cloudJSONFileDataTransformer = new CloudJSONFileDataTransformer(new CloudLoad<>(fileLoaderMock));
 
         final JSON result = cloudJSONFileDataTransformer.transform(cloudObjectReference);
 
@@ -48,7 +48,7 @@ class CloudJSONFileDataTransformerTest {
 
         when(fileLoaderMock.retrieve(cloudObjectReference)).thenReturn(Optional.empty());
 
-        final CloudJSONFileDataTransformer cloudJSONFileDataTransformer = new CloudJSONFileDataTransformer(new CloudStreamLoader<>(fileLoaderMock));
+        final CloudJSONFileDataTransformer cloudJSONFileDataTransformer = new CloudJSONFileDataTransformer(new CloudLoad<>(fileLoaderMock));
 
         final AWSS3Exception exception = assertThrows(AWSS3Exception.class, () ->
                 cloudJSONFileDataTransformer.transform(cloudObjectReference));

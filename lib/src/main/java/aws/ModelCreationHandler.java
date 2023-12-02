@@ -1,12 +1,19 @@
 package aws;
-import aws.root.*;
+
 import assistant_configuration_creator.HandleResult;
+import aws.root.AWSS3Exception;
+import aws.root.S3CloudObjectReference;
+import aws.root.S3StreamLoader;
+import aws.root.S3StreamSaver;
 import cloud.*;
 import com.amazonaws.services.lambda.runtime.Context;
-import com.amazonaws.services.lambda.runtime.RequestHandler;
 import general.Retrievable;
 import general.Transformer;
-import maker.*;
+import maker.ModelMaker;
+import maker.ModelMakerResult;
+import maker.ModelMakerState;
+import software.amazon.awssdk.services.s3.S3Client;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,7 +23,13 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-public class HandleModelCreation implements RequestHandler<Map<String, String>, Void> {
+public class ModelCreationHandler {
+    private static final String MODEL_INPUT_BUCKET_NAME = "ModelInput-BucketName";
+    private static final String MODEL_INPUT_KEY_NAME = "ModelInput-KeyName";
+    private static final String MODEL_INPUT = "Model Input";
+    private static final String MODEL = "Model";
+    private static final String MODEL_BUCKET_NAME = "Model-BucketName";
+    private static final String MODEL_KEY_NAME = "Model-KeyName";
     private static final String UNABLE_TO_LOAD_FILE = "Unable to load file from bucket: %s and key: %s";
     public static final String UNABLE_TO_CREATE_A_MODEL = "Unable To create a model: %s";
     private static final String ERROR_UNABLE_TO_SAVE_MODEL_FILE = "Error unable to save model file: %s";
@@ -33,6 +46,13 @@ public class HandleModelCreation implements RequestHandler<Map<String, String>, 
         this.modelMaker = modelMaker;
     }
 
+    public HandleModelCreation() {
+        this.fileLoader = new S3StreamLoader(S3Client.builder().build());
+        this.fileStore =  new S3StreamSaver(S3Client.builder().build());
+        this.modelMaker = new ModelMaker();
+    }
+
+    @Override
     public Void handleRequest(final Map<String, String> input, final Context context) {
         Optional.of(getS3ObjectForModelInput(input))
                 .map(getFileData())
@@ -47,7 +67,7 @@ public class HandleModelCreation implements RequestHandler<Map<String, String>, 
                 .map(s->fileStore.store(s, stream))
                 .filter(hasErrorState())
                 .ifPresentOrElse(throwSaveException(),
-                ()->context.getLogger().log(OK_RESULT));
+                        ()->context.getLogger().log(OK_RESULT));
     }
 
     private static Consumer<CloudSaverState<CloudSaverResult>> throwSaveException() {
@@ -84,4 +104,13 @@ public class HandleModelCreation implements RequestHandler<Map<String, String>, 
         return new AWSS3Exception(String.format(UNABLE_TO_LOAD_FILE,
                 cloudObjectReference.getStoreName(), cloudObjectReference.getObjectName()));
     }
+
+    private CloudObjectReference getS3ObjectForModelInput(final Map<String, String> input) {
+        return new S3CloudObjectReference(input, MODEL_INPUT_BUCKET_NAME, MODEL_INPUT_KEY_NAME, MODEL_INPUT);
+    }
+
+    private CloudObjectReference getS3ObjectForModel(final Map<String, String> input) {
+        return new S3CloudObjectReference(input,  MODEL_BUCKET_NAME, MODEL_KEY_NAME, MODEL);
+    }
 }
+

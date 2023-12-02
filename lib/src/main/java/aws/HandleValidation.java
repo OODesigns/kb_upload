@@ -4,7 +4,7 @@ import assistant_configuration_creator.ValidationHandler;
 import cloud.CloudJSONFileDataTransformer;
 import cloud.CloudObjectReference;
 import aws.root.S3StreamLoader;
-import cloud.CloudStreamLoader;
+import cloud.CloudLoad;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.networknt.schema.JsonSchemaFactory;
@@ -34,7 +34,7 @@ public class HandleValidation implements RequestHandler<Map<String, String>, Voi
     HandleValidation(final Validator<JSONSchema, JSON, JSONValidationResult> validator,
                      final Retrievable<CloudObjectReference, Optional<InputStream>> fileLoader){
 
-        this.validationHandler = new ValidationHandler(validator, new CloudJSONFileDataTransformer( new CloudStreamLoader<>(fileLoader)));
+        this.validationHandler = new ValidationHandler(validator, new CloudJSONFileDataTransformer( new CloudLoad<>(fileLoader)));
     }
 
     public HandleValidation() {this(defaultValidator, defaultFileLoader);}

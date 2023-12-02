@@ -14,18 +14,18 @@ public class S3StreamSaver extends S3ClientSupplier implements CloudStorable {
         super(s3Client);
     }
 
-    private CloudStreamSaverState<CloudStreamSaverResult> saveContents(final PutObjectRequest putRequest, final ByteArrayOutputStream contents) {
+    private CloudSaverResult saveContents(final PutObjectRequest putRequest, final ByteArrayOutputStream contents) {
         // Do not close s3Client as it can be used across multiple invocations
         try(contents) {
             s3Client.putObject(putRequest, RequestBody.fromBytes(contents.toByteArray()));
-            return new CloudStreamSaverStateOK();
+            return new CloudSaverStateOK();
         }catch (final SdkException | IOException e) {
-            return new CloudStreamSaverStateError(e.toString());
+            return new CloudSaverStateError(e.toString());
         }
     }
 
     @Override
-    public CloudStreamSaverState<CloudStreamSaverResult> store(final CloudObjectReference cloudObjectReference, final ByteArrayOutputStream contents) {
+    public CloudSaverResult store(final CloudObjectReference cloudObjectReference, final ByteArrayOutputStream contents) {
         return saveContents(getPutRequest(cloudObjectReference), contents);
     }
 

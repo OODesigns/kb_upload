@@ -7,12 +7,12 @@ import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class CloudStreamLoader<T> implements CloudStreamLoadable<T>{
-    private static final Logger logger = Logger.getLogger(CloudStreamLoader.class.getName());
+public class CloudLoad<T> implements CloudLoadable<T> {
+    private static final Logger logger = Logger.getLogger(CloudLoad.class.getName());
     private static final String UNABLE_TO_LOAD_FILE = "Unable to load file from store: %s and object: %s";
     private final Retrievable<CloudObjectReference, Optional<InputStream>> fileLoader;
 
-    public CloudStreamLoader(final Retrievable<CloudObjectReference, Optional<InputStream>> fileLoader) {
+    public CloudLoad(final Retrievable<CloudObjectReference, Optional<InputStream>> fileLoader) {
         this.fileLoader = fileLoader;
     }
 

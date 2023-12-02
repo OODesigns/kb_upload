@@ -13,19 +13,18 @@ import java.util.function.Function;
 
 public class TransformationHandler {
     private static final String UNABLE_TO_TRANSFORM_DATA = "Unable to transform data: %s";
-    private static final String ERROR_UNABLE_TO_SAVE_FILE = "Error unable to save file: %s";
     private final CloudObjectToJSON cloudObjectToJSON;
     private final Retrievable<CloudObjectReference, Optional<InputStream>> fileLoader;
     private final Transformer<JSON, Mappable<List<String>, String, String>> jsonTransformer;
-    private final CloudStorable fileStore;
+    private final CloudStorable cloudStorable;
 
     public TransformationHandler(final Retrievable<CloudObjectReference, Optional<InputStream>> fileLoader,
                                  final Transformer<JSON, Mappable<List<String>, String, String>> jsonTransformer,
-                                 final CloudStorable fileStore) {
-        this.cloudObjectToJSON = new CloudJSONFileDataTransformer(new CloudStreamLoader<>(fileLoader));
+                                 final CloudStorable cloudStorable) {
+        this.cloudObjectToJSON = new CloudJSONFileDataTransformer(new CloudLoad<>(fileLoader));
         this.fileLoader = fileLoader;
         this.jsonTransformer = jsonTransformer;
-        this.fileStore = fileStore;
+        this.cloudStorable = cloudStorable;
     }
 
     public void handleRequest(final CloudObjectReference input, final CloudObjectReference output) {
@@ -51,7 +50,7 @@ public class TransformationHandler {
     }
 
     private Optional<ByteArrayOutputStream> getCompleteFileForAssistantDefinitions(final CloudObjectReference input) {
-        return new CloudStreamLoader<ByteArrayOutputStream>(fileLoader).retrieve(input, this::convertInputStreamToByteArrayOutputStream);
+        return new CloudLoad<ByteArrayOutputStream>(fileLoader).retrieve(input, this::convertInputStreamToByteArrayOutputStream);
     }
 
     public ByteArrayOutputStream convertInputStreamToByteArrayOutputStream(final InputStream inputStream) throws IOException {
@@ -68,15 +67,10 @@ public class TransformationHandler {
         return cloudObjectToJSON.transform(input);
     }
 
-    private Function<ByteArrayOutputStream, CloudStreamSaverResult> saveToFile(final CloudObjectReference output) {
-        return data-> {
-            final CloudStreamSaverState<CloudStreamSaverResult> storeResult = fileStore.store(output, data);
-
-            return new HandleResult<CloudStreamSaverResult, CloudStreamSaverResult>()
-                    .calling(storeResult)
-                    .orElseThrow(storeResult, ERROR_UNABLE_TO_SAVE_FILE);
-        };
+    private Function<ByteArrayOutputStream, CloudSaverResult> saveToFile(final CloudObjectReference output) {
+        return data -> cloudStorable.store(output, data);
     }
+
     private Optional<ByteArrayOutputStream> transformDataForModalMaker(final JSON json) {
         return jsonTransformer.transform(json)
                 .map(newLineForEachEntry())

@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Optional;
 
-public interface CloudStreamLoadable <T> {
+public interface CloudLoadable<T> {
 
     @FunctionalInterface
     interface CloudFunctionWithIOException<T> {

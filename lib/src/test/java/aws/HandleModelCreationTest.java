@@ -234,7 +234,7 @@ class HandleModelCreationTest {
                 = new ModelMakerStateOK( "Model Created", outputStream);
 
         when(context.getLogger()).thenReturn(lambdaLogger);
-        when(fileStore.store(any(), any())).thenReturn(new CloudStreamSaverStateError("Test Error"));
+        when(fileStore.store(any(), any())).thenReturn(new CloudSaverStateError("Test Error"));
         when(modelMaker.transform(any())).thenReturn(modelMakerState);
 
         final Map<String, String> input = Map.of(
@@ -272,7 +272,7 @@ class HandleModelCreationTest {
                 = new ModelMakerStateOK( "Model Created", outputStream);
 
         when(context.getLogger()).thenReturn(lambdaLogger);
-        when(fileStore.store(any(), any())).thenReturn(new CloudStreamSaverStateOK());
+        when(fileStore.store(any(), any())).thenReturn(new CloudSaverStateOK());
         when(modelMaker.transform(any())).thenReturn(modelMakerState);
 
         final Map<String, String> input = Map.of(
