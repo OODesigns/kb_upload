@@ -10,9 +10,9 @@ import java.util.Optional;
 
 public class CloudJSONFileDataTransformer implements CloudObjectToJSON {
     private static final String MISSING_DATA_WHEN_CREATING_JSON = "UnExpected missing data when creating JSON";
-    private final CloudLoad<String> cloudLoad;
+    private final CloudLoadable<String> cloudLoad;
 
-    public CloudJSONFileDataTransformer(final CloudLoad<String> cloudLoad) {
+    public CloudJSONFileDataTransformer(final CloudLoadable<String> cloudLoad) {
         this.cloudLoad = cloudLoad;
     }
 

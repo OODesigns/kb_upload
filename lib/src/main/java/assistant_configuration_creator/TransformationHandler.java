@@ -1,12 +1,10 @@
 package assistant_configuration_creator;
 import cloud.*;
 import general.Mappable;
-import general.Retrievable;
 import general.Transformer;
 import json.JSON;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
@@ -14,28 +12,30 @@ import java.util.function.Function;
 public class TransformationHandler {
     private static final String UNABLE_TO_TRANSFORM_DATA = "Unable to transform data: %s";
     private final CloudObjectToJSON cloudObjectToJSON;
-    private final Retrievable<CloudObjectReference, Optional<InputStream>> fileLoader;
     private final Transformer<JSON, Mappable<List<String>, String, String>> jsonTransformer;
     private final CloudStorable cloudStorable;
+    private final CloudCopyable cloudCopyable;
 
-    public TransformationHandler(final Retrievable<CloudObjectReference, Optional<InputStream>> fileLoader,
+    public TransformationHandler(final CloudObjectToJSON cloudObjectToJSON,
                                  final Transformer<JSON, Mappable<List<String>, String, String>> jsonTransformer,
-                                 final CloudStorable cloudStorable) {
-        this.cloudObjectToJSON = new CloudJSONFileDataTransformer(new CloudLoad<>(fileLoader));
-        this.fileLoader = fileLoader;
+                                 final CloudStorable cloudStorable,
+                                 final CloudCopyable cloudCopyable) {
+        this.cloudObjectToJSON = cloudObjectToJSON;
         this.jsonTransformer = jsonTransformer;
         this.cloudStorable = cloudStorable;
+        this.cloudCopyable = cloudCopyable;
     }
 
     public void handleRequest(final CloudObjectReference input, final CloudObjectReference output) {
         Optional.of(getCategoriesAndDocuments(input))
                 .flatMap(this::transformDataForModalMaker)
                 .map(saveToFile(output))
-                .flatMap(__-> getCompleteFileForAssistantDefinitions(input))
-                .map(saveToFile(createDestinationReference(input, output)));
+                .map(__-> createDestinationObjectRef(input, output))
+                .map(copyAssistantDefinitions(input));
     }
 
-    private CloudObjectReference createDestinationReference(final CloudObjectReference input, final CloudObjectReference output) {
+    private CloudObjectReference createDestinationObjectRef(final CloudObjectReference input,
+                                                            final CloudObjectReference output) {
         return new CloudObjectReference() {
             @Override
             public String getStoreName() {
@@ -49,18 +49,8 @@ public class TransformationHandler {
         };
     }
 
-    private Optional<ByteArrayOutputStream> getCompleteFileForAssistantDefinitions(final CloudObjectReference input) {
-        return new CloudLoad<ByteArrayOutputStream>(fileLoader).retrieve(input, this::convertInputStreamToByteArrayOutputStream);
-    }
-
-    public ByteArrayOutputStream convertInputStreamToByteArrayOutputStream(final InputStream inputStream) throws IOException {
-        final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        final byte[] buffer = new byte[1024];
-        int length;
-        while ((length = inputStream.read(buffer)) != -1) {
-                byteArrayOutputStream.write(buffer, 0, length);
-            }
-        return byteArrayOutputStream;
+    private Function<CloudObjectReference, CloudSaverResult> copyAssistantDefinitions(final CloudObjectReference input) {
+        return output-> cloudCopyable.copy(input, output);
     }
 
     private JSON getCategoriesAndDocuments(final CloudObjectReference input) {

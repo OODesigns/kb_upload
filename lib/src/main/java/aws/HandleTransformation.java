@@ -5,15 +5,12 @@ import cloud.*;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import general.Mappable;
-import general.Retrievable;
 import general.Transformer;
 import json.JSON;
 import json.JSONArrayToList;
 import software.amazon.awssdk.services.s3.S3Client;
-import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 
 public class HandleTransformation implements RequestHandler<Map<String, String>, Void> {
@@ -26,25 +23,29 @@ public class HandleTransformation implements RequestHandler<Map<String, String>,
     private static final String TRANSFORMATION = "transformation";
     private static final String TRANSFORMED = "transformed";
     private static final S3Client s3Client = S3Client.builder().build();
-    private static final CloudStorable defaultCloudStorable = new S3StreamSaver(s3Client);
-    private static final Retrievable<CloudObjectReference, Optional<InputStream>> defaultFileLoader = new S3StreamLoader(s3Client);
-    private static final CloudLoadable<InputStream> defaultCloudLoadable = new CloudLoad<>( new S3StreamLoader(s3Client));
+    private static final CloudStorable defaultCloudStorable =  new CloudStore(new S3StreamSaver(s3Client));
+    private static final S3StreamLoader fileLoader = new S3StreamLoader(s3Client);
+    private static final CloudLoadable<String> defaultCloudLoadable = new CloudLoad<>(fileLoader);
+    private static final CloudCopyable defaultCloudCopyer =
+            new CloudCopyToNewStore(new CloudLoad<>(fileLoader), defaultCloudStorable);
+
 
     private final TransformationHandler transformationHandler;
 
-    HandleTransformation(final Retrievable<CloudObjectReference, Optional<InputStream>> fileLoader,
+    HandleTransformation(final  CloudLoadable<String> cloudLoadable,
                          final Transformer<JSON, Mappable<List<String>, String, String>> jsonTransformer,
-                         final CloudStorable fileStore) {
+                         final CloudStorable cloudStorable,
+                         final CloudCopyable cloudCopyable) {
 
-        transformationHandler = new TransformationHandler(fileLoader,
-                                                          jsonTransformer,
-                                                          fileStore);
+        transformationHandler = new TransformationHandler(
+                new CloudJSONFileDataTransformer(cloudLoadable), jsonTransformer, cloudStorable, cloudCopyable);
     }
 
     public HandleTransformation() {
-        this(new S3StreamLoader(s3Client),
+        this(defaultCloudLoadable,
              new JSONArrayToList(UTTERANCE),
-             defaultCloudStorable);
+             defaultCloudStorable,
+             defaultCloudCopyer);
     }
 
 

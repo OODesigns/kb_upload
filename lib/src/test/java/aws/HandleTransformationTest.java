@@ -11,8 +11,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoSettings;
 import com.amazonaws.services.lambda.runtime.Context;
-
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.List;
 import java.util.Map;
@@ -31,15 +29,20 @@ class HandleTransformationTest {
                                        @Mock final Context context,
                                        @Mock final LambdaLogger lambdaLogger,
                                        @Mock final Transformer<JSON, Mappable<List<String>, String, String>> jsonTransformer,
-                                       @Mock final CloudStorable fileStore){
+                                       @Mock final CloudStorable fileStore,
+                                       @Mock final CloudCopyable cloudCopyable,
+                                       @Mock final CloudLoadable<String> cloudLoadable){
 
         when(context.getLogger()).thenReturn(lambdaLogger);
 
+        when(cloudLoadable.retrieve(any(), any())).thenReturn(Optional.of("{}"));
+
         final HandleTransformation handleTransformation
                 = new HandleTransformation(
-                        __-> Optional.of(new ByteArrayInputStream("{}".getBytes())),
+                        cloudLoadable,
                         jsonTransformer,
-                        fileStore);
+                        fileStore,
+                        cloudCopyable);
 
         assertThrows(AWSS3Exception.class, ()->handleTransformation.handleRequest(null, context));
 
@@ -53,18 +56,22 @@ class HandleTransformationTest {
     void errorExpectedTransformationBucketNameMissing(@Mock final Context context,
                                               @Mock final LambdaLogger lambdaLogger,
                                               @Mock final Transformer<JSON, Mappable<List<String>, String, String>> jsonTransformer,
-                                              @Mock final CloudStorable fileStore){
+                                              @Mock final CloudStorable fileStore,
+                                              @Mock final CloudCopyable cloudCopyable,
+                                              @Mock final CloudLoadable<String> cloudLoadable){
 
 
         when(context.getLogger()).thenReturn(lambdaLogger);
+        when(cloudLoadable.retrieve(any(), any())).thenReturn(Optional.of("{}"));
 
         final Map<String, String> input = Map.of("wrong Key", "wrong value");
 
         final HandleTransformation handleTransformation
                 = new HandleTransformation(
-                        __-> Optional.of(new ByteArrayInputStream("{}".getBytes())),
+                        cloudLoadable,
                         jsonTransformer,
-                        fileStore);
+                        fileStore,
+                        cloudCopyable);
 
         assertThrows(AWSS3Exception.class, ()->handleTransformation.handleRequest(input, context));
 
@@ -78,18 +85,23 @@ class HandleTransformationTest {
     void errorExpectedTransformationBucketNameMissingData(@Mock final Context context,
                                               @Mock final LambdaLogger lambdaLogger,
                                               @Mock final Transformer<JSON, Mappable<List<String>, String, String>> jsonTransformer,
-                                              @Mock final CloudStorable fileStore){
+                                              @Mock final CloudStorable fileStore,
+                                              @Mock final CloudCopyable cloudCopyable,
+                                              @Mock final CloudLoadable<String> cloudLoadable){
+
 
 
         when(context.getLogger()).thenReturn(lambdaLogger);
+        when(cloudLoadable.retrieve(any(), any())).thenReturn(Optional.of("{}"));
 
         final Map<String, String> input = Map.of("Transformation-BucketName", "");
 
         final HandleTransformation handleTransformation
                 = new HandleTransformation(
-                        __-> Optional.of(new ByteArrayInputStream("{}".getBytes())),
+                        cloudLoadable,
                         jsonTransformer,
-                        fileStore);
+                        fileStore,
+                        cloudCopyable);
 
         assertThrows(AWSS3Exception.class, ()->handleTransformation.handleRequest(input, context));
 
@@ -103,17 +115,22 @@ class HandleTransformationTest {
     void errorExpectedTransformationKeyNameMissing(@Mock final Context context,
                                                    @Mock final LambdaLogger lambdaLogger,
                                                    @Mock final Transformer<JSON, Mappable<List<String>, String, String>> jsonTransformer,
-                                                   @Mock final CloudStorable fileStore){
+                                                   @Mock final CloudStorable fileStore,
+                                                   @Mock final CloudCopyable cloudCopyable,
+                                                   @Mock final CloudLoadable<String> cloudLoadable){
+
 
         when(context.getLogger()).thenReturn(lambdaLogger);
 
         final Map<String, String> input = Map.of("Transformation-BucketName", "bucket");
+        when(cloudLoadable.retrieve(any(), any())).thenReturn(Optional.of("{}"));
 
         final HandleTransformation handleTransformation
                 = new HandleTransformation(
-                        __-> Optional.of(new ByteArrayInputStream("{}".getBytes())),
+                        cloudLoadable,
                         jsonTransformer,
-                        fileStore);
+                        fileStore,
+                        cloudCopyable);
 
         assertThrows(AWSS3Exception.class, ()->handleTransformation.handleRequest(input, context));
 
@@ -128,20 +145,25 @@ class HandleTransformationTest {
                                @Mock final LambdaLogger lambdaLogger,
                                @Mock final Transformer<JSON, Mappable<List<String>, String, String>> jsonTransformer,
                                @Mock final Mappable<List<String>, String, String> transformedResult,
-                               @Mock final CloudStorable fileStore){
+                               @Mock final CloudStorable fileStore,
+                               @Mock final CloudCopyable cloudCopyable,
+                               @Mock final CloudLoadable<String> cloudLoadable){
+
 
         when(context.getLogger()).thenReturn(lambdaLogger);
         when(jsonTransformer.transform(any())).thenReturn(transformedResult);
         when(transformedResult.map(any())).thenReturn(Optional.empty());
+        when(cloudLoadable.retrieve(any(), any())).thenReturn(Optional.of("{}"));
 
         final Map<String, String> input = Map.of("Transformation-BucketName", "bucket",
                                                  "Transformation-KeyName", "key");
 
         final HandleTransformation handleTransformation
                 = new HandleTransformation(
-                        __-> Optional.of(new ByteArrayInputStream("{}".getBytes())),
+                        cloudLoadable,
                         jsonTransformer,
-                        fileStore);
+                        fileStore,
+                        cloudCopyable);
 
         assertThrows(AWSS3Exception.class, ()->handleTransformation.handleRequest(input, context));
 
@@ -157,20 +179,25 @@ class HandleTransformationTest {
                                    @Mock final LambdaLogger lambdaLogger,
                                    @Mock final Transformer<JSON, Mappable<List<String>, String, String>> jsonTransformer,
                                    @Mock final Mappable<List<String>, String, String> transformedResult,
-                                   @Mock final CloudStorable fileStore){
+                                   @Mock final CloudStorable fileStore,
+                                   @Mock final CloudCopyable cloudCopyable,
+                                   @Mock final CloudLoadable<String> cloudLoadable){
+
 
         when(context.getLogger()).thenReturn(lambdaLogger);
         when(jsonTransformer.transform(any())).thenReturn(transformedResult);
         when(transformedResult.map(any())).thenReturn(Optional.of(List.of("data1", "data2").toString()));
+        when(cloudLoadable.retrieve(any(), any())).thenReturn(Optional.of("{}"));
 
         final Map<String, String> input = Map.of("Transformation-BucketName", "bucket",
                                                  "Transformation-KeyName", "key");
 
         final HandleTransformation handleTransformation
                 = new HandleTransformation(
-                        __-> Optional.of(new ByteArrayInputStream("{}".getBytes())),
+                        cloudLoadable,
                         jsonTransformer,
-                        fileStore);
+                        fileStore,
+                        cloudCopyable);
 
         assertThrows(AWSS3Exception.class, ()->handleTransformation.handleRequest(input, context));
 
@@ -186,11 +213,15 @@ class HandleTransformationTest {
              @Mock final LambdaLogger lambdaLogger,
              @Mock final Transformer<JSON, Mappable<List<String>, String, String>> jsonTransformer,
              @Mock final Mappable<List<String>, String, String> transformedResult,
-             @Mock final CloudStorable fileStore){
+             @Mock final CloudStorable fileStore,
+             @Mock final CloudCopyable cloudCopyable,
+             @Mock final CloudLoadable<String> cloudLoadable){
+
 
         when(context.getLogger()).thenReturn(lambdaLogger);
         when(jsonTransformer.transform(any())).thenReturn(transformedResult);
         when(transformedResult.map(any())).thenReturn(Optional.of(List.of("data1", "data2").toString()));
+        when(cloudLoadable.retrieve(any(), any())).thenReturn(Optional.of("{}"));
 
         final Map<String, String> input = Map.of("Transformation-BucketName", "bucket1",
                                                  "Transformation-KeyName", "key1",
@@ -198,9 +229,10 @@ class HandleTransformationTest {
 
         final HandleTransformation handleTransformation
                 = new HandleTransformation(
-                        __-> Optional.of(new ByteArrayInputStream("{}".getBytes())),
+                        cloudLoadable,
                         jsonTransformer,
-                        fileStore);
+                        fileStore,
+                        cloudCopyable);
 
         assertThrows(AWSS3Exception.class, ()->handleTransformation.handleRequest(input, context));
 
@@ -216,12 +248,16 @@ class HandleTransformationTest {
              @Mock final LambdaLogger lambdaLogger,
              @Mock final Transformer<JSON, Mappable<List<String>, String, String>> jsonTransformer,
              @Mock final Mappable<List<String>, String, String> transformedResult,
-             @Mock final CloudStorable fileStore){
+             @Mock final CloudStorable fileStore,
+             @Mock final CloudCopyable cloudCopyable,
+             @Mock final CloudLoadable<String> cloudLoadable){
+
 
         when(context.getLogger()).thenReturn(lambdaLogger);
         when(jsonTransformer.transform(any())).thenReturn(transformedResult);
         when(transformedResult.map(any())).thenReturn(Optional.of(List.of("data1", "data2").toString()));
         when(fileStore.store(any(), any())).thenReturn(new CloudSaverStateError("Test Error"));
+        when(cloudLoadable.retrieve(any(), any())).thenReturn(Optional.of("{}"));
 
         final Map<String, String> input = Map.of(
                 "Transformation-BucketName", "bucket1",
@@ -232,9 +268,10 @@ class HandleTransformationTest {
 
         final HandleTransformation handleTransformation
                 = new HandleTransformation(
-                        __-> Optional.of(new ByteArrayInputStream("{}".getBytes())),
+                        cloudLoadable,
                         jsonTransformer,
-                        fileStore);
+                        fileStore,
+                        cloudCopyable);
 
         assertThrows(AWSS3Exception.class, ()->handleTransformation.handleRequest(input, context));
 
@@ -250,12 +287,16 @@ class HandleTransformationTest {
              @Mock final LambdaLogger lambdaLogger,
              @Mock final Transformer<JSON, Mappable<List<String>, String, String>> jsonTransformer,
              @Mock final Mappable<List<String>, String, String> transformedResult,
-             @Mock final CloudStorable fileStore){
+             @Mock final CloudStorable fileStore,
+             @Mock final CloudCopyable cloudCopyable,
+             @Mock final CloudLoadable<String> cloudLoadable){
+
 
         when(context.getLogger()).thenReturn(lambdaLogger);
         when(jsonTransformer.transform(any())).thenReturn(transformedResult);
         when(transformedResult.map(any())).thenReturn(Optional.of(List.of("data1", "data2").toString()));
         when(fileStore.store(any(), any())).thenReturn(new CloudSaverStateOK());
+        when(cloudLoadable.retrieve(any(), any())).thenReturn(Optional.of("{}"));
 
         final Map<String, String> input = Map.of(
                 "Transformation-BucketName", "bucket1",
@@ -265,9 +306,10 @@ class HandleTransformationTest {
 
         final HandleTransformation handleTransformation
                 = new HandleTransformation(
-                        __-> Optional.of(new ByteArrayInputStream("{}".getBytes())),
+                        cloudLoadable,
                         jsonTransformer,
-                        fileStore);
+                        fileStore,
+                        cloudCopyable);
 
         handleTransformation.handleRequest(input, context);
 
