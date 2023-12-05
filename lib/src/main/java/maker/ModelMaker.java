@@ -1,5 +1,6 @@
 package maker;
 
+import general.ResultState;
 import general.Transformer;
 import opennlp.tools.doccat.*;
 import opennlp.tools.util.*;
@@ -8,12 +9,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
-public class ModelMaker implements Transformer<InputStream, ModelMakerState<ModelMakerResult>> {
+public class ModelMaker implements Transformer<InputStream, ResultState<ModelMakerResult, ByteArrayOutputStream>> {
 
     public static final String MODEL_SUCCESSFULLY_CREATED = "Model Successfully created";
 
     @Override
-    public ModelMakerState<ModelMakerResult> transform(final InputStream input) {
+    public ResultState<ModelMakerResult, ByteArrayOutputStream> transform(final InputStream input) {
 
         final TrainingParameters params = TrainingParameters.defaultParams();
         params.put(TrainingParameters.CUTOFF_PARAM, "0");

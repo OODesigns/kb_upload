@@ -13,11 +13,6 @@ public class ModelMakerStateOK extends ModelMakerResult {
     }
 
     @Override
-    public String toString() {
-        return "ModelMaker State OK: " + getMessage();
-    }
-
-    @Override
     public ByteArrayOutputStream orElseThrow(final Function<ModelMakerResult, RuntimeException> functionException) throws RuntimeException {
         return outputStream;
     }

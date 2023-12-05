@@ -32,7 +32,7 @@ public class JSONValidator implements Validator<JSONSchema, JSON, JSONValidation
         return Optional.of(validate(jsonNodes))
                 .filter(hasSchemaErrors())
                 .map(this::statusError)
-                .orElseGet(JSONValidatedStateOK::new);
+                .orElseGet(JSONValidatedResultStateOK::new);
     }
 
     private static Predicate<Set<ValidationMessage>> hasSchemaErrors() {
@@ -45,7 +45,7 @@ public class JSONValidator implements Validator<JSONSchema, JSON, JSONValidation
     }
 
     private JSONValidationResult statusError(final Set<ValidationMessage> validationMessages) {
-        return new JSONValidatedStateError( validationMessages
+        return new JSONValidatedResultStateError( validationMessages
                                         .stream()
                                         .map(ValidationMessage::getMessage)
                                         .toList());
@@ -54,9 +54,9 @@ public class JSONValidator implements Validator<JSONSchema, JSON, JSONValidation
     private TransformationResult transformDataToJsonNodes(final JSONSchema jsonSchemaData, final JSON knowledgeData){
         try
         {
-            return new TransformationResult(new JSONValidatedStateOK(), new JSONNodes(getSchemaNode(jsonSchemaData), getNode(knowledgeData)));
+            return new TransformationResult(new JSONValidatedResultStateOK(), new JSONNodes(getSchemaNode(jsonSchemaData), getNode(knowledgeData)));
         } catch (final JsonProcessingException | JsonSchemaException ex) {
-            return new TransformationResult(new JSONValidatedStateError(ex.getMessage()), null);
+            return new TransformationResult(new JSONValidatedResultStateError(ex.getMessage()), null);
         }
     }
 

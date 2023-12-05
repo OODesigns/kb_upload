@@ -256,7 +256,7 @@ class HandleTransformationTest {
         when(context.getLogger()).thenReturn(lambdaLogger);
         when(jsonTransformer.transform(any())).thenReturn(transformedResult);
         when(transformedResult.map(any())).thenReturn(Optional.of(List.of("data1", "data2").toString()));
-        when(fileStore.store(any(), any())).thenReturn(new CloudSaverStateError("Test Error"));
+        when(fileStore.store(any(), any())).thenReturn(new CloudStoreStateError("Test Error"));
         when(cloudLoadable.retrieve(any(), any())).thenReturn(Optional.of("{}"));
 
         final Map<String, String> input = Map.of(
@@ -295,7 +295,7 @@ class HandleTransformationTest {
         when(context.getLogger()).thenReturn(lambdaLogger);
         when(jsonTransformer.transform(any())).thenReturn(transformedResult);
         when(transformedResult.map(any())).thenReturn(Optional.of(List.of("data1", "data2").toString()));
-        when(fileStore.store(any(), any())).thenReturn(new CloudSaverStateOK());
+        when(fileStore.store(any(), any())).thenReturn(new CloudStoreStateOK());
         when(cloudLoadable.retrieve(any(), any())).thenReturn(Optional.of("{}"));
 
         final Map<String, String> input = Map.of(

@@ -1,8 +1,8 @@
 package aws.root;
 
 import cloud.CloudObjectReference;
-import cloud.CloudSaverStateError;
-import cloud.CloudSaverStateOK;
+import cloud.CloudStoreStateError;
+import cloud.CloudStoreStateOK;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
@@ -33,7 +33,7 @@ class S3StreamSaverTest {
 
         final S3StreamSaver s3StreamSaver = new S3StreamSaver(s3Client);
 
-        assertThat(s3StreamSaver.store(cloudObjectReference, streamContents)).isInstanceOf(CloudSaverStateOK.class);
+        assertThat(s3StreamSaver.store(cloudObjectReference, streamContents)).isInstanceOf(CloudStoreStateOK.class);
 
         final ArgumentCaptor<RequestBody> contents = ArgumentCaptor.forClass(RequestBody.class);
 
@@ -58,7 +58,7 @@ class S3StreamSaverTest {
 
         final S3StreamSaver s3StreamSaver = new S3StreamSaver(s3Client);
 
-        assertThat(s3StreamSaver.store(s3Reference, streamContents)).isInstanceOf(CloudSaverStateError.class);
+        assertThat(s3StreamSaver.store(s3Reference, streamContents)).isInstanceOf(CloudStoreStateError.class);
 
     }
 

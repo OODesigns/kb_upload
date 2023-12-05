@@ -8,8 +8,8 @@ class JSONValidatedStateTest {
     @Test
     void validationClassesReturnClassName(){
 
-        assertThat(new JSONValidatedStateOK().toString()).contains("State OK");
-        assertThat(new JSONValidatedStateError("").toString()).contains("State Error");
+        assertThat(new JSONValidatedResultStateOK().toString()).contains("State OK");
+        assertThat(new JSONValidatedResultStateError("").toString()).contains("State Error");
 
     }
 

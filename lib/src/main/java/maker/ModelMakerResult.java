@@ -1,6 +1,10 @@
 package maker;
 
-public abstract class ModelMakerResult implements  ModelMakerState<ModelMakerResult>{
+import general.ResultState;
+
+import java.io.ByteArrayOutputStream;
+
+public abstract class ModelMakerResult implements ResultState<ModelMakerResult, ByteArrayOutputStream> {
 
     private final String message;
 
@@ -9,7 +13,7 @@ public abstract class ModelMakerResult implements  ModelMakerState<ModelMakerRes
     }
 
     @Override
-    public String getMessage() {
+    public String toString() {
         return message;
     }
 }

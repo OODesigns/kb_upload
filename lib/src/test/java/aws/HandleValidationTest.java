@@ -38,7 +38,7 @@ public class HandleValidationTest {
                                                  "Validation-KeyName", "key");
 
         when(context.getLogger()).thenReturn(lambdaLogger);
-        when(validator.validate(any(),any())).thenReturn(new JSONValidatedStateOK());
+        when(validator.validate(any(),any())).thenReturn(new JSONValidatedResultStateOK());
 
         final RequestHandler<Map<String, String>, Void> requestHandler
                 = new HandleValidation(validator,
@@ -64,7 +64,7 @@ public class HandleValidationTest {
 
         when(context.getLogger()).thenReturn(lambdaLogger);
         final List<String> messages = List.of("message1", "message2");
-        when(validator.validate(any(),any())).thenReturn(new JSONValidatedStateError(messages));
+        when(validator.validate(any(),any())).thenReturn(new JSONValidatedResultStateError(messages));
 
         final RequestHandler<Map<String, String>, Void> requestHandler
                 = new HandleValidation(validator,

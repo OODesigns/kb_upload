@@ -2,8 +2,8 @@ package json;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
-public class JSONValidatedStateOK extends JSONValidationResult {
-    public JSONValidatedStateOK() {
+public class JSONValidatedResultStateOK extends JSONValidationResult {
+    public JSONValidatedResultStateOK() {
         super("JSON Validation State OK");
     }
 

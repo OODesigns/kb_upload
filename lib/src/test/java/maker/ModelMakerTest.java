@@ -1,5 +1,6 @@
 package maker;
 import file.FileLoader;
+import general.ResultState;
 import org.junit.jupiter.api.Test;
 import org.mockito.junit.jupiter.MockitoSettings;
 
@@ -25,7 +26,7 @@ class ModelMakerTest {
         final InputStream inputStream = new ByteArrayInputStream(fileLoader.toString().getBytes(StandardCharsets.UTF_8));
 
         final ModelMaker modelMaker = new ModelMaker();
-        final ModelMakerState<ModelMakerResult> transform = modelMaker.transform(inputStream);
+        final ResultState<ModelMakerResult, ByteArrayOutputStream> transform = modelMaker.transform(inputStream);
 
         assertThat(transform).isInstanceOf(ModelMakerStateError.class);
     }
@@ -38,7 +39,7 @@ class ModelMakerTest {
         final InputStream inputStream = new ByteArrayInputStream(fileLoader.toString().getBytes(StandardCharsets.UTF_8));
 
         final ModelMaker modelMaker = new ModelMaker();
-        final ModelMakerState<ModelMakerResult> transform = modelMaker.transform(inputStream);
+        final ResultState<ModelMakerResult, ByteArrayOutputStream> transform = modelMaker.transform(inputStream);
 
         assertThat(transform).isInstanceOf(ModelMakerStateOK.class);
         assertThat(transform.orElseThrow(null)).isInstanceOf(ByteArrayOutputStream.class);
@@ -51,7 +52,7 @@ class ModelMakerTest {
         final InputStream inputStream = new ByteArrayInputStream(data.getBytes(StandardCharsets.UTF_8));
 
         final ModelMaker modelMaker = new ModelMaker();
-        final ModelMakerState<ModelMakerResult> transform = modelMaker.transform(inputStream);
+        final ResultState<ModelMakerResult, ByteArrayOutputStream> transform = modelMaker.transform(inputStream);
 
         // In this example, we assume it would return an empty Optional.
         assertThat(transform).isInstanceOf(ModelMakerStateError.class);
@@ -65,7 +66,7 @@ class ModelMakerTest {
         final InputStream inputStream = new ByteArrayInputStream(data.getBytes(StandardCharsets.UTF_8));
 
         final ModelMaker modelMaker = new ModelMaker();
-        final ModelMakerState<ModelMakerResult> transform = modelMaker.transform(inputStream);
+        final ResultState<ModelMakerResult, ByteArrayOutputStream>transform = modelMaker.transform(inputStream);
 
         // Again, adjust based on expected behavior with empty input. Assuming it returns an empty Optional.
         assertThat(transform).isInstanceOf(ModelMakerStateError.class);
@@ -78,7 +79,7 @@ class ModelMakerTest {
             when(mockStream.read(any(), anyInt(), anyInt())).thenThrow(new IOException("Forced exception"));
 
             final ModelMaker modelMaker = new ModelMaker();
-            final ModelMakerState<ModelMakerResult> transform = modelMaker.transform(mockStream);
+            final ResultState<ModelMakerResult, ByteArrayOutputStream> transform = modelMaker.transform(mockStream);
 
             assertThat(transform).isInstanceOf(ModelMakerStateError.class);
         }

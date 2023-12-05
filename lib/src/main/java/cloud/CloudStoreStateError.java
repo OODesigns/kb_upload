@@ -2,17 +2,17 @@ package cloud;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
-public class CloudSaverStateError extends CloudSaverResult {
+public class CloudStoreStateError extends CloudStoreResult {
     private static final String STREAM_SAVER_STATE_ERROR = "Stream Saver State Error: %s";
-    public CloudSaverStateError(final String message) {
+    public CloudStoreStateError(final String message) {
         super(String.format(STREAM_SAVER_STATE_ERROR,message));
     }
     @Override
-    public CloudSaverResult orElseThrow(final Function<CloudSaverResult, RuntimeException> functionException) throws RuntimeException {
+    public CloudStoreResult orElseThrow(final Function<CloudStoreResult, RuntimeException> functionException) throws RuntimeException {
         throw functionException.apply(this);
     }
     @Override
-    public CloudSaverResult calling(final UnaryOperator<CloudSaverResult> function) {
+    public CloudStoreResult calling(final UnaryOperator<CloudStoreResult> function) {
         return this;
     }
 }

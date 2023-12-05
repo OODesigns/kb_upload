@@ -4,15 +4,15 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
-public class JSONValidatedStateError extends JSONValidationResult {
+public class JSONValidatedResultStateError extends JSONValidationResult {
 
     private static final String VALIDATION_STATE_ERROR = "Validation State Error: %s";
 
-    public JSONValidatedStateError(final List<String> messages) {
+    public JSONValidatedResultStateError(final List<String> messages) {
         this(messages.toString());
     }
 
-    public JSONValidatedStateError(final String message) {
+    public JSONValidatedResultStateError(final String message) {
         super(String.format(VALIDATION_STATE_ERROR,message));
     }
 

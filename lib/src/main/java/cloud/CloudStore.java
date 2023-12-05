@@ -1,6 +1,7 @@
 package cloud;
 
 import assistant_configuration_creator.HandleResult;
+
 import java.io.ByteArrayOutputStream;
 
 public class CloudStore implements CloudStorable{
@@ -11,11 +12,9 @@ public class CloudStore implements CloudStorable{
     }
 
     @Override
-    public CloudSaverResult store(final CloudObjectReference cloudObjectReference, final ByteArrayOutputStream dataStream) {
-        final CloudSaverState<CloudSaverResult> storeResult = cloudStorable.store(cloudObjectReference, dataStream);
-
-        return new HandleResult<CloudSaverResult, CloudSaverResult>()
-                .calling(storeResult)
-                .orElseThrow(storeResult, ERROR_UNABLE_TO_SAVE_FILE);
+    public CloudStoreResult store(final CloudObjectReference cloudObjectReference, final ByteArrayOutputStream dataStream) {
+        return new HandleResult<>(cloudStorable.store(cloudObjectReference, dataStream))
+                .calling()
+                .orElseThrow(ERROR_UNABLE_TO_SAVE_FILE);
     }
 }

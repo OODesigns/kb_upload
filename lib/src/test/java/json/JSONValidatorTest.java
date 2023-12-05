@@ -92,7 +92,7 @@ class JSONValidatorTest {
 
         Optional.of(jsonValidator.validate(jsonSchema, json))
                 .ifPresentOrElse(v -> {
-                    assertThat(v).isInstanceOf(JSONValidatedStateError.class);
+                    assertThat(v).isInstanceOf(JSONValidatedResultStateError.class);
                     assertThat(v.toString()).contains("name: is missing but it is required");}
                    ,()->fail("Expected Error Validation but got null"));
     }
@@ -108,7 +108,7 @@ class JSONValidatorTest {
 
         Optional.of(jsonValidator.validate(jsonSchema, json))
                 .ifPresentOrElse(v -> {
-                            assertThat(v).isInstanceOf(JSONValidatedStateError.class);
+                            assertThat(v).isInstanceOf(JSONValidatedResultStateError.class);
                             assertThat(v.toString()).contains("entries: is missing but it is required");}
                         ,()->fail("Expected Error Validation but got null"));
     }
@@ -125,7 +125,7 @@ class JSONValidatorTest {
 
         Optional.of(jsonValidator.validate(jsonSchema, json))
                 .ifPresentOrElse(v -> {
-                            assertThat(v).isInstanceOf(JSONValidatedStateError.class);
+                            assertThat(v).isInstanceOf(JSONValidatedResultStateError.class);
                             assertThat(v.toString())
                                     .contains("entries: is missing but it is required")
                                     .contains("name: is missing but it is required");}
@@ -144,7 +144,7 @@ class JSONValidatorTest {
 
         Optional.of(jsonValidator.validate(jsonSchema, json))
                 .ifPresentOrElse(v -> {
-                            assertThat(v).isInstanceOf(JSONValidatedStateOK.class);
+                            assertThat(v).isInstanceOf(JSONValidatedResultStateOK.class);
                             assertThat(v.toString()).contains("Validation State OK");}
                         ,()->fail("Expected Valid Validation but got null"));
 
@@ -159,6 +159,6 @@ class JSONValidatorTest {
         final JSONValidator jsonValidator = new JSONValidator(
                 JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V4));
 
-        assertThat(jsonValidator.validate(jsonSchema, json)).isInstanceOf(JSONValidatedStateError.class);
+        assertThat(jsonValidator.validate(jsonSchema, json)).isInstanceOf(JSONValidatedResultStateError.class);
     }
 }

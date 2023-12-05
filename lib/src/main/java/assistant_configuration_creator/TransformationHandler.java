@@ -30,26 +30,11 @@ public class TransformationHandler {
         Optional.of(getCategoriesAndDocuments(input))
                 .flatMap(this::transformDataForModalMaker)
                 .map(saveToFile(output))
-                .map(__-> createDestinationObjectRef(input, output))
+                .map(__->CloudObjectReferenceFactory.moveStore(input, output))
                 .map(copyAssistantDefinitions(input));
     }
 
-    private CloudObjectReference createDestinationObjectRef(final CloudObjectReference input,
-                                                            final CloudObjectReference output) {
-        return new CloudObjectReference() {
-            @Override
-            public String getStoreName() {
-                return output.getStoreName();
-            }
-
-            @Override
-            public String getObjectName() {
-                return input.getObjectName();
-            }
-        };
-    }
-
-    private Function<CloudObjectReference, CloudSaverResult> copyAssistantDefinitions(final CloudObjectReference input) {
+    private Function<CloudObjectReference, CloudStoreResult> copyAssistantDefinitions(final CloudObjectReference input) {
         return output-> cloudCopyable.copy(input, output);
     }
 
@@ -57,7 +42,7 @@ public class TransformationHandler {
         return cloudObjectToJSON.transform(input);
     }
 
-    private Function<ByteArrayOutputStream, CloudSaverResult> saveToFile(final CloudObjectReference output) {
+    private Function<ByteArrayOutputStream, CloudStoreResult> saveToFile(final CloudObjectReference output) {
         return data -> cloudStorable.store(output, data);
     }
 
@@ -74,7 +59,7 @@ public class TransformationHandler {
     private static Function<String, Optional<ByteArrayOutputStream>> transformToStream() {
         return s -> {
             try {
-                final byte[] bytes = s.getBytes();
+                final byte[] bytes = s.toLowerCase().getBytes();
                 return Optional.of(new ByteArrayOutputStream(bytes.length) {{write(bytes);}});
             } catch (final IOException e) {
                 throw new CloudException(String.format(UNABLE_TO_TRANSFORM_DATA, e.getMessage()));

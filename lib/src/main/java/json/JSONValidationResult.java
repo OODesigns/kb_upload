@@ -1,6 +1,8 @@
 package json;
 
-public abstract class JSONValidationResult implements JSONValidatedState<JSONValidationResult> {
+import general.ResultState;
+
+public abstract class JSONValidationResult implements ResultState<JSONValidationResult,JSONValidationResult> {
     private final String message;
 
     protected JSONValidationResult(final String message) {

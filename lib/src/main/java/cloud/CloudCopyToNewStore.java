@@ -15,7 +15,7 @@ public class CloudCopyToNewStore implements CloudCopyable{
     }
 
     @Override
-    public CloudSaverResult copy(final CloudObjectReference input, final CloudObjectReference output){
+    public CloudStoreResult copy(final CloudObjectReference input, final CloudObjectReference output){
         return fromLoadable.retrieve(input, this::convertInputStreamToByteArrayOutputStream)
                 .map(s->toStorable.store(output, s))
                 .orElseThrow(()->new CloudException (String.format(UNABLE_TO_COPY_OBJECT,input)));

@@ -32,10 +32,8 @@ public class ValidationHandler {
     }
 
     private JSONValidationResult validateData(final JSON fileData) {
-        final JSONValidationResult JSONValidationResult = validator.validate(JSON_SCHEMA, fileData);
-
-        return new HandleResult<JSONValidationResult, JSONValidationResult>()
-                  .calling(JSONValidationResult)
-                  .orElseThrow(JSONValidationResult);
+        return new HandleResult<>(validator.validate(JSON_SCHEMA, fileData))
+                .calling()
+                .orElseThrow();
     }
 }

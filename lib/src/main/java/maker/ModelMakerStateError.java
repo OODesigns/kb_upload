@@ -9,11 +9,6 @@ public class ModelMakerStateError extends ModelMakerResult {
     }
 
     @Override
-    public String toString() {
-        return "ModelMaker State Error: "+getMessage();
-    }
-
-    @Override
     public ByteArrayOutputStream orElseThrow(final Function<ModelMakerResult, RuntimeException> functionException) throws RuntimeException {
         throw functionException.apply(this);
     }

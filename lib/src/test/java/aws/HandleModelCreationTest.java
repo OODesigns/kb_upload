@@ -1,9 +1,8 @@
 package aws;
-
-import aws.root.*;
 import cloud.*;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
+import general.ResultState;
 import general.Transformer;
 import maker.*;
 import org.junit.jupiter.api.Test;
@@ -17,7 +16,6 @@ import java.io.InputStream;
 import java.util.Map;
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -28,146 +26,124 @@ class HandleModelCreationTest {
     @Test
     void errorExpectedModelInputBucketNameNullParameters
             (@Mock final Context context,
-             @Mock final LambdaLogger lambdaLogger,
-             @Mock final CloudStorable fileStore,
-             @Mock final Transformer<InputStream, ModelMakerState<ModelMakerResult>> modelMaker){
+             @Mock final CloudStorable cloudStorable,
+             @Mock final CloudLoadable<InputStream> cloudLoadable,
+             @Mock final CloudCopyable cloudCopyable,
+             @Mock final Transformer<InputStream, ResultState<ModelMakerResult, ByteArrayOutputStream>> modelMaker){
 
-        when(context.getLogger()).thenReturn(lambdaLogger);
+        when(cloudLoadable.retrieve(any(), any())).thenReturn(Optional.of(new ByteArrayInputStream("{}".getBytes())));
 
-        final HandleModelCreation handleModelCreation
-                = new HandleModelCreation(
-                __-> Optional.of(new ByteArrayInputStream("{}".getBytes())),
+        final HandleModelCreation handleModelCreation = new HandleModelCreation(
                 modelMaker,
-                fileStore);
+                cloudStorable,
+                cloudLoadable,
+                cloudCopyable);
 
-        assertThrows(AWSS3Exception.class, ()->handleModelCreation.handleRequest(null, context));
-
-        final ArgumentCaptor<String> logData = ArgumentCaptor.forClass(String.class);
-        verify(lambdaLogger, times(1)).log(logData.capture());
-
-        assertThat(logData.getValue()).contains("Bucket name for Model Input file is missing");
+        assertThrows(CloudException.class, ()-> handleModelCreation.handleRequest(null, context));
     }
 
     @Test
     void errorExpectedModelInputBucketNameMissing
             (@Mock final Context context,
-             @Mock final LambdaLogger lambdaLogger,
-             @Mock final CloudStorable fileStore,
-             @Mock final Transformer<InputStream, ModelMakerState<ModelMakerResult>> modelMaker){
+             @Mock final CloudStorable cloudStorable,
+             @Mock final CloudLoadable<InputStream> cloudLoadable,
+             @Mock final CloudCopyable cloudCopyable,
+             @Mock final Transformer<InputStream, ResultState<ModelMakerResult, ByteArrayOutputStream>> modelMaker){
 
-        when(context.getLogger()).thenReturn(lambdaLogger);
+
+        when(cloudLoadable.retrieve(any(), any())).thenReturn(Optional.of(new ByteArrayInputStream("{}".getBytes())));
 
         final Map<String, String> input = Map.of(
                 "wrong-BucketName", "wrong-KeyName");
 
-        final HandleModelCreation handleModelCreation
-                = new HandleModelCreation(
-                __-> Optional.of(new ByteArrayInputStream("{}".getBytes())),
+        final HandleModelCreation handleModelCreation = new HandleModelCreation(
                 modelMaker,
-                fileStore);
+                cloudStorable,
+                cloudLoadable,
+                cloudCopyable);
 
-        assertThrows(AWSS3Exception.class, ()->handleModelCreation.handleRequest(input, context));
-
-        final ArgumentCaptor<String> logData = ArgumentCaptor.forClass(String.class);
-        verify(lambdaLogger, times(1)).log(logData.capture());
-
-        assertThat(logData.getValue()).contains("Bucket name for Model Input file is missing");
+        assertThrows(CloudException.class, ()-> handleModelCreation.handleRequest(input, context));
     }
 
     @Test
     void errorExpectedModelInputBucketNameMissingData
             (@Mock final Context context,
-             @Mock final LambdaLogger lambdaLogger,
-             @Mock final CloudStorable fileStore,
-             @Mock final Transformer<InputStream, ModelMakerState<ModelMakerResult>> modelMaker){
+             @Mock final CloudStorable cloudStorable,
+             @Mock final CloudLoadable<InputStream> cloudLoadable,
+             @Mock final CloudCopyable cloudCopyable,
+             @Mock final Transformer<InputStream, ResultState<ModelMakerResult, ByteArrayOutputStream>> modelMaker){
 
-        when(context.getLogger()).thenReturn(lambdaLogger);
+        when(cloudLoadable.retrieve(any(), any())).thenReturn(Optional.of(new ByteArrayInputStream("{}".getBytes())));
 
         final Map<String, String> input = Map.of(
                 "ModelInput-BucketName", "");
 
-        final HandleModelCreation handleModelCreation
-                = new HandleModelCreation(
-                __-> Optional.of(new ByteArrayInputStream("{}".getBytes())),
+        final HandleModelCreation handleModelCreation = new HandleModelCreation(
                 modelMaker,
-                fileStore);
+                cloudStorable,
+                cloudLoadable,
+                cloudCopyable);
 
-        assertThrows(AWSS3Exception.class, ()->handleModelCreation.handleRequest(input, context));
-
-        final ArgumentCaptor<String> logData = ArgumentCaptor.forClass(String.class);
-        verify(lambdaLogger, times(1)).log(logData.capture());
-
-        assertThat(logData.getValue()).contains("Bucket name for Model Input file is missing");
+        assertThrows(CloudException.class, ()-> handleModelCreation.handleRequest(input, context));
     }
 
     @Test
     void errorExpectedModelInputKeyNameMissing
             (@Mock final Context context,
-             @Mock final LambdaLogger lambdaLogger,
-             @Mock final CloudStorable fileStore,
-             @Mock final Transformer<InputStream, ModelMakerState<ModelMakerResult>> modelMaker){
-
-        when(context.getLogger()).thenReturn(lambdaLogger);
+             @Mock final CloudStorable cloudStorable,
+             @Mock final CloudLoadable<InputStream> cloudLoadable,
+             @Mock final CloudCopyable cloudCopyable,
+             @Mock final Transformer<InputStream, ResultState<ModelMakerResult, ByteArrayOutputStream>> modelMaker){
 
         final Map<String, String> input = Map.of(
                 "ModelInput-BucketName", "bucket1");
 
-        final HandleModelCreation handleModelCreation
-                = new HandleModelCreation(
-                __-> Optional.of(new ByteArrayInputStream("{}".getBytes())),
+        final HandleModelCreation handleModelCreation = new HandleModelCreation(
                 modelMaker,
-                fileStore);
+                cloudStorable,
+                cloudLoadable,
+                cloudCopyable);
 
-        assertThrows(AWSS3Exception.class, ()->handleModelCreation.handleRequest(input, context));
-
-        final ArgumentCaptor<String> logData = ArgumentCaptor.forClass(String.class);
-        verify(lambdaLogger, times(1)).log(logData.capture());
-
-        assertThat(logData.getValue()).contains("Key name for Model Input file is missing");
+        assertThrows(CloudException.class, ()-> handleModelCreation.handleRequest(input, context));
     }
 
     @Test
     void errorUnableToCreateModel
             (@Mock final Context context,
-             @Mock final LambdaLogger lambdaLogger,
-             @Mock final CloudStorable fileStore,
-             @Mock final Transformer<InputStream, ModelMakerState<ModelMakerResult>> modelMaker){
+             @Mock final CloudStorable cloudStorable,
+             @Mock final CloudLoadable<InputStream> cloudLoadable,
+             @Mock final CloudCopyable cloudCopyable,
+             @Mock final Transformer<InputStream, ResultState<ModelMakerResult, ByteArrayOutputStream>> modelMaker){
 
-        final ModelMakerState<ModelMakerResult> modelMakerState
+        final ResultState<ModelMakerResult, ByteArrayOutputStream> modelMakerState
                 = new ModelMakerStateError("Error Message");
 
-        when(context.getLogger()).thenReturn(lambdaLogger);
         when(modelMaker.transform(any())).thenReturn(modelMakerState);
 
         final Map<String, String> input = Map.of(
                 "ModelInput-BucketName", "bucket1",
                 "ModelInput-KeyName", "key1");
 
-        final HandleModelCreation handleModelCreation
-                = new HandleModelCreation(
-                __-> Optional.of(new ByteArrayInputStream("{}".getBytes())),
+        final HandleModelCreation handleModelCreation = new HandleModelCreation(
                 modelMaker,
-                fileStore);
+                cloudStorable,
+                cloudLoadable,
+                cloudCopyable);
 
-        assertThrows(AWSS3Exception.class, ()->handleModelCreation.handleRequest(input, context));
-
-        final ArgumentCaptor<String> logData = ArgumentCaptor.forClass(String.class);
-        verify(lambdaLogger, times(1)).log(logData.capture());
-
-        assertThat(logData.getValue()).contains("Unable To create a model");
+        assertThrows(CloudException.class, ()-> handleModelCreation.handleRequest(input, context));
     }
 
     @Test
     void errorBucketNameForModelFileIsMissing
             (@Mock final Context context,
-             @Mock final LambdaLogger lambdaLogger,
-             @Mock final CloudStorable fileStore,
-             @Mock final Transformer<InputStream, ModelMakerState<ModelMakerResult>> modelMaker,
+             @Mock final CloudStorable cloudStorable,
+             @Mock final CloudLoadable<InputStream> cloudLoadable,
+             @Mock final CloudCopyable cloudCopyable,
+             @Mock final Transformer<InputStream, ResultState<ModelMakerResult, ByteArrayOutputStream>> modelMaker,
              @Mock final ByteArrayOutputStream outputStream){
 
-        when(context.getLogger()).thenReturn(lambdaLogger);
 
-        final ModelMakerState<ModelMakerResult> modelMakerState
+        final ResultState<ModelMakerResult, ByteArrayOutputStream> modelMakerState
                 = new ModelMakerStateOK( "Model Created", outputStream);
 
         when(modelMaker.transform(any())).thenReturn(modelMakerState);
@@ -176,31 +152,27 @@ class HandleModelCreationTest {
                 "ModelInput-BucketName", "bucket1",
                 "ModelInput-KeyName", "key1");
 
-        final HandleModelCreation handleModelCreation
-                = new HandleModelCreation(
-                __-> Optional.of(new ByteArrayInputStream("{}".getBytes())),
+        final HandleModelCreation handleModelCreation = new HandleModelCreation(
                 modelMaker,
-                fileStore);
+                cloudStorable,
+                cloudLoadable,
+                cloudCopyable);
 
-        assertThrows(AWSS3Exception.class, ()->handleModelCreation.handleRequest(input, context));
-
-        final ArgumentCaptor<String> logData = ArgumentCaptor.forClass(String.class);
-        verify(lambdaLogger, times(2)).log(logData.capture());
-
-        assertThat(logData.getValue()).contains("Bucket name for Model file is missing");
+        assertThrows(CloudException.class, ()-> handleModelCreation.handleRequest(input, context));
     }
+
     @Test
     void errorKeyNameForModelIsMissing
             (@Mock final Context context,
-             @Mock final LambdaLogger lambdaLogger,
-             @Mock final CloudStorable fileStore,
-             @Mock final Transformer<InputStream, ModelMakerState<ModelMakerResult>> modelMaker,
+             @Mock final CloudStorable cloudStorable,
+             @Mock final CloudLoadable<InputStream> cloudLoadable,
+             @Mock final CloudCopyable cloudCopyable,
+             @Mock final Transformer<InputStream, ResultState<ModelMakerResult, ByteArrayOutputStream>> modelMaker,
              @Mock final ByteArrayOutputStream outputStream){
 
-        final ModelMakerState<ModelMakerResult> modelMakerState
+        final ResultState<ModelMakerResult, ByteArrayOutputStream> modelMakerState
                 = new ModelMakerStateOK( "Model Created", outputStream);
 
-        when(context.getLogger()).thenReturn(lambdaLogger);
         when(modelMaker.transform(any())).thenReturn(modelMakerState);
 
         final Map<String, String> input = Map.of(
@@ -208,33 +180,28 @@ class HandleModelCreationTest {
                 "ModelInput-KeyName", "key1",
                 "Model-BucketName", "bucket2");
 
-        final HandleModelCreation handleModelCreation
-                = new HandleModelCreation(
-                __-> Optional.of(new ByteArrayInputStream("{}".getBytes())),
+        final HandleModelCreation handleModelCreation = new HandleModelCreation(
                 modelMaker,
-                fileStore);
+                cloudStorable,
+                cloudLoadable,
+                cloudCopyable);
 
-        assertThrows(AWSS3Exception.class, ()->handleModelCreation.handleRequest(input, context));
-
-        final ArgumentCaptor<String> logData = ArgumentCaptor.forClass(String.class);
-        verify(lambdaLogger, times(2)).log(logData.capture());
-
-        assertThat(logData.getValue()).contains("Key name for Model file is missing");
+        assertThrows(CloudException.class, ()-> handleModelCreation.handleRequest(input, context));
     }
 
     @Test
     void errorSavingFile
             (@Mock final Context context,
-             @Mock final LambdaLogger lambdaLogger,
-             @Mock final CloudStorable fileStore,
-             @Mock final Transformer<InputStream, ModelMakerState<ModelMakerResult>> modelMaker,
+             @Mock final CloudStorable cloudStorable,
+             @Mock final CloudLoadable<InputStream> cloudLoadable,
+             @Mock final CloudCopyable cloudCopyable,
+             @Mock final Transformer<InputStream, ResultState<ModelMakerResult, ByteArrayOutputStream>> modelMaker,
              @Mock final ByteArrayOutputStream outputStream){
 
-        final ModelMakerState<ModelMakerResult> modelMakerState
+        final ResultState<ModelMakerResult, ByteArrayOutputStream> modelMakerState
                 = new ModelMakerStateOK( "Model Created", outputStream);
 
-        when(context.getLogger()).thenReturn(lambdaLogger);
-        when(fileStore.store(any(), any())).thenReturn(new CloudSaverStateError("Test Error"));
+        when(cloudStorable.store(any(), any())).thenReturn(new CloudStoreStateError("Test Error"));
         when(modelMaker.transform(any())).thenReturn(modelMakerState);
 
         final Map<String, String> input = Map.of(
@@ -243,36 +210,32 @@ class HandleModelCreationTest {
                 "Model-BucketName", "bucket2",
                 "Model-KeyName", "key2");
 
-        final HandleModelCreation handleModelCreation
-                = new HandleModelCreation(
-                __-> Optional.of(new ByteArrayInputStream("{}".getBytes())),
+        final HandleModelCreation handleModelCreation = new HandleModelCreation(
                 modelMaker,
-                fileStore);
+                cloudStorable,
+                cloudLoadable,
+                cloudCopyable);
 
-        assertThrows(AWSS3Exception.class, ()->handleModelCreation.handleRequest(input, context));
+        assertThrows(CloudException.class, ()-> handleModelCreation.handleRequest(input, context));
 
         final ArgumentCaptor<ByteArrayOutputStream> data = ArgumentCaptor.forClass(ByteArrayOutputStream.class);
-        final ArgumentCaptor<String> logData = ArgumentCaptor.forClass(String.class);
-
-        verify(fileStore, times(1)).store(any(), data.capture());
-        verify(lambdaLogger, times(2)).log(logData.capture());
-
-        assertThat(logData.getValue()).contains("Test Error");
+        verify(cloudStorable, times(1)).store(any(), data.capture());
     }
+
     @Test
     void SavingFileWithOutIssue
             (@Mock final Context context,
-             @Mock final LambdaLogger lambdaLogger,
-             @Mock final CloudStorable fileStore,
-             @Mock final Transformer<InputStream, ModelMakerState<ModelMakerResult>> modelMaker,
+             @Mock final CloudStorable cloudStorable,
+             @Mock final CloudLoadable<InputStream> cloudLoadable,
+             @Mock final CloudCopyable cloudCopyable,
+             @Mock final Transformer<InputStream, ResultState<ModelMakerResult, ByteArrayOutputStream>> modelMaker,
              @Mock final ByteArrayOutputStream outputStream){
 
 
-        final ModelMakerState<ModelMakerResult> modelMakerState
+        final ResultState<ModelMakerResult, ByteArrayOutputStream> modelMakerState
                 = new ModelMakerStateOK( "Model Created", outputStream);
 
-        when(context.getLogger()).thenReturn(lambdaLogger);
-        when(fileStore.store(any(), any())).thenReturn(new CloudSaverStateOK());
+        when(cloudStorable.store(any(), any())).thenReturn(new CloudStoreStateOK());
         when(modelMaker.transform(any())).thenReturn(modelMakerState);
 
         final Map<String, String> input = Map.of(
@@ -281,21 +244,16 @@ class HandleModelCreationTest {
                 "Model-BucketName", "bucket2",
                 "Model-KeyName", "key2");
 
-        final HandleModelCreation handleModelCreation
-                = new HandleModelCreation(
-                __-> Optional.of(new ByteArrayInputStream("{}".getBytes())),
+        final HandleModelCreation handleModelCreation = new HandleModelCreation(
                 modelMaker,
-                fileStore);
+                cloudStorable,
+                cloudLoadable,
+                cloudCopyable);
 
         handleModelCreation.handleRequest(input, context);
 
         final ArgumentCaptor<ByteArrayOutputStream> data = ArgumentCaptor.forClass(ByteArrayOutputStream.class);
-        final ArgumentCaptor<String> logData = ArgumentCaptor.forClass(String.class);
-
-        verify(fileStore, times(1)).store(any(), data.capture());
-        verify(lambdaLogger, times(2)).log(logData.capture());
-
-        assertThat(logData.getValue()).contains("Model Created");
+        verify(cloudStorable, times(1)).store(any(), data.capture());
     }
 
     @Test
@@ -310,11 +268,9 @@ class HandleModelCreationTest {
 
         when(context.getLogger()).thenReturn(lambdaLogger);
 
+        final HandleModelCreation handleModelCreation = new HandleModelCreation();
 
-        final HandleModelCreation handleModelCreation
-                = new HandleModelCreation();
-
-        assertThrows(AWSS3Exception.class, ()-> handleModelCreation.handleRequest(input, context));
+        assertThrows(CloudException.class, ()-> handleModelCreation.handleRequest(input, context));
     }
 
 }
