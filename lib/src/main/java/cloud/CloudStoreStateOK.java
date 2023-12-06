@@ -4,7 +4,7 @@ import java.util.function.UnaryOperator;
 
 public class CloudStoreStateOK extends CloudStoreResult {
     public CloudStoreStateOK() {
-        super("Stream Saver State OK");
+        super("Store state OK");
     }
 
     @Override

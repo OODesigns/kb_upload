@@ -1,4 +1,5 @@
 package aws.root;
+import cloud.CloudException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import java.util.HashMap;
@@ -29,7 +30,7 @@ class S3ReferenceTest {
     public void testMissingBucketName() {
         input.put("keyNameKey", "test-key");
 
-        assertThrows(AWSS3Exception.class, () ->
+        assertThrows(CloudException.class, () ->
                 new S3CloudObjectReference(input, "bucketNameKey", "keyNameKey", "testArea")
         );
     }
@@ -38,7 +39,7 @@ class S3ReferenceTest {
     public void testMissingKeyName() {
         input.put("bucketNameKey", "test-bucket");
 
-        assertThrows(AWSS3Exception.class, () ->
+        assertThrows(CloudException.class, () ->
                 new S3CloudObjectReference(input, "bucketNameKey", "keyNameKey", "testArea")
         );
     }

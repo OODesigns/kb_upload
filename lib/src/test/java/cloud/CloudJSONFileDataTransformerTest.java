@@ -1,8 +1,5 @@
 package cloud;
 
-import aws.root.AWSS3Exception;
-import com.amazonaws.services.lambda.runtime.Context;
-import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import json.JSON;
 import general.Retrievable;
 import org.junit.jupiter.api.Test;
@@ -38,22 +35,19 @@ class CloudJSONFileDataTransformerTest {
     @Test
     public void testTransform_throwsExceptionWhenFileNotLoaded(
             final @Mock CloudObjectReference cloudObjectReference,
-            final @Mock Retrievable<CloudObjectReference, Optional<InputStream>> fileLoaderMock,
-            final @Mock Context context,
-            final @Mock LambdaLogger lambdaLogger) {
+            final @Mock Retrievable<CloudObjectReference, Optional<InputStream>> fileLoaderMock) {
 
         when(cloudObjectReference.getStoreName()).thenReturn("sample-bucket");
         when(cloudObjectReference.getObjectName()).thenReturn("sample-key");
-        when(context.getLogger()).thenReturn(lambdaLogger);
 
         when(fileLoaderMock.retrieve(cloudObjectReference)).thenReturn(Optional.empty());
 
         final CloudJSONFileDataTransformer cloudJSONFileDataTransformer = new CloudJSONFileDataTransformer(new CloudLoad<>(fileLoaderMock));
 
-        final AWSS3Exception exception = assertThrows(AWSS3Exception.class, () ->
+        final CloudException exception = assertThrows(CloudException.class, () ->
                 cloudJSONFileDataTransformer.transform(cloudObjectReference));
 
-        assertEquals("Unable to load file from bucket: sample-bucket and key: sample-key", exception.getMessage());
+        assertEquals("Unable to load file from store: sample-bucket and object: sample-key", exception.getMessage());
     }
 
 }

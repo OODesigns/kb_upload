@@ -1,6 +1,4 @@
 package aws;
-
-import aws.root.*;
 import cloud.*;
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import general.Mappable;
@@ -11,7 +9,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoSettings;
 import com.amazonaws.services.lambda.runtime.Context;
-import java.io.ByteArrayOutputStream;
+import support.LogCapture;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -23,19 +21,15 @@ import static org.mockito.Mockito.*;
 
 @MockitoSettings
 class HandleTransformationTest {
+    public static final String HANDLE_RESULT = "assistant_configuration_creator.HandleResult";
 
     @Test
     void errorExpectedTransformationBucketNameNullParameters(
                                        @Mock final Context context,
-                                       @Mock final LambdaLogger lambdaLogger,
                                        @Mock final Transformer<JSON, Mappable<List<String>, String, String>> jsonTransformer,
                                        @Mock final CloudStorable fileStore,
                                        @Mock final CloudCopyable cloudCopyable,
                                        @Mock final CloudLoadable<String> cloudLoadable){
-
-        when(context.getLogger()).thenReturn(lambdaLogger);
-
-        when(cloudLoadable.retrieve(any(), any())).thenReturn(Optional.of("{}"));
 
         final HandleTransformation handleTransformation
                 = new HandleTransformation(
@@ -44,25 +38,18 @@ class HandleTransformationTest {
                         fileStore,
                         cloudCopyable);
 
-        assertThrows(AWSS3Exception.class, ()->handleTransformation.handleRequest(null, context));
+        final CloudException cloudException =
+                assertThrows(CloudException.class, () -> handleTransformation.handleRequest(null, context));
 
-        final ArgumentCaptor<String> logData = ArgumentCaptor.forClass(String.class);
-        verify(lambdaLogger, times(1)).log(logData.capture());
-
-        assertThat(logData.getValue()).contains("Bucket name for transformation file is missing");
+        assertThat(cloudException.getMessage()).contains("Bucket name for transformation file is missing");
     }
 
     @Test
     void errorExpectedTransformationBucketNameMissing(@Mock final Context context,
-                                              @Mock final LambdaLogger lambdaLogger,
-                                              @Mock final Transformer<JSON, Mappable<List<String>, String, String>> jsonTransformer,
+                                                      @Mock final Transformer<JSON, Mappable<List<String>, String, String>> jsonTransformer,
                                               @Mock final CloudStorable fileStore,
                                               @Mock final CloudCopyable cloudCopyable,
                                               @Mock final CloudLoadable<String> cloudLoadable){
-
-
-        when(context.getLogger()).thenReturn(lambdaLogger);
-        when(cloudLoadable.retrieve(any(), any())).thenReturn(Optional.of("{}"));
 
         final Map<String, String> input = Map.of("wrong Key", "wrong value");
 
@@ -73,12 +60,9 @@ class HandleTransformationTest {
                         fileStore,
                         cloudCopyable);
 
-        assertThrows(AWSS3Exception.class, ()->handleTransformation.handleRequest(input, context));
+        final CloudException cloudException = assertThrows(CloudException.class, () -> handleTransformation.handleRequest(input, context));
 
-        final ArgumentCaptor<String> logData = ArgumentCaptor.forClass(String.class);
-        verify(lambdaLogger, times(1)).log(logData.capture());
-
-        assertThat(logData.getValue()).contains("Bucket name for transformation file is missing");
+        assertThat(cloudException.getMessage()).contains("Bucket name for transformation file is missing");
     }
 
     @Test
@@ -103,7 +87,7 @@ class HandleTransformationTest {
                         fileStore,
                         cloudCopyable);
 
-        assertThrows(AWSS3Exception.class, ()->handleTransformation.handleRequest(input, context));
+        assertThrows(CloudException.class, ()->handleTransformation.handleRequest(input, context));
 
         final ArgumentCaptor<String> logData = ArgumentCaptor.forClass(String.class);
         verify(lambdaLogger, times(1)).log(logData.capture());
@@ -132,7 +116,7 @@ class HandleTransformationTest {
                         fileStore,
                         cloudCopyable);
 
-        assertThrows(AWSS3Exception.class, ()->handleTransformation.handleRequest(input, context));
+        assertThrows(CloudException.class, ()->handleTransformation.handleRequest(input, context));
 
         final ArgumentCaptor<String> logData = ArgumentCaptor.forClass(String.class);
         verify(lambdaLogger, times(1)).log(logData.capture());
@@ -165,7 +149,7 @@ class HandleTransformationTest {
                         fileStore,
                         cloudCopyable);
 
-        assertThrows(AWSS3Exception.class, ()->handleTransformation.handleRequest(input, context));
+        assertThrows(CloudException.class, ()->handleTransformation.handleRequest(input, context));
 
         final ArgumentCaptor<String> logData = ArgumentCaptor.forClass(String.class);
         verify(lambdaLogger, times(1)).log(logData.capture());
@@ -199,7 +183,7 @@ class HandleTransformationTest {
                         fileStore,
                         cloudCopyable);
 
-        assertThrows(AWSS3Exception.class, ()->handleTransformation.handleRequest(input, context));
+        assertThrows(CloudException.class, ()->handleTransformation.handleRequest(input, context));
 
         final ArgumentCaptor<String> logData = ArgumentCaptor.forClass(String.class);
         verify(lambdaLogger, times(1)).log(logData.capture());
@@ -210,15 +194,12 @@ class HandleTransformationTest {
     @Test
     void errorKeyNameForTransFormedIsMissing
             (@Mock final Context context,
-             @Mock final LambdaLogger lambdaLogger,
              @Mock final Transformer<JSON, Mappable<List<String>, String, String>> jsonTransformer,
              @Mock final Mappable<List<String>, String, String> transformedResult,
              @Mock final CloudStorable fileStore,
              @Mock final CloudCopyable cloudCopyable,
              @Mock final CloudLoadable<String> cloudLoadable){
 
-
-        when(context.getLogger()).thenReturn(lambdaLogger);
         when(jsonTransformer.transform(any())).thenReturn(transformedResult);
         when(transformedResult.map(any())).thenReturn(Optional.of(List.of("data1", "data2").toString()));
         when(cloudLoadable.retrieve(any(), any())).thenReturn(Optional.of("{}"));
@@ -234,29 +215,24 @@ class HandleTransformationTest {
                         fileStore,
                         cloudCopyable);
 
-        assertThrows(AWSS3Exception.class, ()->handleTransformation.handleRequest(input, context));
+        final CloudException cloudException
+                = assertThrows(CloudException.class, () -> handleTransformation.handleRequest(input, context));
 
-        final ArgumentCaptor<String> logData = ArgumentCaptor.forClass(String.class);
-        verify(lambdaLogger, times(1)).log(logData.capture());
-
-        assertThat(logData.getValue()).contains("Key name for transformed file is missing");
+        assertThat(cloudException.getMessage()).contains("Key name for transformed file is missing");
     }
 
     @Test
     void errorSavingFile
             (@Mock final Context context,
-             @Mock final LambdaLogger lambdaLogger,
              @Mock final Transformer<JSON, Mappable<List<String>, String, String>> jsonTransformer,
              @Mock final Mappable<List<String>, String, String> transformedResult,
-             @Mock final CloudStorable fileStore,
+             @Mock final CloudStorable cloudStorable,
              @Mock final CloudCopyable cloudCopyable,
              @Mock final CloudLoadable<String> cloudLoadable){
 
-
-        when(context.getLogger()).thenReturn(lambdaLogger);
         when(jsonTransformer.transform(any())).thenReturn(transformedResult);
         when(transformedResult.map(any())).thenReturn(Optional.of(List.of("data1", "data2").toString()));
-        when(fileStore.store(any(), any())).thenReturn(new CloudStoreStateError("Test Error"));
+        when(cloudStorable.store(any(), any())).thenReturn(new CloudStoreStateError("Test Error"));
         when(cloudLoadable.retrieve(any(), any())).thenReturn(Optional.of("{}"));
 
         final Map<String, String> input = Map.of(
@@ -270,21 +246,17 @@ class HandleTransformationTest {
                 = new HandleTransformation(
                         cloudLoadable,
                         jsonTransformer,
-                        fileStore,
+                        cloudStorable,
                         cloudCopyable);
 
-        assertThrows(AWSS3Exception.class, ()->handleTransformation.handleRequest(input, context));
+        final CloudException cloudException = assertThrows(CloudException.class, () -> handleTransformation.handleRequest(input, context));
 
-        final ArgumentCaptor<String> logData = ArgumentCaptor.forClass(String.class);
-        verify(lambdaLogger, times(1)).log(logData.capture());
-
-        assertThat(logData.getValue()).contains("Test Error");
+        assertThat(cloudException.getMessage()).contains("Test Error");
     }
 
     @Test
     void SavingFileWithOutIssue
             (@Mock final Context context,
-             @Mock final LambdaLogger lambdaLogger,
              @Mock final Transformer<JSON, Mappable<List<String>, String, String>> jsonTransformer,
              @Mock final Mappable<List<String>, String, String> transformedResult,
              @Mock final CloudStorable fileStore,
@@ -292,7 +264,6 @@ class HandleTransformationTest {
              @Mock final CloudLoadable<String> cloudLoadable){
 
 
-        when(context.getLogger()).thenReturn(lambdaLogger);
         when(jsonTransformer.transform(any())).thenReturn(transformedResult);
         when(transformedResult.map(any())).thenReturn(Optional.of(List.of("data1", "data2").toString()));
         when(fileStore.store(any(), any())).thenReturn(new CloudStoreStateOK());
@@ -311,15 +282,13 @@ class HandleTransformationTest {
                         fileStore,
                         cloudCopyable);
 
-        handleTransformation.handleRequest(input, context);
+        try(final LogCapture logData =new LogCapture(HANDLE_RESULT)) {
 
-        final ArgumentCaptor<ByteArrayOutputStream> data = ArgumentCaptor.forClass(ByteArrayOutputStream.class);
-        final ArgumentCaptor<String> logData = ArgumentCaptor.forClass(String.class);
+            handleTransformation.handleRequest(input, context);
 
-        verify(fileStore, times(1)).store(any(), data.capture());
-        verify(lambdaLogger, times(1)).log(logData.capture());
 
-        assertThat(logData.getValue()).contains("S3FileSaverOKState");
+            assertThat(logData.getLogs().get(0).getMessage()).contains("S3FileSaverOKState");
+        }
     }
 
     @Test
@@ -338,7 +307,7 @@ class HandleTransformationTest {
         final HandleTransformation handleTransformation
                 = new HandleTransformation();
 
-        assertThrows(AWSS3Exception.class, ()-> handleTransformation.handleRequest(input, context));
+        assertThrows(CloudException.class, ()-> handleTransformation.handleRequest(input, context));
     }
 
 }

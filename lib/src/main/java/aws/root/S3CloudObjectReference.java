@@ -1,5 +1,6 @@
 package aws.root;
 
+import cloud.CloudException;
 import cloud.CloudObjectReference;
 
 import java.util.Map;
@@ -24,7 +25,7 @@ public class S3CloudObjectReference implements CloudObjectReference {
         try {
             return constructor.create(input.get(key));
         } catch (final RuntimeException e) {
-            throw new AWSS3Exception(errorMessage);
+            throw new CloudException(errorMessage);
         }
     }
 
