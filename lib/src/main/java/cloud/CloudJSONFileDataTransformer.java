@@ -9,7 +9,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
 public class CloudJSONFileDataTransformer implements CloudObjectToJSON {
-    private static final String MISSING_DATA_WHEN_CREATING_JSON = "UnExpected missing data when creating JSON";
+    public static final String UNABLE_TO_TRANSFORM_FILE_TO_JSON = "Unable to transform file to JSON";
     private final CloudLoadable<String> cloudLoad;
 
     public CloudJSONFileDataTransformer(final CloudLoadable<String> cloudLoad) {
@@ -18,8 +18,8 @@ public class CloudJSONFileDataTransformer implements CloudObjectToJSON {
 
     public JSON transform(final CloudObjectReference cloudObjectReference) {
         return getData(cloudObjectReference)
-                    .map(JSONData::new)
-                    .orElseThrow(()->new RuntimeException(MISSING_DATA_WHEN_CREATING_JSON));
+                .map(JSONData::new)
+                .orElseThrow(()->new CloudException(UNABLE_TO_TRANSFORM_FILE_TO_JSON));
     }
 
     private Optional<String> getData(final CloudObjectReference cloudObjectReference) {

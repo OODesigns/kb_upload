@@ -47,7 +47,7 @@ class CloudJSONFileDataTransformerTest {
         final CloudException exception = assertThrows(CloudException.class, () ->
                 cloudJSONFileDataTransformer.transform(cloudObjectReference));
 
-        assertEquals("Unable to load file from store: sample-bucket and object: sample-key", exception.getMessage());
+        assertEquals("Unable to transform file to JSON", exception.getMessage());
     }
 
 }

@@ -43,7 +43,7 @@ class CloudLoadTest {
         final CloudLoad<String> cloudLoad = new CloudLoad<>(fileLoader);
 
 
-        try(final LogCapture logCapture = new LogCapture("cloud.CloudException")) {
+        try(final LogCapture logCapture = new LogCapture("cloud.CloudLoad")) {
             cloudLoad.retrieve(cloudObjectReference, s -> "");
             verify(fileLoader, times(1)).retrieve(cloudObjectReference);
             assertThat(logCapture.getLogs().get(0).getMessage()).contains("Unable to load file from store");

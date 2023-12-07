@@ -16,8 +16,8 @@ public class CloudLoad<T> implements CloudLoadable<T> {
         this.fileLoader = fileLoader;
     }
 
-    private CloudException throwUnableToLoadFile(final CloudObjectReference cloudObjectReference) {
-        return new CloudException(String.format(UNABLE_TO_LOAD_FILE,
+    private IOException throwUnableToLoadFile(final CloudObjectReference cloudObjectReference) {
+        return new IOException(String.format(UNABLE_TO_LOAD_FILE,
                 cloudObjectReference.getStoreName(), cloudObjectReference.getObjectName()));
     }
 
@@ -28,10 +28,8 @@ public class CloudLoad<T> implements CloudLoadable<T> {
                     fileLoader.retrieve(cloudObjectReference)
                             .orElseThrow(() -> throwUnableToLoadFile(cloudObjectReference))){
             return Optional.of(transformFunction.apply(filestream));
-        } catch (final IOException | CloudException e) {
-            if (e instanceof IOException) {
-                logger.log(Level.SEVERE,e.getMessage(),e);
-            }
+        } catch (final IOException e) {
+            logger.log(Level.SEVERE,e.getMessage(),e);
             return Optional.empty();
         }
     }
