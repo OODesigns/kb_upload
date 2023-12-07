@@ -3,18 +3,24 @@ import cloud.*;
 import general.Mappable;
 import general.Transformer;
 import json.JSON;
+import json.JSONArrayToList;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class TransformationHandler {
-    private static final String UNABLE_TO_TRANSFORM_DATA = "Unable to transform data: %s";
+    private static final String UNABLE_TO_TRANSFORM_DATA = "Unable to transform data";
     private final CloudObjectToJSON cloudObjectToJSON;
     private final Transformer<JSON, Mappable<List<String>, String, String>> jsonTransformer;
     private final CloudStorable cloudStorable;
     private final CloudCopyable cloudCopyable;
+
+    private static final Logger logger = Logger.getLogger(TransformationHandler.class.getName());
 
     public TransformationHandler(final CloudObjectToJSON cloudObjectToJSON,
                                  final Transformer<JSON, Mappable<List<String>, String, String>> jsonTransformer,
@@ -47,22 +53,24 @@ public class TransformationHandler {
     }
 
     private Optional<ByteArrayOutputStream> transformDataForModalMaker(final JSON json) {
-        return jsonTransformer.transform(json)
+        return Optional.of(jsonTransformer.transform(json)
                 .map(newLineForEachEntry())
-                .flatMap(transformToStream());
+                .flatMap(transformToStream())
+                .orElseThrow(()-> new CloudException(UNABLE_TO_TRANSFORM_DATA)));
     }
 
-    private static Function<List<String>, String> newLineForEachEntry() {
+    private Function<List<String>, String> newLineForEachEntry() {
         return l -> String.join("\n", l);
     }
 
-    private static Function<String, Optional<ByteArrayOutputStream>> transformToStream() {
+    private Function<String, Optional<ByteArrayOutputStream>> transformToStream() {
         return s -> {
             try {
                 final byte[] bytes = s.toLowerCase().getBytes();
                 return Optional.of(new ByteArrayOutputStream(bytes.length) {{write(bytes);}});
             } catch (final IOException e) {
-                throw new CloudException(String.format(UNABLE_TO_TRANSFORM_DATA, e.getMessage()));
+                logger.log(Level.SEVERE, e.getMessage());
+                return Optional.empty();
             }
         };
     }

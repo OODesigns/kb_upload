@@ -80,7 +80,7 @@ public class HandleValidationTest {
 
         final CloudException cloudException = assertThrows(CloudException.class, () -> requestHandler.handleRequest(input, context));
 
-        assertThat(cloudException.getMessage()).contains("Unable to load");
+        assertThat(cloudException.getMessage()).contains("Unable to transform file to JSON");
         verify(validator, never()).validate(any(),any()); //should not be called (no valid file loaded)
     }
 
@@ -94,7 +94,7 @@ public class HandleValidationTest {
         final RequestHandler<Map<String, String>, Void> requestHandler
                 = new HandleValidation();
 
-        final CloudException cloudException = assertThrows(CloudException.class, () -> requestHandler.handleRequest(input, context));
-        assertThat(cloudException.getMessage()).contains("Unable to load");
+        final CloudException exception = assertThrows(CloudException.class, () -> requestHandler.handleRequest(input, context));
+        assertThat(exception.getMessage()).contains("Unable to transform file to JSON");
     }
 }
