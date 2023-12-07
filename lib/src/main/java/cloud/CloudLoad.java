@@ -28,8 +28,10 @@ public class CloudLoad<T> implements CloudLoadable<T> {
                     fileLoader.retrieve(cloudObjectReference)
                             .orElseThrow(() -> throwUnableToLoadFile(cloudObjectReference))){
             return Optional.of(transformFunction.apply(filestream));
-        } catch (final IOException e) {
-            logger.log(Level.SEVERE,e.getMessage());
+        } catch (final IOException | CloudException e) {
+            if (e instanceof IOException) {
+                logger.log(Level.SEVERE,e.getMessage(),e);
+            }
             return Optional.empty();
         }
     }
