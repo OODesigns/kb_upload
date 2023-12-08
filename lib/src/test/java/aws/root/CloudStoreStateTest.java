@@ -9,7 +9,7 @@ class CloudStoreStateTest {
     @Test
     void TransformationStateReturnClassName(){
 
-        assertThat(new CloudStoreStateOK().toString()).contains("S3FileSaverOKState");
+        assertThat(new CloudStoreStateOK().toString()).contains("Store state OK");
         assertThat(new CloudStoreStateError("ERROR").toString()).contains("ERROR");
     }
 }
