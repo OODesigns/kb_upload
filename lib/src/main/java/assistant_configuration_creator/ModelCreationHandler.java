@@ -43,7 +43,9 @@ public class ModelCreationHandler {
     }
 
     private Optional<InputStream> getDataForModel(final CloudObjectReference input) {
-        return cloudLoadable.retrieve(input, s->s);
+        return Optional.of(cloudLoadable
+                .retrieve(input, s->s)
+                .orElseThrow(()->new CloudException("Unable to load model")));
     }
 
     private Function<InputStream, Optional<ByteArrayOutputStream>> createModel() {
