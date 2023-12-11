@@ -278,5 +278,4 @@ class HandleTransformationTest {
 
         assertThat(exception.getMessage()).contains("Unable to transform file to JSON");
     }
-
 }
