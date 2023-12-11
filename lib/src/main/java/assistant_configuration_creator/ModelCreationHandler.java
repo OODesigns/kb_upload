@@ -48,7 +48,7 @@ public class ModelCreationHandler {
                 .orElseThrow(()->new CloudException("Unable to load model")));
     }
 
-    private Function<InputStream, Optional<ByteArrayOutputStream>> createModel() {
+    Function<InputStream, Optional<ByteArrayOutputStream>> createModel() {
         return inputStream -> {
             try(inputStream){
                 return Optional.of(new HandleResult<>(modelMaker.transform(inputStream))
