@@ -5,6 +5,7 @@ import general.ResultState;
 import general.Transformer;
 import maker.*;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoSettings;
 import support.LogCapture;
@@ -246,7 +247,7 @@ class HandleModelCreationTest {
                 "ModelInput-KeyName", "key1",
                 "Model-BucketName", "bucket2",
                 "Model-KeyName", "key2",
-                "Assistant-BucketName", "bucket3",
+                "Assistant-BucketName", "bucket1",
                 "Assistant-KeyName","key3");
 
         final HandleModelCreation handleModelCreation = new HandleModelCreation(
@@ -261,6 +262,20 @@ class HandleModelCreationTest {
 
             assertThat(logCapture.getLogs().get(0).getMessage()).contains("Model Created");
         }
+
+        final ArgumentCaptor<CloudObjectReference> crInput
+                = ArgumentCaptor.forClass(CloudObjectReference.class);
+
+        final ArgumentCaptor<CloudObjectReference> crOutput
+                = ArgumentCaptor.forClass(CloudObjectReference.class);
+
+        verify(cloudCopyable, times(1)).copy(crInput.capture(), crOutput.capture());
+
+        assertThat(crInput.getValue().getObjectName()).contains("key3");
+        assertThat(crOutput.getValue().getObjectName()).contains("key3");
+
+        assertThat(crOutput.getValue().getStoreName()).contains("bucket2");
+        assertThat(crInput.getValue().getStoreName()).contains("bucket1");
     }
 
     @Test
