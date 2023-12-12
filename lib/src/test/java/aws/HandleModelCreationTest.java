@@ -123,7 +123,10 @@ class HandleModelCreationTest {
                 "ModelInput-BucketName", "bucket1",
                 "ModelInput-KeyName", "key1",
                 "Model-BucketName", "bucket2",
-                "Model-KeyName", "key2");
+                "Model-KeyName", "key2",
+                "Assistant-BucketName", "bucket3",
+                "Assistant-KeyName","key3");
+
 
         final CloudStore cloudStorable = new CloudStore(fileStore);
 
@@ -206,7 +209,9 @@ class HandleModelCreationTest {
                 "ModelInput-BucketName", "bucket1",
                 "ModelInput-KeyName", "key1",
                 "Model-BucketName", "bucket2",
-                "Model-KeyName", "key2");
+                "Model-KeyName", "key2",
+                "Assistant-BucketName", "bucket3",
+                "Assistant-KeyName","key3");
 
         final HandleModelCreation handleModelCreation = new HandleModelCreation(
                 modelMaker,
@@ -240,7 +245,9 @@ class HandleModelCreationTest {
                 "ModelInput-BucketName", "bucket1",
                 "ModelInput-KeyName", "key1",
                 "Model-BucketName", "bucket2",
-                "Model-KeyName", "key2");
+                "Model-KeyName", "key2",
+                "Assistant-BucketName", "bucket3",
+                "Assistant-KeyName","key3");
 
         final HandleModelCreation handleModelCreation = new HandleModelCreation(
                 modelMaker,
@@ -263,7 +270,9 @@ class HandleModelCreationTest {
                 "ModelInput-BucketName", "bucket1",
                 "ModelInput-KeyName", "key1",
                 "Model-BucketName", "bucket2",
-                "Model-KeyName", "key2");
+                "Model-KeyName", "key2",
+                "Assistant-BucketName", "bucket3",
+                "Assistant-KeyName","key3");
 
         final HandleModelCreation handleModelCreation = new HandleModelCreation();
 

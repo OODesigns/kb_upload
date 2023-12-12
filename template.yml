@@ -185,8 +185,10 @@ Resources:
           				"ModelInput-BucketName": "${StagingBucketName}",
           				"ModelInput-KeyName": "cat.txt",
           				"Model-BucketName": "${ModelBucketName}",
-          				"Model-KeyName": "cat.bin"
-          			}
+          				"Model-KeyName": "cat.bin",
+                        "Assistant-BucketName":"${StagingBucketName}",
+                        "Assistant-KeyName":"knowledge.json"
+                   }
           		}
           	}
           }

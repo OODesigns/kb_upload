@@ -27,11 +27,13 @@ public class ModelCreationHandler {
         this.cloudCopyable = cloudCopyable;
     }
 
-    public void handleRequest(final CloudObjectReference input, final CloudObjectReference output) {
+    public void handleRequest(final CloudObjectReference input,
+                              final CloudObjectReference output,
+                              final CloudObjectReference assistantReference) {
                  getDataForModel(input)
                 .flatMap(createModel())
                 .map(saveToFile(output))
-                .map(__-> CloudObjectReferenceFactory.moveStore(input, output))
+                .map(__-> CloudObjectReferenceFactory.moveStore(assistantReference, output))
                 .map(copyAssistantDefinitions(input));
     }
     private Function<CloudObjectReference, CloudStoreResult> copyAssistantDefinitions(final CloudObjectReference input) {

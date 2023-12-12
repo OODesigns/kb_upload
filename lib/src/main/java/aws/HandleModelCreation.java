@@ -25,6 +25,9 @@ public class HandleModelCreation implements RequestHandler<Map<String, String>, 
     private static final String MODEL = "Model";
     private static final String MODEL_BUCKET_NAME = "Model-BucketName";
     private static final String MODEL_KEY_NAME = "Model-KeyName";
+    private static final String ASSISTANT_BUCKET_NAME = "Assistant-BucketName";
+    private static final String ASSISTANT_KEY_NAME = "Assistant-KeyName";
+    private static final String ASSISTANT_DEFINITION = "Assistant Definition";
     private static final Transformer<InputStream, ResultState<ModelMakerResult, ByteArrayOutputStream>> defaultModelMaker = new ModelMaker();
     private static final S3Client s3Client = S3Client.builder().build();
     private static final CloudStorable defaultCloudStorable =  new CloudStore(new S3StreamSaver(s3Client));
@@ -51,7 +54,8 @@ public class HandleModelCreation implements RequestHandler<Map<String, String>, 
 
     public Void handleRequest(final Map<String, String> input, final Context context) {
         modelCreationHandler.handleRequest(getS3ObjectForModelCreation(input),
-                                           getS3ObjectForModel(input));
+                                           getS3ObjectForModel(input),
+                                           getS3ObjectForAssistantDefinitions(input));
         return null;
     }
 
@@ -61,6 +65,10 @@ public class HandleModelCreation implements RequestHandler<Map<String, String>, 
 
     private CloudObjectReference getS3ObjectForModel(final Map<String, String> input) {
         return new S3CloudObjectReference(input, MODEL_BUCKET_NAME, MODEL_KEY_NAME, MODEL);
+    }
+
+    private CloudObjectReference getS3ObjectForAssistantDefinitions(final Map<String, String> input) {
+        return new S3CloudObjectReference(input, ASSISTANT_BUCKET_NAME, ASSISTANT_KEY_NAME, ASSISTANT_DEFINITION);
     }
 }
 
