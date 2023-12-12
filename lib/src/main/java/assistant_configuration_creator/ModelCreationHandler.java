@@ -34,7 +34,7 @@ public class ModelCreationHandler {
                 .flatMap(createModel())
                 .map(saveToFile(output))
                 .map(__-> CloudObjectReferenceFactory.moveStore(assistantReference, output))
-                .map(copyAssistantDefinitions(input));
+                .map(copyAssistantDefinitions(assistantReference));
     }
     private Function<CloudObjectReference, CloudStoreResult> copyAssistantDefinitions(final CloudObjectReference input) {
         return output-> cloudCopyable.copy(input, output);
