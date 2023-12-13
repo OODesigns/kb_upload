@@ -10,7 +10,7 @@ Parameters:
   StagingBucketName:
     Type: String
     Default: "s3-knowledge-staging"
-    
+
   ModelBucketName:
     Type: String
     Default: "s3-knowledge-model"
@@ -211,13 +211,11 @@ Resources:
                   "Type": "Task",
                   "Resource": "arn:aws:states:::sns:publish",
                   "Parameters": {
-                    "TopicArn": "arn:aws:sns:eu-north-1:799930001464:model-state",
-                    "Message": {
-                      "message": "Model was successfully created"
-                    }
-                  },
-                  "End": true
-                }
+                      "TopicArn": !Ref ModelStateTopic,
+                      "Message.$": "Model Created"  
+                    },
+                  "End": "true"
+              }
           	}
           }
       RoleArn:
