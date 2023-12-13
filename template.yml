@@ -13,7 +13,12 @@ Parameters:
     
   ModelBucketName:
     Type: String
-    Default: "s3-knowledge-model"  
+    Default: "s3-knowledge-model"
+
+  EmailSubscriptionEndpoint:
+    Type: String
+    Description: Email address for SNS subscription
+    Default: "elegant.wheel5076@fastmail.com"
 
 Resources:
   S3EventBridgeRule:
@@ -148,6 +153,18 @@ Resources:
             Resource:
               Fn::Sub: arn:aws:s3:::${ModelBucketName}/*
 
+  ModelStateTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: "model-state"
+
+  EmailSubscription:
+    Type: AWS::SNS::Subscription
+    Properties:
+      Protocol: email
+      TopicArn: !Ref ModelStateTopic
+      Endpoint: !Ref EmailSubscriptionEndpoint
+
   ChatBotModelCreation:
     Type: AWS::StepFunctions::StateMachine
     Properties:
@@ -207,6 +224,14 @@ Resources:
                 - states.amazonaws.com
             Action: sts:AssumeRole
       Policies:
+        - PolicyName: ModelStatePublishPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - sns:Publish
+                Resource: !Ref ModelStateTopic
         - PolicyName: InvokeLambdaPolicy
           PolicyDocument:
             Version: '2012-10-17'
@@ -218,7 +243,6 @@ Resources:
                   - !GetAtt ValidationFunction.Arn
                   - !GetAtt TransformationFunction.Arn
                   - !GetAtt ModelFunction.Arn
-
 
 Outputs:
   ValidationLambdaFunctionArn:
