@@ -1,0 +1,7 @@
+{
+  "ErrorInfo": {
+    "Error": "json.JSONException",
+    "Cause": "{\"errorMessage\":\"Invalid Json format: Expected a ':' after a key at 829 [character 14 line 8]\",\"errorType\":\"json.JSONException\",\"stackTrace\":[\"json.JSONData.<init>(JSONData.java:14)\",\"java.base/java.util.Optional.map(Unknown Source)\",\"cloud.CloudJSONFileDataTransformer.transform(CloudJSONFileDataTransformer.java:21)\",\"cloud.CloudJSONFileDataTransformer.transform(CloudJSONFileDataTransformer.java:11)\",\"assistant_configuration_creator.ValidationHandler.getFileData(ValidationHandler.java:31)\",\"java.base/java.util.Optional.map(Unknown Source)\",\"assistant_configuration_creator.ValidationHandler.handleRequest(ValidationHandler.java:26)\",\"aws.HandleValidation.handleRequest(HandleValidation.java:44)\",\"aws.HandleValidation.handleRequest(HandleValidation.java:24)\"]}"
+  }
+}
+

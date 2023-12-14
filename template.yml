@@ -181,7 +181,16 @@ Resources:
           			"Parameters": {
           				"Validation-BucketName": "${SourceBucketName}",
           				"Validation-KeyName": "knowledge.json"
-          			}
+          			},
+                   "Catch": [
+                      {
+                        "ErrorEquals": [
+                          "States.ALL"
+                        ],
+                        "ResultPath": "$.ErrorInfo",
+                        "Next": "ExceptionTransformer"
+                      }
+                    ]        
           		},
           		"Transformation": {
           			"Type": "Task",
@@ -192,12 +201,21 @@ Resources:
           				"Transformation-KeyName": "knowledge.json",
           				"Transformed-BucketName": "${StagingBucketName}",
           				"Transformed-KeyName": "cat.txt"
-                     }
-          		},
+                     },
+                    "Catch": [
+                      {
+                        "ErrorEquals": [
+                          "States.ALL"
+                        ],
+                        "ResultPath": "$.ErrorInfo",
+                        "Next": "ExceptionTransformer"
+                      }
+                    ]
+                },
           		"ModelCreation": {
           			"Type": "Task",
           			"Resource": "${ModelFunction.Arn}",
-          			"Next": "SendEmailOnSuccess",
+          			"Next": "NotifySuccess",
           			"Parameters": {
           				"ModelInput-BucketName": "${StagingBucketName}",
           				"ModelInput-KeyName": "cat.txt",
@@ -205,18 +223,54 @@ Resources:
           				"Model-KeyName": "cat.bin",
                         "Assistant-BucketName":"${StagingBucketName}",
                         "Assistant-KeyName":"knowledge.json"
-                   }
-          		},
-                "SendEmailOnSuccess": {
+                   },
+                  "Catch": [
+                    {
+                      "ErrorEquals": [
+                        "States.ALL"
+                      ],
+                      "ResultPath": "$.ErrorInfo",
+                      "Next": "ExceptionTransformer"
+                    }
+                  ]          
+          		},    
+                "ExceptionTransformer": {
+                  "Type": "Pass",
+                  "Next": "NotifyFailure",
+                  "Parameters": {
+                    "Error.$": "States.StringToJson($.ErrorInfo.Cause)"
+                  }
+               },
+               "NotifyFailure": {
                   "Type": "Task",
                   "Resource": "arn:aws:states:::sns:publish",
                   "Parameters": {
+                    "Subject": "[Failure]: Model was not successfully created",
                     "TopicArn": "arn:aws:sns:eu-north-1:799930001464:model-state",
                     "Message": {
-                      "message": "Model was successfully created"
+                      "Message": "Model was not successfully created",
+                      "ErrorMessage.$": "$.Error.errorMessage"
+                      }
+                  },
+                  "Next": "Fail"
+                },
+                "Fail": {
+                  "Type": "Fail"
+                },        
+                "NotifySuccess": {
+                  "Type": "Task",
+                  "Resource": "arn:aws:states:::sns:publish",
+                  "Parameters": {
+                    "Subject": "[Success]: Model was successfully created",
+                    "TopicArn": "arn:aws:sns:eu-north-1:799930001464:model-state",
+                    "Message": {
+                      "Message": "Model was successfully created"
                     }
                   },
-                  "End": true
+                  "Next": "Success"
+                },
+                "Success": {
+                  "Type": "Succeed"
                 }
           	}
           }
