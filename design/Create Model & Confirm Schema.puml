@@ -1,0 +1,32 @@
+@startuml
+'https://plantuml.com/activity-diagram-beta
+!theme mars
+
+start
+:Upload configuration file to cloud store;
+:New File event sent on MessageQueue;
+:Read MessageQueue;
+if (Is Configuration file) then (true)
+   :Validate file schema;
+   if (Valid) then (true)
+     :Create Model Processing File;
+     if (Success) then (true)
+       :Store File in cloud Staging store;
+       :Copy Configuration file to Staging area;
+       :Create Model;
+       if (Success) then (true)
+         :Store Model in cloud configuration store;
+         :Copy Configuration file to configuration store;
+         :Send Notification that job is completed;
+         stop
+       else (false)
+   endif
+   endif
+   endif
+   :Send Notification that job failed;
+   stop
+else (false)
+endif
+stop
+
+@enduml

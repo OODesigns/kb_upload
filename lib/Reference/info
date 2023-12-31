@@ -1,0 +1,1 @@
+aws s3 cp D:\aws\kb_upload\lib\src\main\resources\knowledge.json s3://s3-knowledge-upload
