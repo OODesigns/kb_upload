@@ -15,6 +15,13 @@ if (Is Configuration file) then (true)
        :Copy Configuration file to Staging area;
        :Create Model;
        if (Success) then (true)
+          note
+            the configuration file is copied to the
+            configuration store as the model and config
+            needs to match for the digital assistant
+            to work correctly and to avoid any race
+            conditions.
+          end note
          :Store Model in cloud configuration store;
          :Copy Configuration file to configuration store;
          :Send Notification that job is completed;
@@ -27,6 +34,7 @@ if (Is Configuration file) then (true)
    stop
 else (false)
 endif
+:do nothing;
 stop
 
 @enduml
