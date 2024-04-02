@@ -15,22 +15,20 @@ repositories {
     mavenCentral()
 }
 
-String mockitoVersion = "5.2.0"
-
 dependencies {
     // Use JUnit Jupiter for testing.
-    testImplementation "org.junit.jupiter:junit-jupiter:5.9.3"
-    testImplementation 'junit:junit:4.13.1'
-    testRuntimeOnly "org.junit.platform:junit-platform-launcher"
+    testImplementation(platform('org.junit:junit-bom:5.10.2'))
+    testImplementation('org.junit.jupiter:junit-jupiter')
+    testRuntimeOnly('org.junit.platform:junit-platform-launcher')
 
     testImplementation "org.assertj:assertj-core:3.24.2"
-    testImplementation "org.mockito:mockito-inline:$mockitoVersion"
-    testImplementation "org.mockito:mockito-junit-jupiter:$mockitoVersion"
+    testImplementation 'org.mockito:mockito-inline:5.2.0'
+    testImplementation 'org.mockito:mockito-junit-jupiter:5.11.0'
 
     implementation "com.amazonaws:aws-lambda-java-core:1.2.2"
     implementation "com.amazonaws:aws-lambda-java-events:3.11.0"
     implementation "software.amazon.awssdk:s3:2.20.152"
-    implementation "org.json:json:20230618"
+    implementation 'org.json:json:20231013'
     implementation "commons-io:commons-io:2.14.0"
     implementation "org.apache.opennlp:opennlp-tools:2.3.0"
     implementation "org.apache.opennlp:opennlp-uima:2.3.0"
@@ -44,7 +42,7 @@ dependencies {
 // Apply a specific Java toolchain to ease working on different environments.
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(17)
+        languageVersion = JavaLanguageVersion.of(21)
     }
 }
 

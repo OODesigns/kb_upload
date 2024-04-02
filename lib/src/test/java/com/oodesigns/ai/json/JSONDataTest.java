@@ -1,4 +1,5 @@
 package com.oodesigns.ai.json;
+import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -40,6 +41,9 @@ class JSONDataTest {
 
     @Test
     void validJsonNoException(){
+        final JSONObject data = new JSONObject(validJSON);
+        data.getJSONArray("utterance");
+
         assertDoesNotThrow(()->new JSONData(validJSON));
     }
 

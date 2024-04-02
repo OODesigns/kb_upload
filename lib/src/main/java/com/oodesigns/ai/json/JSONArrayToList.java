@@ -33,7 +33,7 @@ public class JSONArrayToList implements Transformer<JSON, Mappable<List<String>,
                 .orElseGet(()->new JSONArrayToListResult(List.of()));
     }
 
-    private Function<JsonNode, List<String>> getJsonArrayItems() {
+    private Function<JsonNode, List<String>>  getJsonArrayItems() {
         return arrayNode -> StreamSupport.stream(arrayNode.spliterator(), false)
                 .map(getJsonNodeAsString())
                 .collect(Collectors.toList());
