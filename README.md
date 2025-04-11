@@ -52,19 +52,41 @@ The application workflow is based on the following series of steps:
 
 # The diagram below summarizes the workflow:
 
-S3 Upload (knowledge.json) 
-        │
-        ▼
-EventBridge Rule ──► Start State Machine 
-        │
-        ▼
-ValidationFunction ──► [Validation Error?] ──► Exception Handling ──► SNS: Notify Failure
-        │                     │
-        ▼                     │
-TransformationFunction      │
-        │                     │
-        ▼                     ▼
-ModelFunction ──► SNS: Notify Success ──► End
+     +-----------------------------+
+     | S3 Upload (knowledge.json)  |
+     +-------------+---------------+
+                   │
+                   ▼
+     +-----------------------------+
+     |    EventBridge Rule         |
+     |  Start State Machine        |
+     +-------------+---------------+
+                   │
+                   ▼
+     +-----------------------------+
+     |   ValidationFunction        |
+     +-------------+---------------+
+                   │
+     ┌─────────────┴─────────────┐
+     │Is Validation Successful?  │
+     └───────┬─────────┬─────────┘
+             │         │
+        Yes  ▼         │  No
+     +-----------------------------+         +-------------------------+
+     | TransformationFunction      |         | Exception Handling      |
+     +-------------+---------------+         +-------------+-----------+
+                   │                                       │
+                   ▼                                       ▼
+     +-----------------------------+         +-------------------------+
+     |       ModelFunction         |         |  SNS: Notify Failure    |
+     +-------------+---------------+         +-------------+-----------+
+                   │
+                   ▼
+          SNS: Notify Success
+                   │
+                   ▼
+                 End
+
 
 # Setup & Deployment
 Prerequisites
