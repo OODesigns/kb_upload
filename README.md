@@ -95,7 +95,7 @@ Prerequisites
 
     AWS SAM CLI: Install the AWS SAM CLI for building and deploying the application.
 
-    Java 17: The Lambda functions are written in Java 17. Make sure your build environment is set up accordingly.
+    Java 20+: The Lambda functions are written in Java 20+. Make sure your build environment is set up accordingly.
 
 Deployment Steps
 
