@@ -39,7 +39,7 @@ class LogCaptureTest {
         assertEquals(2, capturedLogs.size());
 
         // Check log record details
-        final LogRecord infoRecord = capturedLogs.get(0);
+        final LogRecord infoRecord = capturedLogs.getFirst();
         assertEquals(Level.INFO, infoRecord.getLevel());
         assertEquals("This is an info message.", infoRecord.getMessage());
 

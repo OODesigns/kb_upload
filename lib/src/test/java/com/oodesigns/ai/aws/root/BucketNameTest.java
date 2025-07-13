@@ -2,11 +2,12 @@ package com.oodesigns.ai.aws.root;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static software.amazon.awssdk.utils.StringUtils.repeat;
 
 class BucketNameTest {
 
     @Test
-    public void testValidBucketNames() {
+    void testValidBucketNames() {
         assertDoesNotThrow(() -> new BucketName("valid-bucket-name"));
         assertDoesNotThrow(() -> new BucketName("a.valid.bucket.name"));
         assertDoesNotThrow(() -> new BucketName("a11"));
@@ -14,15 +15,20 @@ class BucketNameTest {
     }
 
     @Test
-    public void testInvalidBucketLength() {
+    void testInvalidBucketLengthTooShort() {
         assertThrows(InvalidBucketNameException.class,
                 () -> new BucketName("ab")); // Too short
-        assertThrows(InvalidBucketNameException.class,
-                () -> new BucketName("a".repeat(64))); // Too long
     }
 
     @Test
-    public void testInvalidBucketCharacters() {
+    void testInvalidBucketLengthTooLong() {
+        final String tooLong = repeat("a", 64);
+        assertThrows(InvalidBucketNameException.class,
+                () -> new BucketName(tooLong));
+    }
+
+    @Test
+    void testInvalidBucketCharacters() {
         assertThrows(InvalidBucketNameException.class,
                 () -> new BucketName("InvalidNameBecauseUpperCase"));
         assertThrows(InvalidBucketNameException.class,
@@ -30,7 +36,7 @@ class BucketNameTest {
     }
 
     @Test
-    public void testInvalidBucketStartOrEnd() {
+    void testInvalidBucketStartOrEnd() {
         assertThrows(InvalidBucketNameException.class,
                 () -> new BucketName("-invalidStart"));
         assertThrows(InvalidBucketNameException.class,
@@ -38,7 +44,7 @@ class BucketNameTest {
     }
 
     @Test
-    public void testInvalidBucketAsIPAddress() {
+    void testInvalidBucketAsIPAddress() {
         assertThrows(InvalidBucketNameException.class,
                 () -> new BucketName("192.168.1.1"));
     }

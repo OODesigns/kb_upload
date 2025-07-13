@@ -10,7 +10,7 @@ class CloudStoreStateErrorTest {
 
         final CloudStoreStateError message = new CloudStoreStateError("message");
 
-        assertThat(message.toString()).isEqualTo("message");
+        assertThat(message).hasToString("message");
     }
 
 }

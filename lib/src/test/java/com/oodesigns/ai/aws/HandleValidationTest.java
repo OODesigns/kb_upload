@@ -20,8 +20,13 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @MockitoSettings
-public class HandleValidationTest {
-    static private final String validJSON = """
+class HandleValidationTest {
+    static {
+        // Provide a default AWS region for SDK clients
+        System.setProperty("aws.region", "us-east-1");
+    }
+
+    private static final String VALID_JSON = """
             {
             }
             """;
@@ -38,11 +43,11 @@ public class HandleValidationTest {
 
         final RequestHandler<Map<String, String>, Void> requestHandler
                 = new HandleValidation(validator,
-                __-> Optional.of(new ByteArrayInputStream(validJSON.getBytes())));
+                _-> Optional.of(new ByteArrayInputStream(VALID_JSON.getBytes())));
 
         try(final LogCapture logCapture =new LogCapture(HandleResult.class)){
             requestHandler.handleRequest(input, context);
-            assertThat(logCapture.getLogs().get(0).getMessage()).contains("State OK");
+            assertThat(logCapture.getLogs().getFirst().getMessage()).contains("State OK");
         }
     }
 
@@ -59,7 +64,7 @@ public class HandleValidationTest {
 
         final RequestHandler<Map<String, String>, Void> requestHandler
                 = new HandleValidation(validator,
-                __-> Optional.of(new ByteArrayInputStream(validJSON.getBytes())));
+                _-> Optional.of(new ByteArrayInputStream(VALID_JSON.getBytes())));
 
         final CloudException cloudException = assertThrows(CloudException.class, () -> requestHandler.handleRequest(input, context));
         assertThat(cloudException.getMessage()).contains("State Error").contains("message1").contains("message2");
@@ -75,7 +80,7 @@ public class HandleValidationTest {
                                                  "Validation-KeyName", "key");
 
         final RequestHandler<Map<String, String>, Void> requestHandler
-                = new HandleValidation(validator, __-> Optional.empty());
+                = new HandleValidation(validator, _-> Optional.empty());
 
         final CloudException cloudException = assertThrows(CloudException.class, () -> requestHandler.handleRequest(input, context));
 

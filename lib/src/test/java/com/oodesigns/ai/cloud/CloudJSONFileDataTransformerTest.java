@@ -16,7 +16,7 @@ import static org.mockito.Mockito.when;
 @MockitoSettings
 class CloudJSONFileDataTransformerTest {
     @Test
-    public void testTransform_successfullyTransforms(
+    void testTransform_successfullyTransforms(
             final @Mock CloudObjectReference cloudObjectReference,
             final @Mock Retrievable<CloudObjectReference, Optional<InputStream>> fileLoaderMock){
 
@@ -32,7 +32,7 @@ class CloudJSONFileDataTransformerTest {
     }
 
     @Test
-    public void testTransform_throwsExceptionWhenFileNotLoaded(
+    void testTransform_throwsExceptionWhenFileNotLoaded(
             final @Mock CloudObjectReference cloudObjectReference,
             final @Mock Retrievable<CloudObjectReference, Optional<InputStream>> fileLoaderMock) {
 

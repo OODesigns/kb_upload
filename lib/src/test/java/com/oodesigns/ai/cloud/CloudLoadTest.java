@@ -27,7 +27,7 @@ class CloudLoadTest {
         final CloudLoad<String> cloudLoad = new CloudLoad<>(fileLoader);
 
         // Act
-        final Optional<String> result = cloudLoad.retrieve(cloudObjectReference, s->"Test Data");
+        final Optional<String> result = cloudLoad.retrieve(cloudObjectReference, _->"Test Data");
 
         // Assert
         verify(fileLoader, times(1)).retrieve(cloudObjectReference);
@@ -45,9 +45,9 @@ class CloudLoadTest {
 
 
         try(final LogCapture logCapture = new LogCapture(CloudLoad.class)) {
-            cloudLoad.retrieve(cloudObjectReference, s -> "");
+            cloudLoad.retrieve(cloudObjectReference, _ -> "");
             verify(fileLoader, times(1)).retrieve(cloudObjectReference);
-            assertThat(logCapture.getLogs().get(0).getMessage()).contains("Unable to load file from store");
+            assertThat(logCapture.getLogs().getFirst().getMessage()).contains("Unable to load file from store");
         }
     }
 
@@ -62,12 +62,12 @@ class CloudLoadTest {
 
         // Act
         try(final LogCapture logCapture = new LogCapture(CloudLoad.class)) {
-            cloudLoad.retrieve(cloudObjectReference, s -> {
+            cloudLoad.retrieve(cloudObjectReference, _ -> {
                 throw new IOException("Test exception");
             });
             verify(fileLoader, times(1)).retrieve(cloudObjectReference);
 
-            assertThat(logCapture.getLogs().get(0).getMessage()).contains("Test exception");
+            assertThat(logCapture.getLogs().getFirst().getMessage()).contains("Test exception");
         }
     }
 }

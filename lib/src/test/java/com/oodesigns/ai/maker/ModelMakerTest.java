@@ -21,7 +21,7 @@ class ModelMakerTest {
 
 
     @Test
-    public void testTransformWithINValidFileBadCatInput() {
+    void testTransformWithINValidFileBadCatInput() {
         final FileLoader fileLoader = new FileLoader("badcat.txt");
         final InputStream inputStream = new ByteArrayInputStream(fileLoader.toString().getBytes(StandardCharsets.UTF_8));
 
@@ -33,7 +33,7 @@ class ModelMakerTest {
 
 
     @Test
-    public void testTransformWithValidInput() {
+    void testTransformWithValidInput() {
         final FileLoader fileLoader = new FileLoader("cat.txt");
 
         final InputStream inputStream = new ByteArrayInputStream(fileLoader.toString().getBytes(StandardCharsets.UTF_8));
@@ -46,7 +46,7 @@ class ModelMakerTest {
     }
 
     @Test
-    public void testTransformWithInvalidInput() {
+    void testTransformWithInvalidInput() {
         // Create a mock input that simulates an invalid input stream.
         final String data = "Invalid data format";
         final InputStream inputStream = new ByteArrayInputStream(data.getBytes(StandardCharsets.UTF_8));
@@ -60,7 +60,7 @@ class ModelMakerTest {
     }
 
     @Test
-    public void testTransformWithEmptyInput(){
+    void testTransformWithEmptyInput(){
         // Create a mock empty input.
         final String data = "";
         final InputStream inputStream = new ByteArrayInputStream(data.getBytes(StandardCharsets.UTF_8));
@@ -73,7 +73,7 @@ class ModelMakerTest {
     }
 
     @Test
-    public void testTransformWithException() throws Exception {
+    void testTransformWithException() throws Exception {
         try(final InputStream mockStream = mock(InputStream.class)) {
 
             when(mockStream.read(any(), anyInt(), anyInt())).thenThrow(new IOException("Forced exception"));

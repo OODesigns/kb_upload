@@ -57,6 +57,6 @@ class JSONArrayToListTest {
         final JSONArrayToList transformer = new JSONArrayToList("person");
         transformer.transform(new JSONData(jsonData))
                 .map(Object::toString)
-                .ifPresent(__->fail("Expected to get nothing but got something"));
+                .ifPresent(_->fail("Expected to get nothing but got something"));
     }
 }

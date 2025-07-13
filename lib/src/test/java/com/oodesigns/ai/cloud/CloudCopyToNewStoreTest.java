@@ -20,7 +20,7 @@ class CloudCopyToNewStoreTest {
 
 
     @Test
-    public void testCopySuccessful(@Mock final Retrievable<CloudObjectReference, Optional<InputStream>> fileLoader,
+    void testCopySuccessful(@Mock final Retrievable<CloudObjectReference, Optional<InputStream>> fileLoader,
                                    @Mock final CloudStorable toStorable,
                                    @Mock final CloudObjectReference input,
                                    @Mock final CloudObjectReference output) {
@@ -38,11 +38,11 @@ class CloudCopyToNewStoreTest {
         verify(toStorable, times(1)).store(any(), captor.capture());
 
         assertThat(result).isInstanceOf(CloudStoreStateOK.class);
-        assertThat(captor.getValue().toString()).isEqualTo("data");
+        assertThat(captor.getValue()).hasToString("data");
     }
 
     @Test
-    public void testCopyFailure(@Mock final CloudLoad<ByteArrayOutputStream> fromLoadable,
+    void testCopyFailure(@Mock final CloudLoad<ByteArrayOutputStream> fromLoadable,
                                 @Mock final CloudStorable toStorable,
                                 @Mock final CloudObjectReference input,
                                 @Mock final CloudObjectReference output) {

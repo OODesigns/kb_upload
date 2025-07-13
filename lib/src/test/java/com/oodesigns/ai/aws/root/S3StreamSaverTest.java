@@ -42,7 +42,7 @@ class S3StreamSaverTest {
             final String expectedContents = new String(stream.readAllBytes(), StandardCharsets.UTF_8);
             assertThat(expectedContents).contains("someData");
 
-        } catch (final IOException e) {
+        } catch (final IOException _) {
             fail("Unexpected failure");
         }
     }

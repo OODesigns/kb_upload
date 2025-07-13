@@ -20,10 +20,10 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
 @MockitoSettings
-public class ModelCreationHandlerTest {
+class ModelCreationHandlerTest {
 
     @Test
-    public void createModelExceptionReturnsEmpty(@Mock final Transformer<InputStream, ResultState<ModelMakerResult, ByteArrayOutputStream>> modelMaker,
+    void createModelExceptionReturnsEmpty(@Mock final Transformer<InputStream, ResultState<ModelMakerResult, ByteArrayOutputStream>> modelMaker,
                                    @Mock final CloudStorable cloudStorable,
                                    @Mock final CloudLoadable<InputStream> cloudLoadable,
                                    @Mock final CloudCopyable cloudCopyable,

@@ -8,7 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class JSONDataTest {
 
-    static private final String validJSON = """           
+    private static final String VALID_JSON = """           
                 {
                  "$schema": "knowledgeSchema.json",
                   "utterance": [
@@ -21,7 +21,7 @@ class JSONDataTest {
                 }
                 """;
 
-    static private final String inValidJSON = """           
+    private static final String IN_VALID_JSON = """           
                 {
                  "$schema": "knowledgeSchema.json",
                   "utterance":
@@ -36,20 +36,20 @@ class JSONDataTest {
 
     @Test
     void invalidJsonThrows(){
-        assertThrows(JSONException.class, ()-> new JSONData(inValidJSON));
+        assertThrows(JSONException.class, ()-> new JSONData(IN_VALID_JSON));
     }
 
     @Test
     void validJsonNoException(){
-        final JSONObject data = new JSONObject(validJSON);
+        final JSONObject data = new JSONObject(VALID_JSON);
         data.getJSONArray("utterance");
 
-        assertDoesNotThrow(()->new JSONData(validJSON));
+        assertDoesNotThrow(()->new JSONData(VALID_JSON));
     }
 
     @Test
     void validJSONGetReturnsSame(){
-        assertThat(new JSONData(validJSON).get()).contains(validJSON);
+        assertThat(new JSONData(VALID_JSON).get()).contains(VALID_JSON);
     }
 
 }

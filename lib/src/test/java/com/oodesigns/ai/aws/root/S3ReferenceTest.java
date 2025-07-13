@@ -11,12 +11,12 @@ class S3ReferenceTest {
     private Map<String, String> input;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         input = new HashMap<>();
     }
 
     @Test
-    public void testValidBucketNameAndKeyName() {
+    void testValidBucketNameAndKeyName() {
         input.put("bucketNameKey", "test-bucket");
         input.put("keyNameKey", "test-key");
 
@@ -27,7 +27,7 @@ class S3ReferenceTest {
     }
 
     @Test
-    public void testMissingBucketName() {
+    void testMissingBucketName() {
         input.put("keyNameKey", "test-key");
 
         assertThrows(CloudException.class, () ->
@@ -36,7 +36,7 @@ class S3ReferenceTest {
     }
 
     @Test
-    public void testMissingKeyName() {
+    void testMissingKeyName() {
         input.put("bucketNameKey", "test-bucket");
 
         assertThrows(CloudException.class, () ->

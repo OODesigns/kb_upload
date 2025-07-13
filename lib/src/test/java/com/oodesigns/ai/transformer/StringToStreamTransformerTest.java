@@ -14,7 +14,7 @@ import static org.mockito.Mockito.doThrow;
 class StringToStreamTransformerTest {
 
     @Test
-    public void testTransformValidInput() {
+    void testTransformValidInput() {
         final byte[] expectedBytes = "Hello, World".toLowerCase().getBytes();
 
         final StringToStreamTransformer stringToStreamTransformer =
@@ -27,12 +27,12 @@ class StringToStreamTransformerTest {
     }
 
     @Test
-    public void testTransformWithIOException(@Mock final ByteArrayOutputStream byteArrayOutputStream) throws IOException {
+    void testTransformWithIOException(@Mock final ByteArrayOutputStream byteArrayOutputStream) throws IOException {
 
         doThrow(new IOException()).when(byteArrayOutputStream).write(any());
 
         final StringToStreamTransformer stringToStreamTransformer =
-                new StringToStreamTransformer(v->byteArrayOutputStream);
+                new StringToStreamTransformer(_ ->byteArrayOutputStream);
 
         final Optional<ByteArrayOutputStream> transform = stringToStreamTransformer.transform("Hello, World");
 

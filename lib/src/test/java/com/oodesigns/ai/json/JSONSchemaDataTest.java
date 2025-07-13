@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class JSONSchemaDataTest {
 
-    static private final String validJSONNotSchemaFile = """           
+    private static final String VALID_JSON_NOT_SCHEMA_FILE = """           
                 {
                  "$schema": "knowledgeSchema.json",
                   "utterance": [
@@ -18,7 +18,7 @@ class JSONSchemaDataTest {
                 }
                 """;
 
-    static private final String validSchemaFile = """           
+    private static final String VALID_SCHEMA_FILE = """           
                 {
                  "$schema": "http://json-schema.org/draft/2020-12/schema#",
                   "utterance": [
@@ -32,9 +32,9 @@ class JSONSchemaDataTest {
                 """;
 
     @Test
-    void nonSchemaFile() {assertThrows(JSONSchemaException.class, ()->new JSONSchemaData(validJSONNotSchemaFile));}
+    void nonSchemaFile() {assertThrows(JSONSchemaException.class, ()->new JSONSchemaData(VALID_JSON_NOT_SCHEMA_FILE));}
 
     @Test
-      void validSchemaFile(){assertDoesNotThrow(()->new JSONSchemaData(validSchemaFile));}
+      void validSchemaFile(){assertDoesNotThrow(()->new JSONSchemaData(VALID_SCHEMA_FILE));}
 
 }

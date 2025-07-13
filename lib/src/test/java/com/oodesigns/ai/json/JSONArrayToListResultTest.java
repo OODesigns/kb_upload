@@ -11,7 +11,7 @@ class
 JSONArrayToListResultTest {
 
     @Test
-    public void testMapWithEmptyList() {
+    void testMapWithEmptyList() {
         final JSONArrayToListResult result = new JSONArrayToListResult(Collections.emptyList());
 
         final Optional<String> mappedValue = result.map(values -> String.join(", ", values));
@@ -20,7 +20,7 @@ JSONArrayToListResultTest {
     }
 
     @Test
-    public void testMapWithNonEmptyList() {
+    void testMapWithNonEmptyList() {
         final JSONArrayToListResult result = new JSONArrayToListResult(Arrays.asList("a", "b", "c"));
 
         final Optional<String> mappedValue = result.map(values -> String.join(", ", values));
@@ -30,14 +30,14 @@ JSONArrayToListResultTest {
     }
 
     @Test
-    public void testToStringWithEmptyList() {
+    void testToStringWithEmptyList() {
         final JSONArrayToListResult result = new JSONArrayToListResult(Collections.emptyList());
 
         assertEquals("[]", result.toString());
     }
 
     @Test
-    public void testToStringWithNonEmptyList() {
+    void testToStringWithNonEmptyList() {
         final JSONArrayToListResult result = new JSONArrayToListResult(Arrays.asList("a", "b", "c"));
 
         assertEquals("[a, b, c]", result.toString());
