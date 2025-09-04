@@ -44,6 +44,38 @@ category.
 - Category 1: `confirmation` → contains many slang words and affirmations.
 - Category 2: `jira` → contains Agile and Jira-related terminology.
 
+> ⚠️ **Limitations:**
+> This format is very simple, but it's easy to make mistakes (missing or extra tokens, categories, or data issues).
+> The format is not extensible, not easily validated, and is hard to maintain as your
+> needs grow. It's not suited for rich or dynamic chatbot definition files.
+
+### 🧩 Our Robust, Extensible JSON Format
+
+To address these issues, this project uses a schema-based JSON format for knowledge data.
+This format is designed for validation, extensibility, and safe editing. The application will transform this JSON format into the OpenNLP flat-file format for actual model training.
+
+**Example: knowledge.json**
+
+```json
+{
+  "$schema": "knowledgeSchema.json",
+  "utterance": [
+    {
+      "name": "confirmation",
+      "entries": "np nbd ofc ik ikr yw rgr yepyep yessirski yezzir yh yeh ya ye yah yus yis ..."
+    },
+    {
+      "name": "jira",
+      "entries": "Jira, Atlassian, issues, stories, backlog, sprint, epic, workflow, board, Scrum ..."
+    }
+  ]
+}
+```
+
+You define your categories and entries in this structured JSON. The pipeline safely validates
+and transforms this into OpenNLP's expected format for final training. This approach makes
+mistakes less likely and future extensions easier.
+
 Once trained, OpenNLP produces a `.bin` model file. You can then run:
 
     opennlp Doccat cat.bin "issues"
@@ -53,6 +85,8 @@ Output:
     Jira 0.92
 
 Means: It's 92% confident the input belongs to the `jira` category.
+
+
 
 ## Implementation Overview
 
