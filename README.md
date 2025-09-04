@@ -6,7 +6,50 @@ I created this application, so I could automate the creation of a model.
 
 This project deploys multiple AWS Lambda functions using AWS SAM (Serverless Application Model) and coordinates them with AWS Step Functions to validate, transform, and create the chat bot model. Notifications are integrated via SNS to alert on success or failure of the model creation process.
 
-# Overview
+# 🐾 What is a Categorization Model in OpenNLP?
+
+A categorization model (sometimes called a document categorizer) is a type of machine learning model that takes text as input and predicts which category it belongs to.
+
+For example:
+
+If you give it "yes, of course", the model might predict the category confirmation.
+
+If you give it "check the Jira backlog", the model might predict jira.
+
+It’s essentially teaching the computer: “when you see these kinds of words, they usually mean X”.
+
+OpenNLP does this by looking at the features of the text (like words, frequencies, and patterns) and learning statistical associations between those features and your defined categories.
+
+# 📂 Training Data Format
+
+OpenNLP expects one training example per line.
+
+Each line begins with the category label.
+
+After the label, you write a piece of text (words, phrases, tokens) that belongs to that category.
+
+So the structure looks like:
+   (category) (text token) 
+
+✅ Example File cat.txt
+    
+    confirmation np nbd ofc ik ikr yw rgr yepyep yessirski yezzir yh yeh ya ye yah ... + more    
+    Jira Jira, Atlassian, issues, stories, backlog, sprint, epic, workflow, board, Scrum ... + more
+    
+    Category 1: confirmation → contains a ton of slang/words that mean “yes” or “confirmed.”
+    Category 2: jira → contains Agile and Jira-related terminology.
+
+Once you train this with OpenNLP, you’ll have a .bin model file. Then you can run something like:
+ 
+    opennlp Doccat mymodel.bin "issues"
+
+Output would be something like:
+   
+    Jira 0.92
+
+Meaning: it’s 92% confident the input belongs to the Jira category.
+
+# Implementation Overview
 
 This repository contains an AWS SAM template that provisions the following key components:
 
