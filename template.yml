@@ -18,7 +18,7 @@ Parameters:
   EmailSubscriptionEndpoint:
     Type: String
     Description: "Email address for SNS subscription"
-    Default: "elegant.wheel5076@fastmail.com"
+    Default: "emailaddress@domain.com"
 
 Resources:
   S3EventBridgeRule:
@@ -308,6 +308,35 @@ Resources:
                   - !GetAtt ValidationFunction.Arn
                   - !GetAtt TransformationFunction.Arn
                   - !GetAtt ModelFunction.Arn
+
+# Explicit Log Groups for Lambdas and State Machine
+  # Explicit Log group for Validation Lambda to ensure retention, traceability and CloudFormation compliance
+  ValidationLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${ValidationFunction}"
+      RetentionInDays: 14
+
+  # Explicit Log group for Transformation Lambda for same reasons
+  TransformationLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${TransformationFunction}"
+      RetentionInDays: 14
+
+  # Explicit Log group for Model Lambda for compliance and external control
+  ModelLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${ModelFunction}"
+      RetentionInDays: 14
+
+  # Explicit Log group for Step Function state machine execution logs
+  StateMachineLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/vendedlogs/states/${ChatBotModelCreation}"
+      RetentionInDays: 14
 
 Outputs:
   ValidationLambdaFunctionArn:
