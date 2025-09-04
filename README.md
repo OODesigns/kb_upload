@@ -46,7 +46,7 @@ category.
 
 Once trained, OpenNLP produces a `.bin` model file. You can then run:
 
-    opennlp Doccat mymodel.bin "issues"
+    opennlp Doccat cat.bin "issues"
 
 Output:
 
