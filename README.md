@@ -103,39 +103,35 @@ The architecture is structured as follows in Text form to illustrate the flow of
 # The diagram below summarizes the workflow:
 
      +-----------------------------+
-     | S3 Upload (knowledge.json)  |
+     | S3 Upload (knowledge.json)  |  
      +-------------+---------------+
                    │
                    ▼
      +-----------------------------+
-     |    EventBridge Rule         |
-     |  Start State Machine        |
+     |(EventBridge Rule Triggered) |      
+     |     Start State Machine     |
      +-------------+---------------+
                    │
                    ▼
-     +-----------------------------+
-     |   ValidationFunction        |
-     +-------------+---------------+
-                   │
-     ┌─────────────┴─────────────┐
-     │Is Validation Successful?  │
-     └───────┬─────────┬─────────┘
-             │         │
-        Yes  ▼         │  No
-     +-----------------------------+         +-------------------------+
-     | TransformationFunction      |         | Exception Handling      |
-     +-------------+---------------+         +-------------+-----------+
-                   │                                       │
-                   ▼                                       ▼
-     +-----------------------------+         +-------------------------+
-     |       ModelFunction         |         |  SNS: Notify Failure    |
-     +-------------+---------------+         +-------------+-----------+
-                   │
+     +-----------------------------+ No
+     │      Validate Schema        │ ───────────────────────────
+     +-------------+---------------+         │                  │  
+                   │                         │                  │
+              Yes  ▼                         │                  ▼  
+     +------------------------------+ No     │     +-------------------------+
+     | Transform to Processing file | ───────      |    Exception Handling   |
+     +-------------+----------------+        │      +-------------+-----------+
+              Yes  │                         │                 │
+                   ▼                         │                 ▼
+     +-----------------------------+ No      │     +-------------------------+
+     |   Create Model from file    |  ───────      |  SNS: Notify Failure    |
+     +-------------+---------------+               +-------------+-----------+
+              Yes  │
                    ▼
           SNS: Notify Success
                    │
                    ▼
-                 End
+                  End
 
 A more detail flow can be found in **design** folder using https://plantuml.com/ UML files.
 
