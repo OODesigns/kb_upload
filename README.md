@@ -163,6 +163,8 @@ See the **design/** folder for a UML diagram (`*.puml`).
       - Source bucket: `s3-knowledge-upload`
       - Staging bucket: `s3-knowledge-staging`
       - Model bucket: `s3-knowledge-model`
+      - SNS Email Endpoint:`emailaddress@domain.com`
+   
 
 4. **Verification:**
    - Upload a valid `knowledge.json` to the source bucket.
