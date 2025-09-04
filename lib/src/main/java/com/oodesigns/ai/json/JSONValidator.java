@@ -14,13 +14,8 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-public class JSONValidator implements Validator<JSONSchema, JSON, JSONValidationResult> {
-
-    private final JsonSchemaFactory schemaFactory;
-
-    public JSONValidator(final JsonSchemaFactory factory) {
-        this.schemaFactory = factory;
-    }
+public record JSONValidator(
+        JsonSchemaFactory schemaFactory) implements Validator<JSONSchema, JSON, JSONValidationResult> {
 
     @Override
     public JSONValidationResult validate(final JSONSchema jsonSchema, final JSON json) {
@@ -45,22 +40,21 @@ public class JSONValidator implements Validator<JSONSchema, JSON, JSONValidation
     }
 
     private JSONValidationResult statusError(final Set<ValidationMessage> validationMessages) {
-        return new JSONValidatedResultStateError( validationMessages
-                                        .stream()
-                                        .map(ValidationMessage::getMessage)
-                                        .toList());
+        return new JSONValidatedResultStateError(validationMessages
+                .stream()
+                .map(ValidationMessage::getMessage)
+                .toList());
     }
 
-    private TransformationResult transformDataToJsonNodes(final JSONSchema jsonSchemaData, final JSON knowledgeData){
-        try
-        {
+    private TransformationResult transformDataToJsonNodes(final JSONSchema jsonSchemaData, final JSON knowledgeData) {
+        try {
             return new TransformationResult(new JSONValidatedResultStateOK(), new JSONNodes(getSchemaNode(jsonSchemaData), getNode(knowledgeData)));
         } catch (final JsonProcessingException | JsonSchemaException ex) {
             return new TransformationResult(new JSONValidatedResultStateError(ex.getMessage()), null);
         }
     }
 
-    private record TransformationResult(JSONValidationResult JSONValidationResult, JSONNodes jsonNodes){
+    private record TransformationResult(JSONValidationResult JSONValidationResult, JSONNodes jsonNodes) {
         public JSONValidationResult map(final Function<JSONNodes, JSONValidationResult> function) {
             return JSONValidationResult.calling(new FunctionHandler(function, jsonNodes)::handleValidation);
         }
@@ -72,13 +66,14 @@ public class JSONValidator implements Validator<JSONSchema, JSON, JSONValidation
         }
     }
 
-    private record JSONNodes(JsonSchema schema, JsonNode node){}
+    private record JSONNodes(JsonSchema schema, JsonNode node) {
+    }
 
     private JsonNode getNode(final JSON json) throws JsonProcessingException {
         return new ObjectMapper().readTree(json.get());
     }
 
-    private JsonSchema getSchemaNode(final JSONSchema jsonSchemaData) throws JsonSchemaException{
+    private JsonSchema getSchemaNode(final JSONSchema jsonSchemaData) throws JsonSchemaException {
         return schemaFactory.getSchema(jsonSchemaData.get());
     }
 }

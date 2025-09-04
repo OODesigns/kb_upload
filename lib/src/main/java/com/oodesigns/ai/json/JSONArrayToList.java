@@ -12,17 +12,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.oodesigns.ai.general.Mappable;
 import com.oodesigns.ai.general.Transformer;
 
-public class JSONArrayToList implements Transformer<JSON, Mappable<List<String>, String, String>> {
+public record JSONArrayToList(String arrayName) implements Transformer<JSON, Mappable<List<String>, String, String>> {
     public static final String SPACE = " ";
     private static final ObjectMapper objectMapper = new ObjectMapper();
-    private final String arrayName;
-
     private static final Logger logger = Logger.getLogger(JSONArrayToList.class.getName());
 
-
-    public JSONArrayToList(final String arrayName) {
-        this.arrayName = arrayName;
-    }
 
     @Override
     public Mappable<List<String>, String, String> transform(final JSON json) {
@@ -30,13 +24,13 @@ public class JSONArrayToList implements Transformer<JSON, Mappable<List<String>,
                 .filter(JsonNode::isArray)
                 .map(getJsonArrayItems())
                 .map(JSONArrayToListResult::new)
-                .orElseGet(()->new JSONArrayToListResult(List.of()));
+                .orElseGet(() -> new JSONArrayToListResult(List.of()));
     }
 
-    private Function<JsonNode, List<String>>  getJsonArrayItems() {
+    private Function<JsonNode, List<String>> getJsonArrayItems() {
         return arrayNode -> StreamSupport.stream(arrayNode.spliterator(), false)
                 .map(getJsonNodeAsString())
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private Function<JsonNode, String> getJsonNodeAsString() {
