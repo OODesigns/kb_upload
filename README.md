@@ -63,7 +63,8 @@ This repository contains an AWS SAM template that provisions the following key c
 
     AWS Step Functions:
 
-        Orchestrates the workflow through a defined state machine that includes validation, transformation, and model creation steps.
+        Orchestrates the workflow through a defined state machine that includes validation, 
+        transformation, and model creation steps.
 
         Implements error handling to capture issues at any step of the process and notifies via SNS.
 
@@ -86,19 +87,24 @@ The architecture is structured as follows in Text form to illustrate the flow of
 
 
     S3 Upload Trigger:
-    When a new file (typically the knowledge.json) is uploaded to the SourceBucket, an EventBridge rule detects the event and triggers the AWS Step Functions state machine.
+    When a new file (typically the knowledge.json) is uploaded to the SourceBucket, an EventBridge rule detects 
+    the event and triggers the AWS Step Functions state machine.
 
     Validation Stage:
-    The state machine first invokes the ValidationFunction which checks the file for structural and content integrity. If validation fails, the error is caught, and the flow branches to notify failure.
+    The state machine first invokes the ValidationFunction which checks the file for structural and content integrity. 
+    If validation fails, the error is caught, and the flow branches to notify failure.
 
     Transformation Stage:
-    On successful validation, the TransformationFunction converts the data and writes the transformed output to a staging S3 bucket.
+    On successful validation, the TransformationFunction converts the data and writes the transformed 
+    output to a staging S3 bucket.
 
     Model Creation:
-    The ModelFunction then consumes the staged data to create the final categorization model, saving it to the Model S3 bucket.
+    The ModelFunction then consumes the staged data to create the final categorization model, saving it 
+    to the Model S3 bucket.
 
     Notification:
-    On process completion, an SNS topic is used to notify success or failure. The notifications include details about the model status sent to the configured email endpoint.
+    On process completion, an SNS topic is used to notify success or failure. The notifications include details 
+    about the model status sent to the configured email endpoint.
 
 # The diagram below summarizes the workflow:
 
