@@ -1,110 +1,99 @@
 # AWS Lambda Chat Bot Categorization Model
 
-This model is to be used by https://opennlp.apache.org/ The Apache OpenNLP library is a machine learning based toolkit for the processing of natural language text.
+This model is designed to be used with [Apache OpenNLP](https://opennlp.apache.org/),
+a machine learning toolkit for processing natural language text. The purpose of
+this application is to automate the creation of a categorization model.
 
-I created this application, so I could automate the creation of a model.
+This project deploys multiple AWS Lambda functions using AWS SAM (Serverless Application
+Model) and coordinates them with AWS Step Functions to validate, transform, and
+create the chat bot model. Notifications are sent via SNS to alert on the success or
+failure of the model creation process.
 
-This project deploys multiple AWS Lambda functions using AWS SAM (Serverless Application Model) and coordinates them with AWS Step Functions to validate, transform, and create the chat bot model. Notifications are integrated via SNS to alert on success or failure of the model creation process.
+## 🐾 What is a Categorization Model in OpenNLP?
 
-# 🐾 What is a Categorization Model in OpenNLP?
+A categorization model (sometimes called a document categorizer) is a machine learning
+model that takes text as input and predicts which category it belongs to.
 
-A categorization model (sometimes called a document categorizer) is a type of machine learning model that takes text as input and predicts which category it belongs to.
+**For example:**
 
-For example:
+- If you give it "yes, of course", the model might predict the category `confirmation`.
+- If you give it "check the Jira backlog", the model might predict `jira`.
 
-If you give it "yes, of course", the model might predict the category confirmation.
+It’s essentially teaching the computer: “when you see these kinds of words, they usually
+mean X”.
 
-If you give it "check the Jira backlog", the model might predict jira.
+OpenNLP does this by analyzing the features of the text (words, frequencies, patterns)
+and learning statistical associations between those features and your categories.
 
-It’s essentially teaching the computer: “when you see these kinds of words, they usually mean X”.
+## 📂 Training Data Format
 
-OpenNLP does this by looking at the features of the text (like words, frequencies, and patterns) and learning statistical associations between those features and your defined categories.
+OpenNLP expects one training example per line. Each line begins with the category label.
+After the label, you provide a piece of text (words, phrases, tokens) that belongs to that
+category.
 
-# 📂 Training Data Format
+**Format:**
 
-OpenNLP expects one training example per line.
+    (category) (text token)
 
-Each line begins with the category label.
+**Example cat.txt:**
 
-After the label, you write a piece of text (words, phrases, tokens) that belongs to that category.
+    confirmation np nbd ofc ik ikr yw rgr yepyep yessirski yezzir yh yeh ya ye yah ...
+    Jira Jira, Atlassian, issues, stories, backlog, sprint, epic, workflow, board,
+    Scrum ...
 
-So the structure looks like:
-   (category) (text token) 
+- Category 1: `confirmation` → contains many slang words and affirmations.
+- Category 2: `jira` → contains Agile and Jira-related terminology.
 
-✅ Example File cat.txt
-    
-    confirmation np nbd ofc ik ikr yw rgr yepyep yessirski yezzir yh yeh ya ye yah ... + more    
-    Jira Jira, Atlassian, issues, stories, backlog, sprint, epic, workflow, board, Scrum ... + more
-    
-    Category 1: confirmation → contains a ton of slang/words that mean “yes” or “confirmed.”
-    Category 2: jira → contains Agile and Jira-related terminology.
+Once trained, OpenNLP produces a `.bin` model file. You can then run:
 
-Once you train this with OpenNLP, you’ll have a .bin model file. Then you can run something like:
- 
     opennlp Doccat mymodel.bin "issues"
 
-Output would be something like:
-   
+Output:
+
     Jira 0.92
 
-Meaning: it’s 92% confident the input belongs to the Jira category.
+Means: It's 92% confident the input belongs to the `jira` category.
 
-# Implementation Overview
+## Implementation Overview
 
-This repository contains an AWS SAM template that provisions the following key components:
+This repository contains an AWS SAM template that provisions the following components:
 
-    Lambda Functions:
+- **Lambda Functions:**
+  - `ValidationFunction`: Validates the structure of the chat bot knowledge file (`knowledge.json`).
+  - `TransformationFunction`: Transforms the validated file into an intermediate format.
+  - `ModelFunction`: Creates the final categorization model (`cat.bin`) using the
+    transformed data.
+- **AWS Step Functions:**
+  - Orchestrates the workflow via a state machine that includes validation, transformation,
+    and model creation steps.
+  - Implements error handling and notifications via SNS.
+- **EventBridge Rule:**
+  - Listens for S3 object creation events and triggers the state machine.
+- **SNS Notifications:**
+  - Sends email alerts regarding model creation success or failure.
+- **IAM Roles/Policies:**
+  - Grant least-privilege permissions to each component.
 
-        ValidationFunction: Validates the structure of the chat bot knowledge file (knowledge.json).
+## Architecture
 
-        TransformationFunction: Transforms the validated file into an intermediate format.
+The application is architected to be scalable and maintainable. It leverages AWS Lambda for
+serverless computing, AWS Step Functions for orchestration, and AWS SNS for notifications.
+The architecture is outlined below:
 
-        ModelFunction: Creates the final categorization model (cat.bin) using the transformed data.
+- **S3 Upload Trigger:**
+  - When a file (typically `knowledge.json`) is uploaded to the source S3 bucket, an
+    EventBridge rule detects the event and triggers the state machine.
+- **Validation Stage:**
+  - The state machine invokes `ValidationFunction`, checking file integrity.
+  - On failure, error is caught and a failure notification is sent.
+- **Transformation Stage:**
+  - On success, `TransformationFunction` converts the data and writes output to staging S3.
+- **Model Creation:**
+  - `ModelFunction` builds the final categorization model, storing it in the model bucket.
+- **Notification:**
+  - SNS notifies success or failure, including detailed status to the configured email.
 
-    AWS Step Functions:
-
-        Orchestrates the workflow through a defined state machine that includes validation, 
-        transformation, and model creation steps.
-
-        Implements error handling to capture issues at any step of the process and notifies via SNS.
-
-    EventBridge Rule:
-
-        Listens for object creation events in the source S3 bucket and triggers the state machine.
-
-    SNS Notifications:
-
-        Sends an email alert to a predefined endpoint regarding the success or failure of model creation.
-
-    IAM Roles and Managed Policies:
-
-        Ensures each component has the minimum required permissions for secure operation.
-
-# Architecture
-The application architecture is designed to be scalable and maintainable. 
-It leverages AWS Lambda for serverless computing, AWS Step Functions for orchestration, and AWS SNS for notifications. 
-The architecture is structured as follows in Text form to illustrate the flow of data and operations within the system.:
-
-
-    S3 Upload Trigger:
-    When a new file (typically the knowledge.json) is uploaded to the SourceBucket, an EventBridge rule detects 
-    the event and triggers the AWS Step Functions state machine.
-
-    Validation Stage:
-    The state machine first invokes the ValidationFunction which checks the file for structural and content integrity. 
-    If validation fails, the error is caught, and the flow branches to notify failure.
-
-    Transformation Stage:
-    On successful validation, the TransformationFunction converts the data and writes the transformed 
-    output to a staging S3 bucket.
-
-    Model Creation:
-    The ModelFunction then consumes the staged data to create the final categorization model, saving it 
-    to the Model S3 bucket.
-
-    Notification:
-    On process completion, an SNS topic is used to notify success or failure. The notifications include details 
-    about the model status sent to the configured email endpoint.
+### Diagram of Workflow
 
 # The diagram below summarizes the workflow:
 
@@ -141,54 +130,56 @@ The architecture is structured as follows in Text form to illustrate the flow of
 
 A more detail flow can be found in **design** folder using https://plantuml.com/ UML files.
 
-# Setup & Deployment
-Prerequisites
+See the **design/** folder for a UML diagram (`*.puml`).
 
-    AWS CLI: Ensure you have the AWS CLI installed and configured with your credentials.
+## Setup & Deployment
 
-    AWS SAM CLI: Install the AWS SAM CLI for building and deploying the application.
+### Prerequisites
+- **AWS CLI**: Installed and configured.
+- **AWS SAM CLI**: For building and deploying.
+- **Java 20+**: Lambda code is in Java 20+. Ensure your build環境 matches this.
 
-    Java 20+: The Lambda functions are written in Java 20+. Make sure your build environment is set up accordingly.
+### Deployment Steps
 
-Deployment Steps
+1. **Clone the Repository:**
 
-    Clone the Repository:
+    ```sh
+    git clone <repository-url>
+    cd <repository-directory>
+    ```
 
-git clone <repository-url>
-cd <repository-directory>
+2. **Build the Application:**
+   Compile and package Java code as in your build scripts. This usually creates a ZIP (see
+   `CodeUri` in SAM pointing to `lib/build/distributions/lib.zip`).
 
-Build the Application:
+3. **Deploy Using SAM:**
+   Run the guided deployment command and follow prompts to set params such as S3 buckets and email:
 
-Compile and package your Java code as described in your build scripts. Typically, this involves creating a ZIP file (as seen by the CodeUri pointing to lib/build/distributions/lib.zip).
-
-Deploy Using SAM:
-
-Run the guided deployment command and follow the prompts to set parameters such as S3 bucket names and email subscription endpoint:
-
+    ```sh
     sam deploy --guided
+    ```
 
-    During the deployment process, you can modify default values like the source bucket (s3-knowledge-upload), staging bucket (s3-knowledge-staging), and model bucket (s3-knowledge-model).
+    During deployment, you may set:
+      - Source bucket: `s3-knowledge-upload`
+      - Staging bucket: `s3-knowledge-staging`
+      - Model bucket: `s3-knowledge-model`
 
-    Verification:
+4. **Verification:**
+   - Upload a valid `knowledge.json` to the source bucket.
+   - Monitor Step Functions in AWS Console.
+   - Check CloudWatch logs for debugging Lambda executions.
+   - Confirm email notification of model creation status.
 
-        Upload a valid knowledge.json file to the source bucket.
+### Testing
 
-        Monitor the AWS Step Functions execution via the AWS Console.
+To manually test the workflow:
 
-        Check the CloudWatch logs for each Lambda function for debugging and tracking purposes.
+- **Upload Event Trigger:**
+    Upload a properly formatted `knowledge.json` to the source bucket to start the state machine.
 
-        Verify that an email is received confirming the success or failure of the model creation process.
+- **Monitor Execution:**
+    Check execution results in AWS Step Functions. CloudWatch logs provide debugging.
 
-Testing
-
-To manually test the full workflow:
-
-    Upload Event Trigger:
-    Place a properly formatted knowledge.json into the SourceBucket. This action should trigger the entire state machine.
-
-    Monitor Execution:
-    Check the execution results in AWS Step Functions. Utilize CloudWatch logs for detailed debugging information for each state/step.
-
-    Error Handling:
-    Intentionally provide a malformed knowledge.json to see how the error is captured and reported. The state machine is designed to catch errors and publish a failure message via SNS.
-
+- **Error Handling:**
+    Try uploading a malformed `knowledge.json` to verify that error capture and SNS failure 
+    notification are functioning as intended.
