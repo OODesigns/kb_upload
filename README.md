@@ -32,8 +32,10 @@ This repository contains an AWS SAM template that provisions the following key c
         Ensures each component has the minimum required permissions for secure operation.
 
 # Architecture
+The application architecture is designed to be scalable and maintainable. 
+It leverages AWS Lambda for serverless computing, AWS Step Functions for orchestration, and AWS SNS for notifications. 
+The architecture is structured as follows in Text form to illustrate the flow of data and operations within the system.:
 
-The application workflow is based on the following series of steps:
 
     S3 Upload Trigger:
     When a new file (typically the knowledge.json) is uploaded to the SourceBucket, an EventBridge rule detects the event and triggers the AWS Step Functions state machine.
@@ -87,6 +89,7 @@ The application workflow is based on the following series of steps:
                    ▼
                  End
 
+A more detail flow can be found in **design** folder using https://plantuml.com/ UML files.
 
 # Setup & Deployment
 Prerequisites
