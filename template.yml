@@ -309,7 +309,6 @@ Resources:
                   - !GetAtt TransformationFunction.Arn
                   - !GetAtt ModelFunction.Arn
 
-# Explicit Log Groups for Lambdas and State Machine
   # Explicit Log group for Validation Lambda to ensure retention, traceability and CloudFormation compliance
   ValidationLogGroup:
     Type: AWS::Logs::LogGroup
