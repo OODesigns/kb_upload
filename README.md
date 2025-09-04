@@ -1,7 +1,12 @@
 # AWS Lambda Chat Bot Categorization Model
 
-A Serverless application designed to create a categorization model for an NLP chat bot. This project deploys multiple AWS Lambda functions using AWS SAM (Serverless Application Model) and coordinates them with AWS Step Functions to validate, transform, and create the chat bot model. Notifications are integrated via SNS to alert on success or failure of the model creation process.
-Overview
+This model is to be used by https://opennlp.apache.org/ The Apache OpenNLP library is a machine learning based toolkit for the processing of natural language text.
+
+I created this application, so I could automate the creation of a model.
+
+This project deploys multiple AWS Lambda functions using AWS SAM (Serverless Application Model) and coordinates them with AWS Step Functions to validate, transform, and create the chat bot model. Notifications are integrated via SNS to alert on success or failure of the model creation process.
+
+# Overview
 
 This repository contains an AWS SAM template that provisions the following key components:
 
